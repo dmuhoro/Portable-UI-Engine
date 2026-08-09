@@ -1,0 +1,6 @@
+{
+  "name": "Portable UI Engine",
+  "description": "Framework-agnostic Native Web Components asset library featuring design tokens, universal app shell, and data table.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
