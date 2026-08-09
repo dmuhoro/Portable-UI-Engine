@@ -3,17 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portable UI Engine - Native Web Components Sandbox</title>
+    <title>Portable UI Engine - Framework-Agnostic Web Components Release Showcase</title>
     
-    <!-- 1. Global CSS Design Tokens -->
+    <!-- Global Design System Tokens CSS -->
     <link rel="stylesheet" href="./theme.css" />
 
-    <!-- 2. Framework-Agnostic Web Components (ES Modules) -->
-    <script type="module" src="./universal-app-shell.js"></script>
-    <script type="module" src="./universal-data-table.js"></script>
+    <!-- CDN Release Simulator: Single Unified Engine Import -->
+    <script type="module" src="./engine.js"></script>
 
     <style>
-      /* Page-level container & control panel styling */
+      /* Showcase Page Styles & Utility Layouts */
       .brand-title {
         display: flex;
         align-items: center;
@@ -25,29 +24,67 @@
       }
 
       .brand-icon {
-        width: 24px;
-        height: 24px;
-        background-color: var(--color-primary);
-        color: white;
-        border-radius: var(--radius-sm);
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+        color: var(--color-text-inverse, #ffffff);
+        border-radius: var(--radius-md);
         display: inline-flex;
         align-items: center;
         justify-content: center;
         font-weight: var(--font-weight-bold);
-        font-size: 14px;
+        font-size: 16px;
+        box-shadow: var(--shadow-sm);
       }
 
-      .tech-badge {
+      /* Header Toolbar Controls */
+      .header-toolbar {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-3);
+      }
+
+      .theme-select-label {
         font-size: var(--font-size-xs);
-        padding: 2px 8px;
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-2);
+      }
+
+      .theme-select {
+        padding: 6px 12px;
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-bold);
+        font-family: inherit;
+        color: var(--color-text-primary);
+        background-color: var(--color-bg-app);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-md);
+        outline: none;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .theme-select:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      }
+
+      .badge-version {
+        font-size: var(--font-size-xs);
+        padding: 4px 10px;
         background-color: var(--color-primary-light);
         color: var(--color-primary);
-        border: 1px solid rgba(37, 99, 235, 0.2);
+        border: 1px solid var(--color-border);
         border-radius: var(--radius-full);
-        font-weight: var(--font-weight-semibold);
+        font-weight: var(--font-weight-bold);
       }
 
-      /* Sidebar nav styling */
+      /* Sidebar Navigation */
       .nav-menu {
         list-style: none;
         padding: 0;
@@ -79,9 +116,14 @@
         font-weight: var(--font-weight-semibold);
       }
 
-      /* Workspace Header */
+      /* Workspace Layout */
       .workspace-header {
-        margin-bottom: var(--spacing-6);
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-5);
+        flex-wrap: wrap;
+        gap: var(--spacing-4);
       }
 
       .workspace-title {
@@ -89,6 +131,7 @@
         font-weight: var(--font-weight-bold);
         margin: 0 0 var(--spacing-1) 0;
         letter-spacing: -0.02em;
+        color: var(--color-text-primary);
       }
 
       .workspace-subtitle {
@@ -97,32 +140,14 @@
         margin: 0;
       }
 
-      /* Control Sandbox Card */
-      .control-panel {
-        background-color: var(--color-bg-surface);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-5);
-        margin-bottom: var(--spacing-6);
-        box-shadow: var(--shadow-sm);
-      }
-
-      .control-title {
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-semibold);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--color-text-secondary);
-        margin: 0 0 var(--spacing-3) 0;
-      }
-
-      .button-group {
+      .header-actions-group {
         display: flex;
+        align-items: center;
         gap: var(--spacing-2);
         flex-wrap: wrap;
-        margin-bottom: var(--spacing-4);
       }
 
+      /* Buttons */
       .btn {
         display: inline-flex;
         align-items: center;
@@ -145,7 +170,7 @@
 
       .btn-primary {
         background-color: var(--color-primary);
-        color: var(--color-text-inverse);
+        color: var(--color-text-inverse, #ffffff);
         border-color: var(--color-primary);
       }
 
@@ -154,307 +179,448 @@
         border-color: var(--color-primary-hover);
       }
 
-      .btn-danger {
-        color: var(--color-danger);
-        border-color: rgba(220, 38, 38, 0.3);
+      /* View Tabs */
+      .view-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--color-border);
+        margin-bottom: var(--spacing-6);
+        gap: var(--spacing-2);
+        overflow-x: auto;
       }
 
-      .btn-danger:hover {
-        background-color: var(--color-danger-bg);
+      .tab-btn {
+        padding: var(--spacing-3) var(--spacing-4);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-secondary);
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all var(--transition-fast);
       }
 
-      .json-sandbox-details {
-        margin-top: var(--spacing-3);
-      }
-
-      .json-editor {
-        width: 100%;
-        height: 110px;
-        font-family: var(--font-mono);
-        font-size: var(--font-size-xs);
-        padding: var(--spacing-3);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        background-color: var(--color-bg-app);
+      .tab-btn:hover {
         color: var(--color-text-primary);
-        resize: vertical;
-        box-sizing: border-box;
       }
 
-      .json-editor:focus {
-        outline: none;
-        border-color: var(--color-primary);
+      .tab-btn.active {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
       }
 
-      /* Specs & Features Grid */
-      .specs-grid {
+      .tab-pane {
+        display: none;
+      }
+
+      .tab-pane.active {
+        display: block;
+      }
+
+      /* Split View Layout */
+      .split-workspace {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: var(--spacing-4);
-        margin-top: var(--spacing-8);
+        grid-template-columns: 360px 1fr;
+        gap: var(--spacing-6);
+        align-items: start;
       }
 
-      .spec-card {
+      @media (max-width: 1024px) {
+        .split-workspace {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Developer Code Snippet Cards */
+      .docs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-6);
+      }
+
+      .docs-card {
         background-color: var(--color-bg-surface);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);
-        padding: var(--spacing-4);
+        padding: var(--spacing-5);
+        box-shadow: var(--shadow-sm);
       }
 
-      .spec-card h3 {
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-semibold);
-        margin: 0 0 var(--spacing-1) 0;
-        color: var(--color-primary);
-      }
-
-      .spec-card p {
-        font-size: var(--font-size-xs);
-        color: var(--color-text-secondary);
-        margin: 0;
-        line-height: var(--line-height-normal);
-      }
-
-      .theme-toggle-btn {
-        padding: var(--spacing-2) var(--spacing-3);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--color-border);
-        background: var(--color-bg-surface);
+      .docs-card h3 {
+        margin-top: 0;
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-bold);
         color: var(--color-text-primary);
-        font-size: var(--font-size-xs);
-        font-weight: var(--font-weight-medium);
-        cursor: pointer;
       }
 
-      .theme-toggle-btn:hover {
-        background-color: var(--color-bg-hover);
+      .code-block {
+        background-color: var(--color-bg-app);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-3);
+        font-family: var(--font-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-primary);
+        overflow-x: auto;
+        white-space: pre;
+      }
+
+      /* Floating Toast Notification */
+      .toast-notification {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 12px 20px;
+        background-color: var(--color-text-primary);
+        color: var(--color-text-inverse, #ffffff);
+        border-radius: var(--radius-lg);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+      }
+
+      .toast-notification.show {
+        opacity: 1;
+        transform: translateY(0);
       }
     </style>
   </head>
   <body>
 
-    <!-- Native Custom Element App Shell -->
-    <universal-app-shell id="main-shell" drawer-open>
+    <!-- Native App Shell Web Component -->
+    <universal-app-shell id="app-shell" drawer-open>
       
-      <!-- Brand Logo Header Slot -->
+      <!-- Slot: Brand Title -->
       <a href="#" slot="brand" class="brand-title">
         <span class="brand-icon">P</span>
         <span>Portable UI Engine</span>
       </a>
 
-      <!-- Header Actions Slot -->
-      <div slot="header-actions" style="display: flex; align-items: center; gap: 12px;">
-        <span class="tech-badge">Web Components ES6+</span>
-        <button type="button" class="theme-toggle-btn" id="theme-toggle">
-          🌙 Dark Mode
-        </button>
+      <!-- Slot: Header Configuration Toolbar (Theme Preset Selector) -->
+      <div slot="header-actions" class="header-toolbar">
+        <span class="badge-version">v2.0 CDN Release</span>
+        
+        <label for="theme-preset-select" class="theme-select-label">
+          <span>🎨 Preset:</span>
+          <select id="theme-preset-select" class="theme-select">
+            <option value="light" selected>Light Default</option>
+            <option value="dark">Dark Default</option>
+            <option value="corporate">Corporate Minimal</option>
+            <option value="cyberpunk">Cyberpunk Neon</option>
+            <option value="midnight">Midnight Dev</option>
+            <option value="emerald">Emerald Clean</option>
+          </select>
+        </label>
       </div>
 
-      <!-- Navigation Drawer Slot -->
+      <!-- Slot: Sidebar Drawer Navigation -->
       <nav slot="drawer">
         <ul class="nav-menu">
           <li class="nav-item">
-            <a href="#users" class="active" id="nav-users">
-              <span>👥</span> Users Directory
+            <a href="#dashboard" class="active" id="nav-dash">
+              <span>📊</span> Composite Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#split" id="nav-split">
+              <span>📝</span> Form & Data Table
             </a>
           </li>
           <li class="nav-item">
             <a href="#metrics" id="nav-metrics">
-              <span>📊</span> System Metrics
+              <span>📈</span> Standalone Metrics
             </a>
           </li>
           <li class="nav-item">
-            <a href="#audit" id="nav-audit">
-              <span>🛡️</span> Audit Trail Logs
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#sandbox" id="nav-sandbox">
-              <span>⚡</span> JSON Payload Sandbox
+            <a href="#docs" id="nav-docs">
+              <span>📖</span> CDN & API Reference
             </a>
           </li>
         </ul>
       </nav>
 
-      <!-- Main Workspace Slot Content -->
+      <!-- Slot: Main Workspace Content -->
       <div class="workspace">
         
         <header class="workspace-header">
-          <h1 class="workspace-title">Native Component Dashboard</h1>
-          <p class="workspace-subtitle">
-            Demonstrating zero-dependency Shadow DOM custom elements compiling cleanly directly in native browser environments.
-          </p>
+          <div>
+            <h1 class="workspace-title">Framework-Agnostic SaaS Engine Showcase</h1>
+            <p class="workspace-subtitle">
+              Native Web Components, Shadow DOM style isolation, and real-time state mutation with zero framework dependencies.
+            </p>
+          </div>
+
+          <div class="header-actions-group">
+            <button type="button" class="btn btn-primary" id="btn-realtime-fetch">
+              ⚡ Simulate Real-Time Data Fetch
+            </button>
+            <button type="button" class="btn" id="btn-toggle-sidebar">
+              📐 Toggle Sidebar
+            </button>
+          </div>
         </header>
 
-        <!-- Interactive Control Panel for Ingesting Payloads -->
-        <section class="control-panel">
-          <h2 class="control-title">Payload Control Sandbox</h2>
-          
-          <div class="button-group">
-            <button type="button" class="btn btn-primary" id="btn-load-users">
-              Inject Users Dataset (JS Property)
-            </button>
-            <button type="button" class="btn" id="btn-load-metrics">
-              Inject System Metrics (JSON Attribute)
-            </button>
-            <button type="button" class="btn" id="btn-load-audit">
-              Inject Audit Trail
-            </button>
-            <button type="button" class="btn btn-danger" id="btn-clear-data">
-              Clear Data
-            </button>
-          </div>
+        <!-- Showcase Navigation Tabs -->
+        <div class="view-tabs">
+          <button type="button" class="tab-btn active" data-tab="tab-dashboard">Composite Dashboard</button>
+          <button type="button" class="tab-btn" data-tab="tab-split">Data-Driven Form & Table</button>
+          <button type="button" class="tab-btn" data-tab="tab-metrics">Metrics Card Grid</button>
+          <button type="button" class="tab-btn" data-tab="tab-docs">Integration Docs</button>
+        </div>
 
-          <div class="json-sandbox-details">
-            <label for="custom-json-input" style="display: block; font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin-bottom: 6px; color: var(--color-text-secondary);">
-              Inspect / Modify Raw JSON Payload:
-            </label>
-            <textarea id="custom-json-input" class="json-editor" spellcheck="false"></textarea>
-            <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
-              <button type="button" class="btn btn-primary" id="btn-apply-json" style="font-size: var(--font-size-xs);">
-                Apply Custom Payload
-              </button>
+        <!-- TAB 1: Composite SaaS Dashboard -->
+        <div class="tab-pane active" id="tab-dashboard">
+          <universal-saas-dashboard id="saas-dashboard"></universal-saas-dashboard>
+        </div>
+
+        <!-- TAB 2: Form & Data Table Split View -->
+        <div class="tab-pane" id="tab-split">
+          <div class="split-workspace">
+            
+            <universal-form
+              id="user-entry-form"
+              title="Add New Member"
+              submit-label="Submit & Push Payload"
+            ></universal-form>
+
+            <universal-data-table id="split-data-table"></universal-data-table>
+
+          </div>
+        </div>
+
+        <!-- TAB 3: Standalone Metrics Card Grid -->
+        <div class="tab-pane" id="tab-metrics">
+          <div style="margin-bottom: 16px;">
+            <h2 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); margin: 0 0 4px 0;">
+              Standalone Universal Metric Grid
+            </h2>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0;">
+              Instantiated independently via standard JSON payload property.
+            </p>
+          </div>
+          <universal-metric-grid id="standalone-metrics-grid"></universal-metric-grid>
+        </div>
+
+        <!-- TAB 4: API & Developer Integration Docs -->
+        <div class="tab-pane" id="tab-docs">
+          <div class="docs-grid">
+            
+            <div class="docs-card">
+              <h3>1. CDN Single-Line Import</h3>
+              <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+                Include the unified barrel file and design tokens in any HTML document:
+              </p>
+              <div class="code-block">&lt;link rel="stylesheet" href="./theme.css" /&gt;
+&lt;script type="module" src="./engine.js"&gt;&lt;/script&gt;</div>
             </div>
-          </div>
-        </section>
 
-        <!-- Unbreakable Data Table Custom Element -->
-        <universal-data-table id="demo-table"></universal-data-table>
+            <div class="docs-card">
+              <h3>2. Dynamic Theme Swapping API</h3>
+              <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+                Invoke the global controller to alter theme presets or override specific tokens:
+              </p>
+              <div class="code-block">// Switch to a pre-defined theme preset
+UniversalUI.setTheme('cyberpunk');
 
-        <!-- Technical Specification Highlights -->
-        <section class="specs-grid">
-          <div class="spec-card">
-            <h3>Style Isolation</h3>
-            <p>Components utilize Shadow DOM ('open' mode) ensuring zero CSS leak into global page scope.</p>
+// Override custom design tokens directly
+UniversalUI.setTheme('dark', {
+  '--color-primary': '#ff0055',
+  '--radius-md': '12px'
+});</div>
+            </div>
+
+            <div class="docs-card">
+              <h3>3. Deep State Mutation</h3>
+              <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+                Pass master state JSON objects to composite custom elements synchronously:
+              </p>
+              <div class="code-block">const dashboard = document.querySelector('universal-saas-dashboard');
+dashboard.state = {
+  metrics: [...],
+  tableHeaders: [...],
+  tableRows: [...]
+};</div>
+            </div>
+
           </div>
-          <div class="spec-card">
-            <h3>Design Tokens</h3>
-            <p>Native CSS variables (`theme.css`) power real-time theme inheritance across shadow boundaries.</p>
-          </div>
-          <div class="spec-card">
-            <h3>Strict Data Contract</h3>
-            <p>Components safely ingest data via standardized JSON strings (`payload` attribute) or property object setters.</p>
-          </div>
-          <div class="spec-card">
-            <h3>Native Performance</h3>
-            <p>Compiles directly in modern browsers without Virtual DOM overhead or external runtime libraries.</p>
-          </div>
-        </section>
+        </div>
 
       </div>
     </universal-app-shell>
 
-    <!-- Demo Controller Script -->
+    <!-- Floating Toast Notification -->
+    <div class="toast-notification" id="toast">Notification Message</div>
+
+    <!-- Application Controller Script -->
     <script>
-      // 1. Sample Data Schemas
-      const usersDataset = [
-        { id: "USR-1001", name: "Elena Rostova", role: "Principal Engineer", department: "Infrastructure", status: "Active", lastActive: "2 mins ago" },
-        { id: "USR-1002", name: "Marcus Vance", role: "Product Designer", department: "Design System", status: "Active", lastActive: "15 mins ago" },
-        { id: "USR-1003", name: "Sarah Jenkins", role: "Security Analyst", department: "SecOps", status: "Pending", lastActive: "1 hour ago" },
-        { id: "USR-1004", name: "Devon Kim", role: "Backend Architect", department: "Data Core", status: "Active", lastActive: "Just now" },
-        { id: "USR-1005", name: "Amira Patel", role: "QA Specialist", department: "Release Eng", status: "Inactive", lastActive: "3 days ago" },
-        { id: "USR-1006", name: "Lucas Thorne", role: "DevOps Lead", department: "Cloud Ops", status: "Active", lastActive: "12 mins ago" }
-      ];
+      // Wait for DOM and Engine ready
+      window.addEventListener('DOMContentLoaded', () => {
+        
+        // 1. Initial Master SaaS Data Object
+        let masterData = {
+          metrics: [
+            { title: "Total Revenue", value: "$52,840.00", change: "+14.2%", trend: "upward", context: "vs last month" },
+            { title: "Active Users", value: "2,845", change: "+8.1%", trend: "upward", context: "vs last week" },
+            { title: "Avg Resolution", value: "1.4 hrs", change: "-18.5%", trend: "upward", context: "faster response" },
+            { title: "Churn Rate", value: "1.08%", change: "+0.2%", trend: "downward", context: "vs target" }
+          ],
+          tableHeaders: ["Member Name", "Email Address", "Role", "Department", "Status"],
+          tableRows: [
+            ["Elena Rostova", "elena@corp.internal", "Principal Engineer", "Infrastructure", "Active"],
+            ["Marcus Vance", "marcus@corp.internal", "Product Designer", "Design System", "Active"],
+            ["Sarah Jenkins", "sarah@corp.internal", "Security Analyst", "SecOps", "Pending"],
+            ["Devon Kim", "devon@corp.internal", "Backend Architect", "Data Core", "Active"],
+            ["Amira Patel", "amira@corp.internal", "QA Specialist", "Release Eng", "Inactive"]
+          ]
+        };
 
-      const systemMetricsDataset = {
-        headers: ["Service Name", "Cluster Region", "CPU Load", "Memory Usage", "Health Status"],
-        rows: [
-          ["Authentication Router", "us-east-1", "12.4%", "412 MB", "Healthy"],
-          ["Database Proxy Node", "us-east-1", "68.9%", "3.1 GB", "Warning"],
-          ["Payment Gateway API", "eu-west-1", "5.1%", "256 MB", "Healthy"],
-          ["Analytics Ingestion", "ap-southeast-1", "94.2%", "7.8 GB", "Failed"],
-          ["Static Asset CDN", "global", "1.8%", "128 MB", "Healthy"]
-        ]
-      };
+        // 2. Form JSON Layout Schema
+        const memberFormSchema = [
+          { name: "name", type: "text", label: "Full Name", required: true, placeholder: "e.g. Alex Morgan" },
+          { name: "email", type: "email", label: "Email Address", required: true, placeholder: "alex@corp.internal" },
+          { name: "role", type: "select", label: "User Role", required: true, options: ["Principal Engineer", "Product Designer", "Security Analyst", "Backend Architect", "QA Specialist", "DevOps Lead"], defaultValue: "Principal Engineer" },
+          { name: "department", type: "text", label: "Department", required: true, placeholder: "e.g. Cloud Ops" },
+          { name: "status", type: "select", label: "Initial Status", required: true, options: ["Active", "Pending", "Inactive"], defaultValue: "Active" }
+        ];
 
-      const auditDataset = [
-        { timestamp: "2026-08-09 08:15:22", actor: "admin@corp.internal", action: "UPDATE_CONFIG", target: "Auth_Service", status: "Active" },
-        { timestamp: "2026-08-09 08:12:05", actor: "system_cron", action: "PURGE_CACHE", target: "Edge_CDN", status: "Completed" },
-        { timestamp: "2026-08-09 07:58:41", actor: "devon.kim@corp.internal", action: "DEPLOY_BUILD", target: "v2.4.12-release", status: "Failed" },
-        { timestamp: "2026-08-09 07:30:00", actor: "sarah.j@corp.internal", action: "ROTATE_KEYS", target: "Vault_Cluster", status: "Pending" }
-      ];
+        // 3. DOM Elements Setup
+        const appShell = document.getElementById('app-shell');
+        const dashboard = document.getElementById('saas-dashboard');
+        const userForm = document.getElementById('user-entry-form');
+        const splitTable = document.getElementById('split-data-table');
+        const standaloneGrid = document.getElementById('standalone-metrics-grid');
+        const themeSelect = document.getElementById('theme-preset-select');
+        const toast = document.getElementById('toast');
 
-      // 2. DOM Elements Selection
-      const table = document.getElementById('demo-table');
-      const jsonTextarea = document.getElementById('custom-json-input');
+        // Populate initial element properties
+        if (dashboard) dashboard.state = masterData;
+        if (userForm) userForm.schema = memberFormSchema;
+        if (splitTable) splitTable.payload = { headers: masterData.tableHeaders, rows: masterData.tableRows };
+        if (standaloneGrid) standaloneGrid.payload = masterData.metrics;
 
-      // 3. Helper to sync component state with editor
-      function updateTableData(data, useAttribute = false) {
-        if (useAttribute) {
-          // Demonstrating JSON String Attribute injection
-          const jsonString = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-          table.setAttribute('payload', jsonString);
-          jsonTextarea.value = jsonString;
-        } else {
-          // Demonstrating Direct Property assignment
-          table.payload = data;
-          jsonTextarea.value = JSON.stringify(data, null, 2);
+        // Toast Helper
+        function showToast(msg) {
+          toast.textContent = msg;
+          toast.classList.add('show');
+          setTimeout(() => {
+            toast.classList.remove('show');
+          }, 3000);
         }
-      }
 
-      // 4. Bind Control Sandbox Actions
-      document.getElementById('btn-load-users').addEventListener('click', () => {
-        updateTableData(usersDataset, false);
-      });
-
-      document.getElementById('btn-load-metrics').addEventListener('click', () => {
-        updateTableData(systemMetricsDataset, true);
-      });
-
-      document.getElementById('btn-load-audit').addEventListener('click', () => {
-        updateTableData(auditDataset, false);
-      });
-
-      document.getElementById('btn-clear-data').addEventListener('click', () => {
-        updateTableData(null, false);
-      });
-
-      document.getElementById('btn-apply-json').addEventListener('click', () => {
-        try {
-          const customVal = jsonTextarea.value.trim();
-          if (!customVal) {
-            updateTableData(null, false);
-            return;
+        // 4. Theme Preset Controller Interaction
+        themeSelect.addEventListener('change', (e) => {
+          const selectedTheme = e.target.value;
+          if (window.UniversalUI) {
+            window.UniversalUI.setTheme(selectedTheme);
+            showToast(`Theme preset changed to "${selectedTheme.toUpperCase()}"`);
           }
-          const parsed = JSON.parse(customVal);
-          updateTableData(parsed, true);
-        } catch (err) {
-          alert('Invalid JSON syntax: ' + err.message);
-        }
-      });
-
-      // 5. Navigation Sidebar links interactions
-      const navLinks = document.querySelectorAll('.nav-menu a');
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          navLinks.forEach(l => l.classList.remove('active'));
-          link.classList.add('active');
-
-          if (link.id === 'nav-users') updateTableData(usersDataset, false);
-          if (link.id === 'nav-metrics') updateTableData(systemMetricsDataset, true);
-          if (link.id === 'nav-audit') updateTableData(auditDataset, false);
-          if (link.id === 'nav-sandbox') jsonTextarea.focus();
         });
-      });
 
-      // 6. Theme Switcher (Dark / Light Mode Toggle)
-      const themeToggleBtn = document.getElementById('theme-toggle');
-      let currentTheme = 'light';
+        // 5. Reactive Form Submission Pipeline
+        userForm.addEventListener('app-form-submit', (e) => {
+          const formData = e.detail.formData;
 
-      themeToggleBtn.addEventListener('click', () => {
-        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-        if (currentTheme === 'dark') {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          themeToggleBtn.textContent = '☀️ Light Mode';
-        } else {
-          document.documentElement.removeAttribute('data-theme');
-          themeToggleBtn.textContent = '🌙 Dark Mode';
+          // Convert form output into row array
+          const newRow = [
+            formData.name,
+            formData.email,
+            formData.role,
+            formData.department,
+            formData.status
+          ];
+
+          // Mutate master data state
+          masterData.tableRows.unshift(newRow);
+
+          // Synchronous deep state setter update to dashboard
+          dashboard.state = { ...masterData };
+
+          // Update split table
+          splitTable.payload = { headers: masterData.tableHeaders, rows: masterData.tableRows };
+
+          // Reset form
+          userForm.reset();
+
+          showToast(`Added member ${formData.name} to state object!`);
+        });
+
+        // 6. Real-Time Data Simulation Logic
+        document.getElementById('btn-realtime-fetch').addEventListener('click', () => {
+          const rev = (45000 + Math.floor(Math.random() * 25000)).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+          const users = (2200 + Math.floor(Math.random() * 2000)).toLocaleString();
+          const churn = (0.4 + Math.random() * 1.2).toFixed(2) + '%';
+
+          masterData.metrics = [
+            { title: "Total Revenue", value: rev, change: "+18.2%", trend: "upward", context: "vs last month" },
+            { title: "Active Users", value: users, change: "+11.5%", trend: "upward", context: "vs last week" },
+            { title: "Avg Resolution", value: "1.1 hrs", change: "-20.4%", trend: "upward", context: "faster response" },
+            { title: "Churn Rate", value: churn, change: "-0.5%", trend: "upward", context: "improving" }
+          ];
+
+          // Forward mutated master state to sub-components via dashboard setter
+          dashboard.state = { ...masterData };
+          standaloneGrid.payload = masterData.metrics;
+
+          showToast('Real-time mock payload generated and dispatched!');
+        });
+
+        // 7. Sidebar Toggle Listener
+        document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
+          appShell.toggleDrawer();
+        });
+
+        // 8. Tab Switcher
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const targetTab = btn.dataset.tab;
+
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanes.forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            document.getElementById(targetTab)?.classList.add('active');
+          });
+        });
+
+        // Navigation Menu Click Handling
+        document.getElementById('nav-dash')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          setActiveTab('tab-dashboard');
+        });
+        document.getElementById('nav-split')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          setActiveTab('tab-split');
+        });
+        document.getElementById('nav-metrics')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          setActiveTab('tab-metrics');
+        });
+        document.getElementById('nav-docs')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          setActiveTab('tab-docs');
+        });
+
+        function setActiveTab(tabId) {
+          tabBtns.forEach(b => {
+            if (b.dataset.tab === tabId) b.classList.add('active');
+            else b.classList.remove('active');
+          });
+          tabPanes.forEach(p => {
+            if (p.id === tabId) p.classList.add('active');
+            else p.classList.remove('active');
+          });
         }
-      });
 
-      // Initial Default Load
-      updateTableData(usersDataset, false);
+      });
     </script>
   </body>
 </html>

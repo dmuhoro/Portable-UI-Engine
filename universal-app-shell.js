@@ -1,7 +1,8 @@
 /**
  * universal-app-shell.js
  * Portable UI Engine - Native Web Component App Shell Layout
- * Utilizes Shadow DOM and <slot> elements for isolation and flex layout.
+ * Utilizes Shadow DOM and <slot> elements for style isolation and flex/grid layout.
+ * Emits 'drawer-toggle' CustomEvent on state shifts.
  */
 class UniversalAppShell extends HTMLElement {
   constructor() {
@@ -17,35 +18,46 @@ class UniversalAppShell extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'drawer-open' && oldValue !== newValue) {
       this._drawerOpen = newValue !== null && newValue !== 'false';
-      this._updateDrawerState();
+      this._updateDrawerState(false);
+    }
+  }
+
+  get drawerOpen() {
+    return this._drawerOpen;
+  }
+
+  set drawerOpen(val) {
+    const isOpen = Boolean(val);
+    if (this._drawerOpen !== isOpen) {
+      this._drawerOpen = isOpen;
+      if (isOpen) {
+        this.setAttribute('drawer-open', '');
+      } else {
+        this.removeAttribute('drawer-open');
+      }
+      this._updateDrawerState(true);
     }
   }
 
   connectedCallback() {
     this.render();
     this._setupEventListeners();
-    this._updateDrawerState();
+    // Default drawer-open attribute check
+    if (this.hasAttribute('drawer-open')) {
+      this._drawerOpen = this.getAttribute('drawer-open') !== 'false';
+    }
+    this._updateDrawerState(false);
   }
 
   toggleDrawer() {
-    this._drawerOpen = !this._drawerOpen;
-    if (this._drawerOpen) {
-      this.setAttribute('drawer-open', '');
-    } else {
-      this.removeAttribute('drawer-open');
-    }
-    this.dispatchEvent(
-      new CustomEvent('drawer-toggle', {
-        detail: { open: this._drawerOpen },
-        bubbles: true,
-        composed: true,
-      })
-    );
+    this.drawerOpen = !this._drawerOpen;
   }
 
-  _updateDrawerState() {
+  _updateDrawerState(emitEvent = true) {
     const layout = this.shadowRoot?.querySelector('.shell-layout');
     const toggleBtn = this.shadowRoot?.querySelector('.drawer-toggle-btn');
+    const isMobile = window.innerWidth <= 768;
+
     if (layout) {
       if (this._drawerOpen) {
         layout.classList.add('drawer-open');
@@ -55,26 +67,46 @@ class UniversalAppShell extends HTMLElement {
         layout.classList.add('drawer-closed');
       }
     }
+
     if (toggleBtn) {
       toggleBtn.setAttribute('aria-expanded', String(this._drawerOpen));
+    }
+
+    if (emitEvent) {
+      this.dispatchEvent(
+        new CustomEvent('drawer-toggle', {
+          detail: { 
+            open: this._drawerOpen,
+            isMobile: isMobile
+          },
+          bubbles: true,
+          composed: true,
+        })
+      );
     }
   }
 
   _setupEventListeners() {
-    const toggleBtn = this.shadowRoot.querySelector('.drawer-toggle-btn');
-    const backdrop = this.shadowRoot.querySelector('.drawer-backdrop');
+    const toggleBtn = this.shadowRoot?.querySelector('.drawer-toggle-btn');
+    const backdrop = this.shadowRoot?.querySelector('.drawer-backdrop');
 
     toggleBtn?.addEventListener('click', () => this.toggleDrawer());
     backdrop?.addEventListener('click', () => {
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 768 && this._drawerOpen) {
         this.toggleDrawer();
       }
     });
 
-    // Handle ESC key to close drawer on mobile view
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this._drawerOpen && window.innerWidth <= 768) {
         this.toggleDrawer();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile && this._drawerOpen && !this.hasAttribute('mobile-auto-close-handled')) {
+        this.setAttribute('mobile-auto-close-handled', 'true');
       }
     });
   }
@@ -195,7 +227,13 @@ class UniversalAppShell extends HTMLElement {
           box-sizing: border-box;
         }
 
-        /* Responsive Breakpoint Mobile Adjustments */
+        /* Responsive Breakpoint Adjustments (Tablet & Mobile) */
+        @media (max-width: 1024px) {
+          :host {
+            --drawer-width: 230px;
+          }
+        }
+
         @media (max-width: 768px) {
           .shell-layout {
             grid-template-columns: 1fr;
@@ -209,7 +247,7 @@ class UniversalAppShell extends HTMLElement {
             top: var(--header-height, 64px);
             left: 0;
             bottom: 0;
-            width: var(--drawer-width, 260px);
+            width: var(--drawer-width, 280px);
             transform: translateX(-100%);
             box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.1));
             z-index: 30;
@@ -227,6 +265,7 @@ class UniversalAppShell extends HTMLElement {
             right: 0;
             bottom: 0;
             background-color: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(2px);
             opacity: 0;
             pointer-events: none;
             transition: opacity var(--transition-normal, 250ms ease);
