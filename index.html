@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portable UI Engine - Framework-Agnostic Web Components Release Showcase</title>
+    <title>Portable UI Engine - Framework-Agnostic Web Components Showcase & API Hub</title>
     
     <!-- Global Design System Tokens CSS -->
     <link rel="stylesheet" href="./theme.css" />
@@ -179,6 +179,11 @@
         border-color: var(--color-primary-hover);
       }
 
+      .btn-xs {
+        padding: 4px 8px;
+        font-size: var(--font-size-xs);
+      }
+
       /* View Tabs */
       .view-tabs {
         display: flex;
@@ -232,10 +237,10 @@
         }
       }
 
-      /* Developer Code Snippet Cards */
+      /* Developer Code Snippet Cards & API Docs Hub */
       .docs-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
         gap: var(--spacing-6);
       }
 
@@ -245,13 +250,35 @@
         border-radius: var(--radius-lg);
         padding: var(--spacing-5);
         box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .docs-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-3);
       }
 
       .docs-card h3 {
-        margin-top: 0;
+        margin: 0;
         font-size: var(--font-size-base);
         font-weight: var(--font-weight-bold);
         color: var(--color-text-primary);
+      }
+
+      .docs-card p {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+        margin: 0 0 var(--spacing-3) 0;
+        line-height: var(--line-height-normal);
+      }
+
+      .code-block-wrapper {
+        position: relative;
+        margin-top: var(--spacing-2);
       }
 
       .code-block {
@@ -264,6 +291,42 @@
         color: var(--color-text-primary);
         overflow-x: auto;
         white-space: pre;
+        margin: 0;
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: var(--color-bg-surface);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-sm);
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .copy-btn:hover {
+        color: var(--color-primary);
+        border-color: var(--color-primary);
+      }
+
+      /* Transaction Log Banner */
+      .tx-log-card {
+        background-color: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-4);
+        margin-top: var(--spacing-6);
+        box-shadow: var(--shadow-sm);
+        display: none;
+      }
+
+      .tx-log-card.visible {
+        display: block;
       }
 
       /* Floating Toast Notification */
@@ -328,6 +391,11 @@
             </a>
           </li>
           <li class="nav-item">
+            <a href="#billing" id="nav-billing">
+              <span>💳</span> Billing System Setup
+            </a>
+          </li>
+          <li class="nav-item">
             <a href="#split" id="nav-split">
               <span>📝</span> Form & Data Table
             </a>
@@ -339,7 +407,7 @@
           </li>
           <li class="nav-item">
             <a href="#docs" id="nav-docs">
-              <span>📖</span> CDN & API Reference
+              <span>📖</span> Component API Docs
             </a>
           </li>
         </ul>
@@ -369,9 +437,10 @@
         <!-- Showcase Navigation Tabs -->
         <div class="view-tabs">
           <button type="button" class="tab-btn active" data-tab="tab-dashboard">Composite Dashboard</button>
+          <button type="button" class="tab-btn" data-tab="tab-billing">Billing System Setup</button>
           <button type="button" class="tab-btn" data-tab="tab-split">Data-Driven Form & Table</button>
           <button type="button" class="tab-btn" data-tab="tab-metrics">Metrics Card Grid</button>
-          <button type="button" class="tab-btn" data-tab="tab-docs">Integration Docs</button>
+          <button type="button" class="tab-btn" data-tab="tab-docs">Component API Docs</button>
         </div>
 
         <!-- TAB 1: Composite SaaS Dashboard -->
@@ -379,7 +448,20 @@
           <universal-saas-dashboard id="saas-dashboard"></universal-saas-dashboard>
         </div>
 
-        <!-- TAB 2: Form & Data Table Split View -->
+        <!-- TAB 2: Commercial Multi-Step Billing Funnel -->
+        <div class="tab-pane" id="tab-billing">
+          <universal-billing-funnel id="billing-funnel"></universal-billing-funnel>
+
+          <!-- Transaction Event Payload Log Container -->
+          <div class="tx-log-card" id="tx-log-container">
+            <h3 style="margin-top: 0; font-size: var(--font-size-base); color: var(--color-success); display: flex; align-items: center; gap: 8px;">
+              <span>⚡</span> Live Transaction Event Caught (app-checkout-complete)
+            </h3>
+            <pre class="code-block" id="tx-log-payload"></pre>
+          </div>
+        </div>
+
+        <!-- TAB 3: Form & Data Table Split View -->
         <div class="tab-pane" id="tab-split">
           <div class="split-workspace">
             
@@ -394,7 +476,7 @@
           </div>
         </div>
 
-        <!-- TAB 3: Standalone Metrics Card Grid -->
+        <!-- TAB 4: Standalone Metrics Card Grid -->
         <div class="tab-pane" id="tab-metrics">
           <div style="margin-bottom: 16px;">
             <h2 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); margin: 0 0 4px 0;">
@@ -407,45 +489,157 @@
           <universal-metric-grid id="standalone-metrics-grid"></universal-metric-grid>
         </div>
 
-        <!-- TAB 4: API & Developer Integration Docs -->
+        <!-- TAB 5: API & Developer Interactive Documentation Hub -->
         <div class="tab-pane" id="tab-docs">
+          <div style="margin-bottom: var(--spacing-5);">
+            <h2 style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); margin: 0 0 var(--spacing-1) 0;">
+              Interactive Component API & Code Snippet Hub
+            </h2>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0;">
+              Copy-paste production-ready Custom Element snippets directly into your HTML documents or backend template engines.
+            </p>
+          </div>
+
           <div class="docs-grid">
             
+            <!-- Snippet 1: Quick Engine Setup -->
             <div class="docs-card">
-              <h3>1. CDN Single-Line Import</h3>
-              <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                Include the unified barrel file and design tokens in any HTML document:
-              </p>
-              <div class="code-block">&lt;link rel="stylesheet" href="./theme.css" /&gt;
-&lt;script type="module" src="./engine.js"&gt;&lt;/script&gt;</div>
+              <div>
+                <div class="docs-card-header">
+                  <h3>1. CDN Single-Line Import</h3>
+                  <span class="badge-version">CSS + JS</span>
+                </div>
+                <p>
+                  Include design system tokens and custom elements bundle in any HTML head tag:
+                </p>
+              </div>
+              <div class="code-block-wrapper">
+                <button type="button" class="copy-btn" data-copy-target="code-snippet-1">Copy</button>
+                <pre class="code-block" id="code-snippet-1">&lt;!-- Global CSS Design Tokens --&gt;
+&lt;link rel="stylesheet" href="./theme.css" /&gt;
+
+&lt;!-- Engine Barrel Script --&gt;
+&lt;script type="module" src="./engine.js"&gt;&lt;/script&gt;</pre>
+              </div>
             </div>
 
+            <!-- Snippet 2: Dynamic Theme Controller -->
             <div class="docs-card">
-              <h3>2. Dynamic Theme Swapping API</h3>
-              <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                Invoke the global controller to alter theme presets or override specific tokens:
-              </p>
-              <div class="code-block">// Switch to a pre-defined theme preset
+              <div>
+                <div class="docs-card-header">
+                  <h3>2. Dynamic Theme Swapping API</h3>
+                  <span class="badge-version">JavaScript API</span>
+                </div>
+                <p>
+                  Invoke global controller to swap preset themes or override custom tokens:
+                </p>
+              </div>
+              <div class="code-block-wrapper">
+                <button type="button" class="copy-btn" data-copy-target="code-snippet-2">Copy</button>
+                <pre class="code-block" id="code-snippet-2">// Switch preset theme
 UniversalUI.setTheme('cyberpunk');
 
-// Override custom design tokens directly
+// Override custom tokens
 UniversalUI.setTheme('dark', {
-  '--color-primary': '#ff0055',
-  '--radius-md': '12px'
-});</div>
+  '--color-primary': '#2563eb',
+  '--radius-md': '8px'
+});</pre>
+              </div>
             </div>
 
+            <!-- Snippet 3: App Shell Component -->
             <div class="docs-card">
-              <h3>3. Deep State Mutation</h3>
-              <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                Pass master state JSON objects to composite custom elements synchronously:
-              </p>
-              <div class="code-block">const dashboard = document.querySelector('universal-saas-dashboard');
-dashboard.state = {
-  metrics: [...],
-  tableHeaders: [...],
-  tableRows: [...]
-};</div>
+              <div>
+                <div class="docs-card-header">
+                  <h3>3. App Shell Layout</h3>
+                  <span class="badge-version">&lt;universal-app-shell&gt;</span>
+                </div>
+                <p>
+                  Responsive SaaS grid container with slots for brand, header actions, and drawer:
+                </p>
+              </div>
+              <div class="code-block-wrapper">
+                <button type="button" class="copy-btn" data-copy-target="code-snippet-3">Copy</button>
+                <pre class="code-block" id="code-snippet-3">&lt;universal-app-shell drawer-open&gt;
+  &lt;a slot="brand" href="#"&gt;My App&lt;/a&gt;
+  &lt;div slot="header-actions"&gt;User Profile&lt;/div&gt;
+  &lt;nav slot="drawer"&gt;Navigation Menu&lt;/nav&gt;
+  &lt;div class="workspace"&gt;Main Content&lt;/div&gt;
+&lt;/universal-app-shell&gt;</pre>
+              </div>
+            </div>
+
+            <!-- Snippet 4: Commercial Billing Funnel -->
+            <div class="docs-card">
+              <div>
+                <div class="docs-card-header">
+                  <h3>4. Multi-Step Billing Funnel</h3>
+                  <span class="badge-version">&lt;universal-billing-funnel&gt;</span>
+                </div>
+                <p>
+                  Subscription wizard managing plan selection, checkout, and completion event emission:
+                </p>
+              </div>
+              <div class="code-block-wrapper">
+                <button type="button" class="copy-btn" data-copy-target="code-snippet-4">Copy</button>
+                <pre class="code-block" id="code-snippet-4">const funnel = document.querySelector('universal-billing-funnel');
+funnel.plans = [
+  { id: "pro", name: "Pro", price: "$49/mo", features: ["5 Users"], popular: true }
+];
+
+funnel.addEventListener('app-checkout-complete', (e) => {
+  console.log('Transaction Payload:', e.detail);
+});</pre>
+              </div>
+            </div>
+
+            <!-- Snippet 5: Dynamic Schema Form -->
+            <div class="docs-card">
+              <div>
+                <div class="docs-card-header">
+                  <h3>5. Schema-Driven Form</h3>
+                  <span class="badge-version">&lt;universal-form&gt;</span>
+                </div>
+                <p>
+                  Instantiate interactive forms purely from JSON schema arrays:
+                </p>
+              </div>
+              <div class="code-block-wrapper">
+                <button type="button" class="copy-btn" data-copy-target="code-snippet-5">Copy</button>
+                <pre class="code-block" id="code-snippet-5">const form = document.querySelector('universal-form');
+form.schema = [
+  { name: "email", type: "email", label: "Email", required: true },
+  { name: "role", type: "select", label: "Role", options: ["Admin", "User"] }
+];
+
+form.addEventListener('app-form-submit', (e) => {
+  console.log('Form Output:', e.detail.formData);
+});</pre>
+              </div>
+            </div>
+
+            <!-- Snippet 6: Paginated Data Table -->
+            <div class="docs-card">
+              <div>
+                <div class="docs-card-header">
+                  <h3>6. Interactive Data Grid</h3>
+                  <span class="badge-version">&lt;universal-data-table&gt;</span>
+                </div>
+                <p>
+                  Pass structured row matrices to trigger sorting, filtering, and pagination:
+                </p>
+              </div>
+              <div class="code-block-wrapper">
+                <button type="button" class="copy-btn" data-copy-target="code-snippet-6">Copy</button>
+                <pre class="code-block" id="code-snippet-6">const table = document.querySelector('universal-data-table');
+table.payload = {
+  headers: ["Name", "Email", "Status"],
+  rows: [
+    ["Elena Rostova", "elena@corp.internal", "Active"],
+    ["Marcus Vance", "marcus@corp.internal", "Active"]
+  ]
+};</pre>
+              </div>
             </div>
 
           </div>
@@ -489,20 +683,31 @@ dashboard.state = {
           { name: "status", type: "select", label: "Initial Status", required: true, options: ["Active", "Pending", "Inactive"], defaultValue: "Active" }
         ];
 
-        // 3. DOM Elements Setup
+        // 3. Custom Billing Plans Schema
+        const customBillingPlans = [
+          { id: "tier-basic", name: "Basic Core", price: "$19/mo", features: ["1 User", "Standard Analytics", "Community Support"], popular: false },
+          { id: "tier-pro", name: "Growth Pro", price: "$49/mo", features: ["5 Users", "Deep Telemetry", "Priority Support", "API Access"], popular: true },
+          { id: "tier-enterprise", name: "Enterprise Scale", price: "$199/mo", features: ["Unlimited Users", "Dedicated SLA", "Custom Integrations", "24/7 Dedicated Support"], popular: false }
+        ];
+
+        // 4. DOM Elements Setup
         const appShell = document.getElementById('app-shell');
         const dashboard = document.getElementById('saas-dashboard');
         const userForm = document.getElementById('user-entry-form');
         const splitTable = document.getElementById('split-data-table');
         const standaloneGrid = document.getElementById('standalone-metrics-grid');
+        const billingFunnel = document.getElementById('billing-funnel');
         const themeSelect = document.getElementById('theme-preset-select');
         const toast = document.getElementById('toast');
+        const txLogContainer = document.getElementById('tx-log-container');
+        const txLogPayload = document.getElementById('tx-log-payload');
 
         // Populate initial element properties
         if (dashboard) dashboard.state = masterData;
         if (userForm) userForm.schema = memberFormSchema;
         if (splitTable) splitTable.payload = { headers: masterData.tableHeaders, rows: masterData.tableRows };
         if (standaloneGrid) standaloneGrid.payload = masterData.metrics;
+        if (billingFunnel) billingFunnel.plans = customBillingPlans;
 
         // Toast Helper
         function showToast(msg) {
@@ -510,10 +715,26 @@ dashboard.state = {
           toast.classList.add('show');
           setTimeout(() => {
             toast.classList.remove('show');
-          }, 3000);
+          }, 4000);
         }
 
-        // 4. Theme Preset Controller Interaction
+        // 5. Billing Funnel Checkout Event Listener
+        if (billingFunnel) {
+          billingFunnel.addEventListener('app-checkout-complete', (e) => {
+            const payload = e.detail;
+            
+            // Show smooth toast notification
+            showToast(`💳 Transaction Completed! Plan: ${payload.plan.name} (${payload.plan.price}) | ID: ${payload.transactionId}`);
+            
+            // Display live log on workspace
+            if (txLogContainer && txLogPayload) {
+              txLogPayload.textContent = JSON.stringify(payload, null, 2);
+              txLogContainer.classList.add('visible');
+            }
+          });
+        }
+
+        // 6. Theme Preset Controller Interaction
         themeSelect.addEventListener('change', (e) => {
           const selectedTheme = e.target.value;
           if (window.UniversalUI) {
@@ -522,7 +743,7 @@ dashboard.state = {
           }
         });
 
-        // 5. Reactive Form Submission Pipeline
+        // 7. Reactive Form Submission Pipeline
         userForm.addEventListener('app-form-submit', (e) => {
           const formData = e.detail.formData;
 
@@ -550,7 +771,7 @@ dashboard.state = {
           showToast(`Added member ${formData.name} to state object!`);
         });
 
-        // 6. Real-Time Data Simulation Logic
+        // 8. Real-Time Data Simulation Logic
         document.getElementById('btn-realtime-fetch').addEventListener('click', () => {
           const rev = (45000 + Math.floor(Math.random() * 25000)).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
           const users = (2200 + Math.floor(Math.random() * 2000)).toLocaleString();
@@ -570,24 +791,62 @@ dashboard.state = {
           showToast('Real-time mock payload generated and dispatched!');
         });
 
-        // 7. Sidebar Toggle Listener
+        // 9. Sidebar Toggle Listener
         document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
           appShell.toggleDrawer();
         });
 
-        // 8. Tab Switcher
+        // 10. Copy Snippet Buttons Logic
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copyTarget;
+            const codeEl = document.getElementById(targetId);
+            if (codeEl) {
+              navigator.clipboard.writeText(codeEl.textContent).then(() => {
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.borderColor = 'var(--color-success)';
+                btn.style.color = 'var(--color-success)';
+                setTimeout(() => {
+                  btn.textContent = originalText;
+                  btn.style.borderColor = '';
+                  btn.style.color = '';
+                }, 2000);
+              }).catch(err => {
+                console.error('Failed to copy code snippet:', err);
+              });
+            }
+          });
+        });
+
+        // 11. Tab Switcher
         const tabBtns = document.querySelectorAll('.tab-btn');
         const tabPanes = document.querySelectorAll('.tab-pane');
 
+        function setActiveTab(tabId) {
+          tabBtns.forEach(b => {
+            if (b.dataset.tab === tabId) b.classList.add('active');
+            else b.classList.remove('active');
+          });
+
+          tabPanes.forEach(p => {
+            if (p.id === tabId) p.classList.add('active');
+            else p.classList.remove('active');
+          });
+
+          // Sync nav menu active state
+          document.querySelectorAll('.nav-item a').forEach(a => {
+            if (a.getAttribute('href') === `#${tabId.replace('tab-', '')}`) {
+              a.classList.add('active');
+            } else {
+              a.classList.remove('active');
+            }
+          });
+        }
+
         tabBtns.forEach(btn => {
           btn.addEventListener('click', () => {
-            const targetTab = btn.dataset.tab;
-
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabPanes.forEach(p => p.classList.remove('active'));
-
-            btn.classList.add('active');
-            document.getElementById(targetTab)?.classList.add('active');
+            setActiveTab(btn.dataset.tab);
           });
         });
 
@@ -595,6 +854,10 @@ dashboard.state = {
         document.getElementById('nav-dash')?.addEventListener('click', (e) => {
           e.preventDefault();
           setActiveTab('tab-dashboard');
+        });
+        document.getElementById('nav-billing')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          setActiveTab('tab-billing');
         });
         document.getElementById('nav-split')?.addEventListener('click', (e) => {
           e.preventDefault();
@@ -608,17 +871,6 @@ dashboard.state = {
           e.preventDefault();
           setActiveTab('tab-docs');
         });
-
-        function setActiveTab(tabId) {
-          tabBtns.forEach(b => {
-            if (b.dataset.tab === tabId) b.classList.add('active');
-            else b.classList.remove('active');
-          });
-          tabPanes.forEach(p => {
-            if (p.id === tabId) p.classList.add('active');
-            else p.classList.remove('active');
-          });
-        }
 
       });
     </script>

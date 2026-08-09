@@ -10,6 +10,7 @@ import './universal-form.js';
 import './universal-metric-grid.js';
 import './universal-data-table.js';
 import './universal-saas-dashboard.js';
+import './universal-billing-funnel.js';
 
 // Pre-defined Theme Presets Dictionary
 const THEME_PRESETS = {
@@ -205,7 +206,8 @@ const UniversalUI = {
       'universal-form',
       'universal-metric-grid',
       'universal-data-table',
-      'universal-saas-dashboard'
+      'universal-saas-dashboard',
+      'universal-billing-funnel'
     ];
     return components.filter(tag => Boolean(customElements.get(tag)));
   }
