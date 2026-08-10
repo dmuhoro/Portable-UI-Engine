@@ -3,13 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portable UI Engine - Framework-Agnostic Web Components Showcase & API Hub</title>
+    <title>Portable UI Engine - Framework-Agnostic Web Components Showcase & AI Gateway Hub</title>
     
     <!-- Global Design System Tokens CSS -->
     <link rel="stylesheet" href="./theme.css" />
 
-    <!-- CDN Release Simulator: Single Unified Engine Import -->
+    <!-- CDN Release Simulator: Single Unified Engine Barrel Import -->
     <script type="module" src="./engine.js"></script>
+
+    <!-- QA Chaos Pressure Testing Engine Module Import -->
+    <script type="module" src="./qa-pressure-test.js"></script>
 
     <style>
       /* Showcase Page Styles & Utility Layouts */
@@ -116,6 +119,68 @@
         font-weight: var(--font-weight-semibold);
       }
 
+      /* Developer Control Deck Alert Toolbar */
+      .control-deck-card {
+        background: linear-gradient(135deg, var(--color-bg-surface), var(--color-bg-surface-elevated));
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-4) var(--spacing-5);
+        margin-bottom: var(--spacing-6);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .control-deck-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-3);
+        flex-wrap: wrap;
+        gap: var(--spacing-3);
+      }
+
+      .control-deck-title {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-2);
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+      }
+
+      .control-deck-controls {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-3);
+        flex-wrap: wrap;
+      }
+
+      .qa-console-log {
+        background-color: var(--color-bg-app);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-3);
+        font-family: var(--font-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-primary);
+        max-height: 120px;
+        overflow-y: auto;
+        margin-top: var(--spacing-3);
+        display: none;
+      }
+
+      .qa-console-log.active {
+        display: block;
+      }
+
+      .qa-log-line {
+        margin: 2px 0;
+        display: flex;
+        gap: 8px;
+      }
+
+      .qa-tag-pass { color: var(--color-success); font-weight: bold; }
+      .qa-tag-target { color: var(--color-primary); font-weight: bold; }
+
       /* Workspace Layout */
       .workspace-header {
         display: flex;
@@ -177,6 +242,16 @@
       .btn-primary:hover {
         background-color: var(--color-primary-hover);
         border-color: var(--color-primary-hover);
+      }
+
+      .btn-danger {
+        background-color: var(--color-danger, #dc2626);
+        color: var(--color-text-inverse, #ffffff);
+        border-color: var(--color-danger, #dc2626);
+      }
+
+      .btn-danger:hover {
+        background-color: #b91c1c;
       }
 
       .btn-xs {
@@ -386,7 +461,12 @@
       <nav slot="drawer">
         <ul class="nav-menu">
           <li class="nav-item">
-            <a href="#dashboard" class="active" id="nav-dash">
+            <a href="#ai-hub" class="active" id="nav-ai-hub">
+              <span>🤖</span> Frontier AI Gateway
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#dashboard" id="nav-dash">
               <span>📊</span> Composite Dashboard
             </a>
           </li>
@@ -416,11 +496,39 @@
       <!-- Slot: Main Workspace Content -->
       <div class="workspace">
         
+        <!-- DEVELOPER CONTROL DECK ALERT TOOLBAR -->
+        <div class="control-deck-card">
+          <div class="control-deck-header">
+            <div class="control-deck-title">
+              <span style="font-size: 20px;">🛡️</span>
+              <div>
+                <strong style="display: block;">Developer Control Deck & Automated QA Engine</strong>
+                <span style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">
+                  Run real-time automated fault-tolerance chaos testing across active Shadow DOM layouts.
+                </span>
+              </div>
+            </div>
+
+            <div class="control-deck-controls">
+              <button type="button" class="btn btn-primary" id="btn-start-qa">
+                ⚡ Launch Chaos QA Pressure Test
+              </button>
+              <button type="button" class="btn btn-danger" id="btn-stop-qa" style="display: none;">
+                🛑 Stop Chaos QA Test
+              </button>
+              <span class="badge-version" id="qa-status-badge">QA Engine: IDLE</span>
+            </div>
+          </div>
+
+          <!-- Live Real-Time QA Pressure Test Stream Logs -->
+          <div class="qa-console-log" id="qa-console"></div>
+        </div>
+
         <header class="workspace-header">
           <div>
             <h1 class="workspace-title">Framework-Agnostic SaaS Engine Showcase</h1>
             <p class="workspace-subtitle">
-              Native Web Components, Shadow DOM style isolation, and real-time state mutation with zero framework dependencies.
+              Native Web Components, Shadow DOM style isolation, Frontier AI Gateway adapters, and zero framework dependencies.
             </p>
           </div>
 
@@ -436,15 +544,84 @@
 
         <!-- Showcase Navigation Tabs -->
         <div class="view-tabs">
-          <button type="button" class="tab-btn active" data-tab="tab-dashboard">Composite Dashboard</button>
+          <button type="button" class="tab-btn active" data-tab="tab-ai-hub">🤖 AI Gateway Adapter</button>
+          <button type="button" class="tab-btn" data-tab="tab-dashboard">Composite Dashboard</button>
           <button type="button" class="tab-btn" data-tab="tab-billing">Billing System Setup</button>
           <button type="button" class="tab-btn" data-tab="tab-split">Data-Driven Form & Table</button>
           <button type="button" class="tab-btn" data-tab="tab-metrics">Metrics Card Grid</button>
           <button type="button" class="tab-btn" data-tab="tab-docs">Component API Docs</button>
         </div>
 
+        <!-- TAB 0: FRONTIER AI GATEWAY ADAPTER -->
+        <div class="tab-pane active" id="tab-ai-hub">
+          <div style="margin-bottom: var(--spacing-4);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+              <h2 style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); margin: 0;">
+                Frontier AI Model Gateway (&lt;universal-ai-bridge&gt;)
+              </h2>
+
+              <label for="ai-model-selector" class="theme-select-label">
+                <span>Model Target:</span>
+                <select id="ai-model-selector" class="theme-select">
+                  <option value="gpt-4o" selected>OpenAI GPT-4o Omni</option>
+                  <option value="claude-3-5">Anthropic Claude 3.5 Sonnet</option>
+                  <option value="gemini-1-5">Google Gemini 1.5 Pro</option>
+                  <option value="ollama-llama3">Local Ollama Llama 3 70B</option>
+                </select>
+              </label>
+            </div>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0;">
+              Type any natural language UI description below. The AI adapter queries the model, receives structured JSON schemas, and dispatches real-time layout updates directly to active components.
+            </p>
+          </div>
+
+          <!-- Native AI Bridge Custom Element -->
+          <universal-ai-bridge
+            id="master-ai-bridge"
+            endpoint="/api/generate"
+            target-component="saas-dashboard"
+            mock-mode
+          ></universal-ai-bridge>
+
+          <!-- Integration Code Snippet Card -->
+          <div style="margin-top: var(--spacing-6);">
+            <div class="docs-card">
+              <div>
+                <div class="docs-card-header">
+                  <h3>Direct AI Model Integration Snippet</h3>
+                  <span class="badge-version">HTML & JS</span>
+                </div>
+                <p>
+                  Connect your custom LLM backend endpoint or client stream directly to the bridge:
+                </p>
+              </div>
+              <div class="code-block-wrapper">
+                <button type="button" class="copy-btn" data-copy-target="code-snippet-ai">Copy</button>
+                <pre class="code-block" id="code-snippet-ai">&lt;!-- 1. Declare Gateway Component in Markup --&gt;
+&lt;universal-ai-bridge
+  endpoint="https://your-api.com/v1/ai/generate"
+  target-component="saas-dashboard"
+&gt;&lt;/universal-ai-bridge&gt;
+
+&lt;!-- 2. Intercept AI Generation Complete Event --&gt;
+&lt;script&gt;
+  document.addEventListener('ai-generation-complete', (e) =&gt; {
+    const { prompt, payload, targetType } = e.detail;
+    console.log('AI Generated Layout Payload:', payload);
+
+    // Feed directly to engine component setters (Zero build tools)
+    if (targetType === 'dashboard') {
+      document.querySelector('universal-saas-dashboard').state = payload;
+    }
+  });
+&lt;/script&gt;</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- TAB 1: Composite SaaS Dashboard -->
-        <div class="tab-pane active" id="tab-dashboard">
+        <div class="tab-pane" id="tab-dashboard">
           <universal-saas-dashboard id="saas-dashboard"></universal-saas-dashboard>
         </div>
 
@@ -652,7 +829,9 @@ table.payload = {
     <div class="toast-notification" id="toast">Notification Message</div>
 
     <!-- Application Controller Script -->
-    <script>
+    <script type="module">
+      import { QAPressureTest } from './qa-pressure-test.js';
+
       // Wait for DOM and Engine ready
       window.addEventListener('DOMContentLoaded', () => {
         
@@ -702,6 +881,12 @@ table.payload = {
         const txLogContainer = document.getElementById('tx-log-container');
         const txLogPayload = document.getElementById('tx-log-payload');
 
+        // QA Control Deck Elements
+        const btnStartQA = document.getElementById('btn-start-qa');
+        const btnStopQA = document.getElementById('btn-stop-qa');
+        const qaBadge = document.getElementById('qa-status-badge');
+        const qaConsole = document.getElementById('qa-console');
+
         // Populate initial element properties
         if (dashboard) dashboard.state = masterData;
         if (userForm) userForm.schema = memberFormSchema;
@@ -718,15 +903,78 @@ table.payload = {
           }, 4000);
         }
 
-        // 5. Billing Funnel Checkout Event Listener
+        // 5. Intercept Frontier AI Generation Complete Events
+        document.addEventListener('ai-generation-complete', (e) => {
+          const detail = e.detail;
+          const { prompt, payload, targetType } = detail;
+
+          showToast(`✨ AI Generation Complete! Layout compiled for target: ${targetType.toUpperCase()}`);
+
+          if (targetType === 'form') {
+            setActiveTab('tab-split');
+            if (userForm) userForm.schema = payload;
+          } else if (targetType === 'metrics') {
+            setActiveTab('tab-metrics');
+            if (standaloneGrid) standaloneGrid.payload = payload;
+          } else if (targetType === 'billing') {
+            setActiveTab('tab-billing');
+            if (billingFunnel) billingFunnel.plans = payload;
+          } else {
+            setActiveTab('tab-dashboard');
+            if (dashboard) dashboard.state = payload;
+          }
+        });
+
+        // 6. QA Chaos Pressure Test Driver
+        if (btnStartQA && btnStopQA) {
+          btnStartQA.addEventListener('click', () => {
+            qaConsole.classList.add('active');
+            btnStartQA.style.display = 'none';
+            btnStopQA.style.display = 'inline-flex';
+            qaBadge.textContent = 'QA Engine: RUNNING';
+            qaBadge.style.backgroundColor = 'var(--color-danger-bg, #fef2f2)';
+            qaBadge.style.color = 'var(--color-danger, #dc2626)';
+
+            QAPressureTest.start({ intervalMs: 500 });
+            showToast('⚡ Chaos QA Engine active! Flooding elements with test vectors...');
+          });
+
+          btnStopQA.addEventListener('click', () => {
+            QAPressureTest.stop();
+            btnStartQA.style.display = 'inline-flex';
+            btnStopQA.style.display = 'none';
+            qaBadge.textContent = 'QA Engine: IDLE';
+            qaBadge.style.backgroundColor = '';
+            qaBadge.style.color = '';
+            showToast('🛑 Chaos QA Test halted.');
+          });
+
+          // Listen for live QA log events
+          window.addEventListener('qa-pressure-log', (e) => {
+            const entry = e.detail;
+            const line = document.createElement('div');
+            line.className = 'qa-log-line';
+            line.innerHTML = `
+              <span style="color: var(--color-text-muted);">[${entry.timestamp}]</span>
+              <span class="qa-tag-target">&lt;${entry.componentTag}&gt;</span>
+              <span class="qa-tag-pass">${entry.status}</span>
+              <span>(${entry.scenarioName})</span>
+              <span style="color: var(--color-text-secondary);">${entry.message}</span>
+            `;
+            qaConsole.prepend(line);
+
+            if (qaConsole.children.length > 50) {
+              qaConsole.removeChild(qaConsole.lastChild);
+            }
+          });
+        }
+
+        // 7. Billing Funnel Checkout Event Listener
         if (billingFunnel) {
           billingFunnel.addEventListener('app-checkout-complete', (e) => {
             const payload = e.detail;
-            
-            // Show smooth toast notification
             showToast(`💳 Transaction Completed! Plan: ${payload.plan.name} (${payload.plan.price}) | ID: ${payload.transactionId}`);
             
-            // Display live log on workspace
             if (txLogContainer && txLogPayload) {
               txLogPayload.textContent = JSON.stringify(payload, null, 2);
               txLogContainer.classList.add('visible');
@@ -734,7 +982,7 @@ table.payload = {
           });
         }
 
-        // 6. Theme Preset Controller Interaction
+        // 8. Theme Preset Controller Interaction
         themeSelect.addEventListener('change', (e) => {
           const selectedTheme = e.target.value;
           if (window.UniversalUI) {
@@ -743,11 +991,10 @@ table.payload = {
           }
         });
 
-        // 7. Reactive Form Submission Pipeline
+        // 9. Reactive Form Submission Pipeline
         userForm.addEventListener('app-form-submit', (e) => {
           const formData = e.detail.formData;
 
-          // Convert form output into row array
           const newRow = [
             formData.name,
             formData.email,
@@ -756,22 +1003,16 @@ table.payload = {
             formData.status
           ];
 
-          // Mutate master data state
           masterData.tableRows.unshift(newRow);
 
-          // Synchronous deep state setter update to dashboard
           dashboard.state = { ...masterData };
-
-          // Update split table
           splitTable.payload = { headers: masterData.tableHeaders, rows: masterData.tableRows };
-
-          // Reset form
           userForm.reset();
 
           showToast(`Added member ${formData.name} to state object!`);
         });
 
-        // 8. Real-Time Data Simulation Logic
+        // 10. Real-Time Data Simulation Logic
         document.getElementById('btn-realtime-fetch').addEventListener('click', () => {
           const rev = (45000 + Math.floor(Math.random() * 25000)).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
           const users = (2200 + Math.floor(Math.random() * 2000)).toLocaleString();
@@ -784,19 +1025,18 @@ table.payload = {
             { title: "Churn Rate", value: churn, change: "-0.5%", trend: "upward", context: "improving" }
           ];
 
-          // Forward mutated master state to sub-components via dashboard setter
           dashboard.state = { ...masterData };
           standaloneGrid.payload = masterData.metrics;
 
           showToast('Real-time mock payload generated and dispatched!');
         });
 
-        // 9. Sidebar Toggle Listener
+        // 11. Sidebar Toggle Listener
         document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
           appShell.toggleDrawer();
         });
 
-        // 10. Copy Snippet Buttons Logic
+        // 12. Copy Snippet Buttons Logic
         document.querySelectorAll('.copy-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const targetId = btn.dataset.copyTarget;
@@ -819,7 +1059,7 @@ table.payload = {
           });
         });
 
-        // 11. Tab Switcher
+        // 13. Tab Switcher
         const tabBtns = document.querySelectorAll('.tab-btn');
         const tabPanes = document.querySelectorAll('.tab-pane');
 
@@ -834,7 +1074,6 @@ table.payload = {
             else p.classList.remove('active');
           });
 
-          // Sync nav menu active state
           document.querySelectorAll('.nav-item a').forEach(a => {
             if (a.getAttribute('href') === `#${tabId.replace('tab-', '')}`) {
               a.classList.add('active');
@@ -851,6 +1090,10 @@ table.payload = {
         });
 
         // Navigation Menu Click Handling
+        document.getElementById('nav-ai-hub')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          setActiveTab('tab-ai-hub');
+        });
         document.getElementById('nav-dash')?.addEventListener('click', (e) => {
           e.preventDefault();
           setActiveTab('tab-dashboard');
