@@ -55,14 +55,23 @@ class UniversalForm extends HTMLElement {
 
   _parseAndSetSchema(val) {
     let parsed = val;
+    let parseError = false;
+
     if (typeof val === 'string') {
       try {
         parsed = JSON.parse(val);
       } catch (err) {
         console.warn('UniversalForm: Failed to parse schema JSON string.', err);
-        parsed = [];
+        parsed = null;
+        parseError = true;
       }
     }
+
+    if (parsed && !Array.isArray(parsed) && typeof parsed === 'object') {
+      parsed = parsed.schema || parsed.fields || null;
+    }
+
+    this._hasParseError = parseError || (val && !Array.isArray(parsed));
     this._schema = Array.isArray(parsed) ? parsed : [];
     this._renderFields();
   }
@@ -189,8 +198,22 @@ class UniversalForm extends HTMLElement {
     const fieldsContainer = this.shadowRoot?.querySelector('.fields-container');
     if (!fieldsContainer) return;
 
+    if (this._hasParseError) {
+      fieldsContainer.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: var(--spacing-4, 16px); background-color: var(--color-danger-bg, #fef2f2); border: 1px solid rgba(220, 38, 38, 0.2); border-radius: var(--radius-md, 6px); color: var(--color-danger, #dc2626);">
+          <strong style="display: block; margin-bottom: 4px; font-size: var(--font-size-sm, 14px);">⚠️ Invalid Data Format Provided</strong>
+          <span style="font-size: var(--font-size-xs, 12px);">Failed to parse form schema JSON or invalid format supplied. Please pass an array of field objects.</span>
+        </div>
+      `;
+      return;
+    }
+
     if (!this._schema || this._schema.length === 0) {
-      fieldsContainer.innerHTML = `<p class="empty-schema-msg">No form schema supplied.</p>`;
+      fieldsContainer.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: var(--spacing-4, 16px); text-align: center; color: var(--color-text-muted, #94a3b8);">
+          <p class="empty-schema-msg" style="margin: 0; font-style: italic;">No Active Records Available (Provide a valid schema array)</p>
+        </div>
+      `;
       return;
     }
 

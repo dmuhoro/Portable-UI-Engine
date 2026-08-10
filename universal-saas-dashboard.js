@@ -37,18 +37,24 @@ class UniversalSaaSDashboard extends HTMLElement {
         parsed = JSON.parse(newState);
       } catch (e) {
         console.warn('UniversalSaasDashboard: Invalid JSON state string provided.', e);
-        return;
+        parsed = null;
       }
     }
 
     if (parsed && typeof parsed === 'object') {
       this._state = {
-        metrics: parsed.metrics || [],
+        metrics: Array.isArray(parsed.metrics) ? parsed.metrics : [],
         tableHeaders: parsed.tableHeaders || (parsed.tableData?.headers) || [],
         tableRows: parsed.tableRows || (parsed.tableData?.rows) || (Array.isArray(parsed.tableData) ? parsed.tableData : [])
       };
-      this._propagateStateToChildren();
+    } else {
+      this._state = {
+        metrics: [],
+        tableHeaders: [],
+        tableRows: []
+      };
     }
+    this._propagateStateToChildren();
   }
 
   connectedCallback() {
@@ -63,6 +69,7 @@ class UniversalSaaSDashboard extends HTMLElement {
       this.state = parsed;
     } catch (e) {
       console.warn('UniversalSaasDashboard: Failed to parse attribute state JSON.', e);
+      this.state = null;
     }
   }
 

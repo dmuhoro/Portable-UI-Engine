@@ -37,14 +37,19 @@ class UniversalMetricGrid extends HTMLElement {
 
   _parseAndSetPayload(val) {
     let parsed = val;
+    let parseError = false;
+
     if (typeof val === 'string') {
       try {
         parsed = JSON.parse(val);
       } catch (e) {
         console.warn('UniversalMetricGrid: Failed to parse JSON payload string.', e);
-        parsed = [];
+        parsed = null;
+        parseError = true;
       }
     }
+
+    this._hasParseError = parseError;
     this._payload = Array.isArray(parsed) ? parsed : [];
     this._renderCards();
   }
@@ -53,10 +58,20 @@ class UniversalMetricGrid extends HTMLElement {
     const container = this.shadowRoot?.querySelector('.grid-container');
     if (!container) return;
 
+    if (this._hasParseError) {
+      container.innerHTML = `
+        <div class="empty-state error-state" style="grid-column: 1 / -1; padding: 16px; text-align: center; background-color: var(--color-danger-bg, #fef2f2); border: 1px solid rgba(220, 38, 38, 0.2); border-radius: var(--radius-lg, 8px); color: var(--color-danger, #dc2626);">
+          <strong style="display: block; margin-bottom: 4px; font-size: var(--font-size-sm, 14px);">⚠️ Invalid Data Format Provided</strong>
+          <span style="font-size: var(--font-size-xs, 12px);">Metric payload must be a valid JSON array of metric objects.</span>
+        </div>
+      `;
+      return;
+    }
+
     if (!this._payload || this._payload.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <p>No metrics data available.</p>
+          <p>No Active Records Available</p>
         </div>
       `;
       return;

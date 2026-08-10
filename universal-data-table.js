@@ -41,6 +41,7 @@ class UniversalDataTable extends HTMLElement {
 
   _parseAndSetPayload(val) {
     let data = val;
+    let parseError = false;
 
     if (typeof val === 'string') {
       try {
@@ -48,9 +49,11 @@ class UniversalDataTable extends HTMLElement {
       } catch (e) {
         console.warn('UniversalDataTable: Invalid JSON string supplied to payload attribute.', e);
         data = null;
+        parseError = true;
       }
     }
 
+    this._hasParseError = parseError;
     this._parsedData = this._normalizePayload(data);
     this._renderTableBody();
   }
@@ -212,6 +215,20 @@ class UniversalDataTable extends HTMLElement {
 
     if (!tbody) return;
 
+    if (this._hasParseError) {
+      tbody.innerHTML = '';
+      if (countBadge) countBadge.textContent = '0 records';
+      if (emptyState) {
+        emptyState.style.display = 'flex';
+        const titleEl = emptyState.querySelector('.empty-title');
+        const subEl = emptyState.querySelector('.empty-sub');
+        if (titleEl) titleEl.textContent = 'Invalid Data Format Provided';
+        if (subEl) subEl.textContent = 'Failed to parse JSON string or malformed table payload provided.';
+      }
+      if (tableContainer) tableContainer.style.display = 'none';
+      return;
+    }
+
     const rows = this._getFilteredAndSortedRows();
 
     if (countBadge) {
@@ -220,7 +237,13 @@ class UniversalDataTable extends HTMLElement {
 
     if (this._parsedData.headers.length === 0 || rows.length === 0) {
       tbody.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'flex';
+      if (emptyState) {
+        emptyState.style.display = 'flex';
+        const titleEl = emptyState.querySelector('.empty-title');
+        const subEl = emptyState.querySelector('.empty-sub');
+        if (titleEl) titleEl.textContent = 'No Active Records Available';
+        if (subEl) subEl.textContent = 'Inject a valid JSON payload to render data rows.';
+      }
       if (tableContainer) tableContainer.style.display = 'none';
       return;
     }
