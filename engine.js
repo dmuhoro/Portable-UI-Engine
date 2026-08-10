@@ -183,7 +183,16 @@ const UniversalUI = {
       });
     }
 
-    // 3. Dispatch global theme shift event across shadow roots
+    // 3. Persist theme preference to localStorage for instant boot hydration
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('universal-ui-theme', this.currentTheme);
+      }
+    } catch (e) {
+      // Ignore storage access errors in restricted contexts
+    }
+
+    // 4. Dispatch global theme shift event across shadow roots
     window.dispatchEvent(
       new CustomEvent('universal-theme-change', {
         detail: {
@@ -196,6 +205,22 @@ const UniversalUI = {
     );
 
     return this.currentTheme;
+  },
+
+  /**
+   * Auto-restores stored theme preference from localStorage on page load.
+   */
+  initStoredTheme() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const savedTheme = localStorage.getItem('universal-ui-theme');
+        if (savedTheme && THEME_PRESETS[savedTheme]) {
+          this.setTheme(savedTheme);
+        }
+      }
+    } catch (e) {
+      // Ignore storage access errors
+    }
   },
 
   /**
@@ -218,6 +243,8 @@ const UniversalUI = {
 // Bind to window object for global script / CDN usage
 if (typeof window !== 'undefined') {
   window.UniversalUI = UniversalUI;
+  // Initialize stored theme immediately on script boot
+  UniversalUI.initStoredTheme();
 }
 
 export { UniversalUI };

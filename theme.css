@@ -224,6 +224,29 @@
   box-sizing: border-box;
 }
 
+/* Low-Latency Hydration Baseline for Custom Elements (Eliminating FOUC) */
+universal-app-shell:not(:defined),
+universal-form:not(:defined),
+universal-metric-grid:not(:defined),
+universal-data-table:not(:defined),
+universal-saas-dashboard:not(:defined),
+universal-billing-funnel:not(:defined),
+universal-ai-bridge:not(:defined),
+:not(:defined) {
+  opacity: 0.3;
+  min-height: 80px;
+  background: linear-gradient(90deg, var(--color-bg-surface, #ffffff) 25%, var(--color-bg-hover, #f1f5f9) 50%, var(--color-bg-surface, #ffffff) 75%);
+  background-size: 200% 100%;
+  animation: engine-skeleton-pulse 1.5s infinite ease-in-out;
+  border-radius: var(--radius-lg, 8px);
+  transition: opacity var(--transition-fast, 150ms ease);
+}
+
+@keyframes engine-skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 body {
   margin: 0;
   padding: 0;

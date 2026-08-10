@@ -442,6 +442,9 @@
 
       <!-- Slot: Header Configuration Toolbar (Theme Preset Selector) -->
       <div slot="header-actions" class="header-toolbar">
+        <span id="boot-latency-widget" class="badge-version" style="background-color: var(--color-success-bg, #f0fdf4); color: var(--color-success, #16a34a); border-color: var(--color-success, #16a34a);">
+          ⚡ Engine Boot Latency: Measuring...
+        </span>
         <span class="badge-version">v2.0 CDN Release</span>
         
         <label for="theme-preset-select" class="theme-select-label">
@@ -640,6 +643,15 @@
 
         <!-- TAB 3: Form & Data Table Split View -->
         <div class="tab-pane" id="tab-split">
+          <div style="margin-bottom: var(--spacing-4);">
+            <h2 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); margin: 0 0 4px 0;">
+              Dual-Mode Data Ingestion: Reactive JSON + HTMX Declarative HTML
+            </h2>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0;">
+              Demonstrating both JSON payload reactive updates and server-rendered declarative HTML table ingestion.
+            </p>
+          </div>
+
           <div class="split-workspace">
             
             <universal-form
@@ -650,6 +662,66 @@
 
             <universal-data-table id="split-data-table"></universal-data-table>
 
+          </div>
+
+          <!-- Declarative HTML Table Fallback (HTMX Bridge) Showcase -->
+          <div style="margin-top: var(--spacing-6); padding-top: var(--spacing-5); border-top: 1px dashed var(--color-border-strong);">
+            <div style="margin-bottom: var(--spacing-3); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); margin: 0; color: var(--color-text-primary);">
+                  Declarative HTML Table Fallback (&lt;universal-data-table&gt; HTMX Bridge)
+                </h3>
+                <p style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0 0;">
+                  Raw light-DOM &lt;table&gt; elements parsed automatically without JSON property assignments.
+                </p>
+              </div>
+              <span class="badge-version" style="background-color: var(--color-accent, #0d9488); color: white;">Zero JS Property Assignment</span>
+            </div>
+
+            <!-- Declarative Custom Element Ingesting Semantic Light DOM HTML Table -->
+            <universal-data-table id="htmx-declarative-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Service Endpoint</th>
+                    <th>Protocol</th>
+                    <th>Avg Latency</th>
+                    <th>Uptime SLA</th>
+                    <th>Region Cluster</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>/api/v1/auth/token</td>
+                    <td>HTTP/2 TLS 1.3</td>
+                    <td>14ms</td>
+                    <td>99.99%</td>
+                    <td>us-east-1a</td>
+                  </tr>
+                  <tr>
+                    <td>/api/v1/telemetry/stream</td>
+                    <td>gRPC Web</td>
+                    <td>8ms</td>
+                    <td>99.95%</td>
+                    <td>us-east-1b</td>
+                  </tr>
+                  <tr>
+                    <td>/api/v1/inference/predict</td>
+                    <td>WebSocket WSS</td>
+                    <td>42ms</td>
+                    <td>99.90%</td>
+                    <td>eu-west-1a</td>
+                  </tr>
+                  <tr>
+                    <td>/api/v1/storage/upload</td>
+                    <td>HTTPS Rest</td>
+                    <td>28ms</td>
+                    <td>99.99%</td>
+                    <td>ap-southeast-1</td>
+                  </tr>
+                </tbody>
+              </table>
+            </universal-data-table>
           </div>
         </div>
 
@@ -835,6 +907,24 @@ table.payload = {
       // Wait for DOM and Engine ready
       window.addEventListener('DOMContentLoaded', () => {
         
+        // 0. Boot Latency Performance Measurement
+        const pageLoadStart = window.performance ? performance.now() : Date.now();
+        Promise.all([
+          customElements.whenDefined('universal-app-shell'),
+          customElements.whenDefined('universal-form'),
+          customElements.whenDefined('universal-metric-grid'),
+          customElements.whenDefined('universal-data-table'),
+          customElements.whenDefined('universal-saas-dashboard'),
+          customElements.whenDefined('universal-billing-funnel'),
+          customElements.whenDefined('universal-ai-bridge')
+        ]).then(() => {
+          const latencyMs = (performance.now() - pageLoadStart).toFixed(2);
+          const latencyWidget = document.getElementById('boot-latency-widget');
+          if (latencyWidget) {
+            latencyWidget.innerHTML = `⚡ Engine Boot Latency: <strong>${latencyMs}ms</strong>`;
+          }
+        });
+
         // 1. Initial Master SaaS Data Object
         let masterData = {
           metrics: [

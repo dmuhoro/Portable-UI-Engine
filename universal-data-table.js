@@ -37,6 +37,51 @@ class UniversalDataTable extends HTMLElement {
   connectedCallback() {
     this.render();
     this._setupEvents();
+    if ((!this._parsedData.headers.length && !this._parsedData.rows.length) || !this._payload) {
+      this._parseLightDomTable();
+    }
+  }
+
+  _parseLightDomTable() {
+    // Skip fallback if payload already supplied valid records
+    if (this._payload && (this._parsedData.headers.length > 0 || this._parsedData.rows.length > 0)) {
+      return false;
+    }
+
+    const lightTable = this.querySelector('table');
+    if (!lightTable) {
+      return false;
+    }
+
+    const headers = [];
+    const rows = [];
+
+    // Extract headers from <thead> <th> or <tr> <th>
+    const thElements = lightTable.querySelectorAll('thead th, tr:first-child th');
+    if (thElements.length > 0) {
+      thElements.forEach(th => headers.push(th.textContent.trim()));
+    }
+
+    // Extract rows from <tbody> <tr> or direct <tr> elements
+    const trElements = lightTable.querySelectorAll('tbody tr, tr');
+    trElements.forEach(tr => {
+      if (tr.parentElement && tr.parentElement.tagName.toLowerCase() === 'thead') return;
+      const tdElements = tr.querySelectorAll('td');
+      if (tdElements.length > 0) {
+        const row = Array.from(tdElements).map(td => td.textContent.trim());
+        rows.push(row);
+      }
+    });
+
+    if (headers.length > 0 || rows.length > 0) {
+      this._hasParseError = false;
+      this._parsedData = { headers, rows };
+      this._renderHeaders();
+      this._renderTableBody();
+      return true;
+    }
+
+    return false;
   }
 
   _parseAndSetPayload(val) {
@@ -55,6 +100,14 @@ class UniversalDataTable extends HTMLElement {
 
     this._hasParseError = parseError;
     this._parsedData = this._normalizePayload(data);
+
+    // HTMX / Light DOM Fallback if payload is missing or empty
+    if (!parseError && (!this._parsedData.headers.length && !this._parsedData.rows.length)) {
+      if (this._parseLightDomTable()) {
+        return;
+      }
+    }
+
     this._renderTableBody();
   }
 
@@ -166,7 +219,7 @@ class UniversalDataTable extends HTMLElement {
     });
 
     const thead = this.shadowRoot.querySelector('thead');
-    thead?.addEventListener('click', e => {
+    const triggerSort = (e) => {
       const th = e.target.closest('th');
       if (th && th.dataset.index !== undefined) {
         const colIndex = parseInt(th.dataset.index, 10);
@@ -178,6 +231,14 @@ class UniversalDataTable extends HTMLElement {
         }
         this._renderHeaders();
         this._renderTableBody();
+      }
+    };
+
+    thead?.addEventListener('click', triggerSort);
+    thead?.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        triggerSort(e);
       }
     });
   }
@@ -194,9 +255,10 @@ class UniversalDataTable extends HTMLElement {
     thead.innerHTML = this._parsedData.headers
       .map((header, index) => {
         const isSorted = this._sortColumn === index;
+        const sortAttr = isSorted ? (this._sortAsc ? 'ascending' : 'descending') : 'none';
         const arrow = isSorted ? (this._sortAsc ? ' ↑' : ' ↓') : '';
         return `
-        <th data-index="${index}" class="${isSorted ? 'sorted' : ''}" scope="col">
+        <th data-index="${index}" class="${isSorted ? 'sorted' : ''}" scope="col" role="columnheader" tabindex="0" aria-sort="${sortAttr}">
           <span>${this._escapeHtml(header)}</span>
           <span class="sort-icon">${arrow}</span>
         </th>
@@ -254,9 +316,9 @@ class UniversalDataTable extends HTMLElement {
     tbody.innerHTML = rows
       .map((row, rowIndex) => {
         const cellsHtml = row
-          .map(cell => `<td>${this._formatCellValue(cell)}</td>`)
+          .map(cell => `<td role="cell">${this._formatCellValue(cell)}</td>`)
           .join('');
-        return `<tr data-row-index="${rowIndex}">${cellsHtml}</tr>`;
+        return `<tr data-row-index="${rowIndex}" role="row">${cellsHtml}</tr>`;
       })
       .join('');
   }
@@ -497,6 +559,7 @@ class UniversalDataTable extends HTMLElement {
       </style>
 
       <div class="table-card">
+        <slot style="display:none;"></slot>
         <div class="table-toolbar">
           <div class="toolbar-left">
             <h2 class="table-title">Data Records</h2>
@@ -511,11 +574,11 @@ class UniversalDataTable extends HTMLElement {
         </div>
 
         <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr></tr>
+          <table role="table">
+            <thead role="rowgroup">
+              <tr role="row"></tr>
             </thead>
-            <tbody></tbody>
+            <tbody role="rowgroup"></tbody>
           </table>
         </div>
 

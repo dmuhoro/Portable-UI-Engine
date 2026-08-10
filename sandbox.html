@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portable UI Engine - Native Component Workbench & Sandbox</title>
+    
+    <!-- Global Design System Tokens CSS -->
+    <link rel="stylesheet" href="./theme.css" />
+
+    <!-- Engine Barrel Script Entry Point -->
+    <script type="module" src="./engine.js"></script>
+
+    <style>
+      :root {
+        --sandbox-sidebar-width: 280px;
+        --sandbox-editor-width: 420px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: var(--font-sans, system-ui, sans-serif);
+        background-color: var(--color-bg-app, #f8fafc);
+        color: var(--color-text-primary, #0f172a);
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Topbar Workbench Navigation */
+      .sandbox-topbar {
+        height: 56px;
+        background-color: var(--color-bg-surface, #ffffff);
+        border-bottom: 1px solid var(--color-border, #e2e8f0);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 var(--spacing-4, 16px);
+        z-index: 100;
+        box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0,0,0,0.05));
+      }
+
+      .topbar-brand {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-2, 8px);
+        font-weight: var(--font-weight-bold, 700);
+        font-size: var(--font-size-base, 16px);
+        color: var(--color-primary, #2563eb);
+        text-decoration: none;
+      }
+
+      .topbar-badge {
+        font-size: var(--font-size-xs, 12px);
+        padding: 2px 8px;
+        background-color: var(--color-primary-light, #eff6ff);
+        color: var(--color-primary, #2563eb);
+        border: 1px solid var(--color-border, #e2e8f0);
+        border-radius: var(--radius-full, 9999px);
+        font-weight: var(--font-weight-semibold, 600);
+      }
+
+      .topbar-controls {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-3, 12px);
+      }
+
+      .theme-select {
+        padding: 4px 10px;
+        font-size: var(--font-size-xs, 12px);
+        font-weight: var(--font-weight-semibold, 600);
+        font-family: inherit;
+        color: var(--color-text-primary, #0f172a);
+        background-color: var(--color-bg-app, #f8fafc);
+        border: 1px solid var(--color-border-strong, #cbd5e1);
+        border-radius: var(--radius-md, 6px);
+        outline: none;
+        cursor: pointer;
+      }
+
+      /* Sandbox Workbench Layout */
+      .sandbox-body {
+        display: grid;
+        grid-template-columns: var(--sandbox-sidebar-width) 1fr var(--sandbox-editor-width);
+        flex: 1;
+        height: calc(100vh - 56px);
+        overflow: hidden;
+      }
+
+      @media (max-width: 1200px) {
+        .sandbox-body {
+          grid-template-columns: 220px 1fr 340px;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .sandbox-body {
+          grid-template-columns: 1fr;
+          overflow-y: auto;
+        }
+      }
+
+      /* Sidebar Component Selector */
+      .sandbox-sidebar {
+        background-color: var(--color-bg-surface, #ffffff);
+        border-right: 1px solid var(--color-border, #e2e8f0);
+        padding: var(--spacing-4, 16px);
+        overflow-y: auto;
+      }
+
+      .sidebar-title {
+        font-size: var(--font-size-xs, 12px);
+        font-weight: var(--font-weight-bold, 700);
+        color: var(--color-text-secondary, #475569);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0 0 var(--spacing-3, 12px) 0;
+      }
+
+      .component-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-1, 4px);
+      }
+
+      .component-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-3, 12px);
+        padding: var(--spacing-2, 8px) var(--spacing-3, 12px);
+        font-size: var(--font-size-sm, 14px);
+        font-weight: var(--font-weight-medium, 500);
+        color: var(--color-text-secondary, #475569);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: var(--radius-md, 6px);
+        cursor: pointer;
+        text-align: left;
+        transition: all var(--transition-fast, 150ms ease);
+      }
+
+      .component-btn:hover {
+        background-color: var(--color-bg-hover, #f1f5f9);
+        color: var(--color-text-primary, #0f172a);
+      }
+
+      .component-btn.active {
+        background-color: var(--color-primary-light, #eff6ff);
+        color: var(--color-primary, #2563eb);
+        border-color: rgba(37, 99, 235, 0.2);
+        font-weight: var(--font-weight-semibold, 600);
+      }
+
+      .component-tag-label {
+        font-family: var(--font-mono, monospace);
+        font-size: 11px;
+        color: var(--color-text-muted, #94a3b8);
+        display: block;
+      }
+
+      /* Central Isolated Component Viewport */
+      .sandbox-viewport-container {
+        background-color: var(--color-bg-app, #f8fafc);
+        padding: var(--spacing-6, 24px);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .viewport-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-4, 16px);
+        padding-bottom: var(--spacing-3, 12px);
+        border-bottom: 1px solid var(--color-border, #e2e8f0);
+      }
+
+      .viewport-title {
+        font-size: var(--font-size-lg, 18px);
+        font-weight: var(--font-weight-bold, 700);
+        margin: 0;
+      }
+
+      .isolated-viewport {
+        background-color: var(--color-bg-surface, #ffffff);
+        border: 1px solid var(--color-border, #e2e8f0);
+        border-radius: var(--radius-xl, 12px);
+        padding: var(--spacing-6, 24px);
+        box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0,0,0,0.05));
+        flex: 1;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      /* Right-Hand JSON Live Playground Panel */
+      .sandbox-editor-panel {
+        background-color: var(--color-bg-surface, #ffffff);
+        border-left: 1px solid var(--color-border, #e2e8f0);
+        padding: var(--spacing-4, 16px);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3, 12px);
+      }
+
+      .editor-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .editor-title {
+        font-size: var(--font-size-xs, 12px);
+        font-weight: var(--font-weight-bold, 700);
+        color: var(--color-text-secondary, #475569);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+      }
+
+      .status-badge {
+        font-size: 11px;
+        font-weight: var(--font-weight-bold, 700);
+        padding: 2px 8px;
+        border-radius: var(--radius-full, 9999px);
+      }
+
+      .status-valid {
+        background-color: var(--color-success-bg, #f0fdf4);
+        color: var(--color-success, #16a34a);
+      }
+
+      .status-invalid {
+        background-color: var(--color-danger-bg, #fef2f2);
+        color: var(--color-danger, #dc2626);
+      }
+
+      .json-textarea {
+        width: 100%;
+        flex: 1;
+        min-height: 350px;
+        font-family: var(--font-mono, monospace);
+        font-size: var(--font-size-xs, 12px);
+        padding: var(--spacing-3, 12px);
+        color: var(--color-text-primary, #0f172a);
+        background-color: var(--color-bg-app, #f8fafc);
+        border: 1px solid var(--color-border-strong, #cbd5e1);
+        border-radius: var(--radius-md, 6px);
+        outline: none;
+        resize: none;
+        line-height: 1.5;
+        transition: border-color var(--transition-fast, 150ms ease);
+      }
+
+      .json-textarea:focus {
+        border-color: var(--color-primary, #2563eb);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+      }
+
+      .editor-actions {
+        display: flex;
+        gap: var(--spacing-2, 8px);
+      }
+
+      .action-btn {
+        flex: 1;
+        padding: 6px 12px;
+        font-size: var(--font-size-xs, 12px);
+        font-weight: var(--font-weight-semibold, 600);
+        border-radius: var(--radius-md, 6px);
+        border: 1px solid var(--color-border, #e2e8f0);
+        background-color: var(--color-bg-surface, #ffffff);
+        color: var(--color-text-primary, #0f172a);
+        cursor: pointer;
+        transition: all var(--transition-fast, 150ms ease);
+      }
+
+      .action-btn:hover {
+        background-color: var(--color-bg-hover, #f1f5f9);
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Workbench Topbar -->
+    <header class="sandbox-topbar">
+      <a href="index.html" class="topbar-brand">
+        <span>⚡ Portable UI Engine</span>
+        <span class="topbar-badge">Isolated Component Sandbox</span>
+      </a>
+
+      <div class="topbar-controls">
+        <label for="sandbox-theme-select" style="font-size: 12px; font-weight: 600; color: var(--color-text-secondary);">
+          Theme:
+        </label>
+        <select id="sandbox-theme-select" class="theme-select">
+          <option value="light" selected>Light Default</option>
+          <option value="dark">Dark Default</option>
+          <option value="corporate">Corporate Minimal</option>
+          <option value="cyberpunk">Cyberpunk Neon</option>
+          <option value="midnight">Midnight Dev</option>
+          <option value="emerald">Emerald Clean</option>
+        </select>
+        <a href="index.html" class="action-btn" style="text-decoration: none; text-align: center;">← Back to Showcase</a>
+      </div>
+    </header>
+
+    <!-- Workbench Main Workspace -->
+    <div class="sandbox-body">
+      
+      <!-- Left Sidebar Component Selector -->
+      <aside class="sandbox-sidebar">
+        <h3 class="sidebar-title">Component Catalog</h3>
+        <ul class="component-menu">
+          <li>
+            <button type="button" class="component-btn active" data-component="data-table">
+              <div>
+                <div>Data Grid</div>
+                <span class="component-tag-label">&lt;universal-data-table&gt;</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="component-btn" data-component="form">
+              <div>
+                <div>Schema Form</div>
+                <span class="component-tag-label">&lt;universal-form&gt;</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="component-btn" data-component="metrics">
+              <div>
+                <div>Metric Grid</div>
+                <span class="component-tag-label">&lt;universal-metric-grid&gt;</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="component-btn" data-component="billing">
+              <div>
+                <div>Billing Funnel</div>
+                <span class="component-tag-label">&lt;universal-billing-funnel&gt;</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="component-btn" data-component="dashboard">
+              <div>
+                <div>SaaS Dashboard</div>
+                <span class="component-tag-label">&lt;universal-saas-dashboard&gt;</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="component-btn" data-component="ai-bridge">
+              <div>
+                <div>Frontier AI Bridge</div>
+                <span class="component-tag-label">&lt;universal-ai-bridge&gt;</span>
+              </div>
+            </button>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Central Isolated Component Viewport -->
+      <main class="sandbox-viewport-container">
+        <div class="viewport-header">
+          <h2 class="viewport-title" id="active-component-title">Data Grid (&lt;universal-data-table&gt;)</h2>
+          <span style="font-size: 12px; color: var(--color-text-secondary);">Isolated Shadow DOM Canvas</span>
+        </div>
+
+        <div class="isolated-viewport" id="isolated-viewport">
+          <!-- Active isolated component renders here -->
+        </div>
+      </main>
+
+      <!-- Right Panel Raw JSON Contract Live Playground -->
+      <aside class="sandbox-editor-panel">
+        <div class="editor-header">
+          <h3 class="editor-title">JSON Contract Schema</h3>
+          <span class="status-badge status-valid" id="json-status">JSON Valid ✅</span>
+        </div>
+
+        <textarea id="json-editor" class="json-textarea" spellcheck="false"></textarea>
+
+        <div class="editor-actions">
+          <button type="button" class="action-btn" id="btn-format-json">Format JSON</button>
+          <button type="button" class="action-btn" id="btn-reset-json">Reset Contract</button>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- Sandbox Playground Controller Script -->
+    <script type="module">
+      window.addEventListener('DOMContentLoaded', () => {
+        
+        // Component Presets Registry
+        const PRESETS = {
+          'data-table': {
+            title: 'Data Grid (<universal-data-table>)',
+            tag: 'universal-data-table',
+            prop: 'payload',
+            defaultData: {
+              headers: ["Member Name", "Email Address", "Role", "Department", "Status"],
+              rows: [
+                ["Elena Rostova", "elena@corp.internal", "Principal Engineer", "Infrastructure", "Active"],
+                ["Marcus Vance", "marcus@corp.internal", "Product Designer", "Design System", "Active"],
+                ["Sarah Jenkins", "sarah@corp.internal", "Security Analyst", "SecOps", "Pending"],
+                ["Devon Kim", "devon@corp.internal", "Backend Architect", "Data Core", "Active"]
+              ]
+            }
+          },
+          'form': {
+            title: 'Schema Form (<universal-form>)',
+            tag: 'universal-form',
+            prop: 'schema',
+            defaultData: [
+              { name: "full_name", type: "text", label: "Full Name", required: true, placeholder: "e.g. Alex Morgan" },
+              { name: "email", type: "email", label: "Work Email", required: true, placeholder: "alex@corp.internal" },
+              { name: "role", type: "select", label: "Role", options: ["Admin", "Engineer", "Designer"], defaultValue: "Engineer" },
+              { name: "bio", type: "textarea", label: "Short Bio", placeholder: "Tell us about your technical background..." }
+            ]
+          },
+          'metrics': {
+            title: 'Metric Grid (<universal-metric-grid>)',
+            tag: 'universal-metric-grid',
+            prop: 'payload',
+            defaultData: [
+              { title: "Total Revenue", value: "$128,450.00", change: "+24.5%", trend: "upward", context: "vs Q2 target" },
+              { title: "Active Subscriptions", value: "4,120", change: "+12.1%", trend: "upward", context: "vs last month" },
+              { title: "Churn Rate", value: "0.85%", change: "-0.15%", trend: "upward", context: "improving SLA" },
+              { title: "Avg Response", value: "1.2 hrs", change: "-18.0%", trend: "upward", context: "faster tickets" }
+            ]
+          },
+          'billing': {
+            title: 'Billing Funnel (<universal-billing-funnel>)',
+            tag: 'universal-billing-funnel',
+            prop: 'plans',
+            defaultData: [
+              { id: "tier-basic", name: "Basic Core", price: "$19/mo", features: ["1 User", "Standard Analytics"], popular: false },
+              { id: "tier-pro", name: "Growth Pro", price: "$49/mo", features: ["5 Users", "Deep Telemetry", "Priority Support"], popular: true },
+              { id: "tier-enterprise", name: "Enterprise Scale", price: "$199/mo", features: ["Unlimited Users", "Custom SLA", "24/7 Support"], popular: false }
+            ]
+          },
+          'dashboard': {
+            title: 'SaaS Dashboard (<universal-saas-dashboard>)',
+            tag: 'universal-saas-dashboard',
+            prop: 'state',
+            defaultData: {
+              metrics: [
+                { title: "MRR Growth", value: "$84,200", change: "+18.4%", trend: "upward", context: "vs last month" },
+                { title: "System Uptime", value: "99.98%", change: "0.0%", trend: "neutral", context: "30 days SLA" }
+              ],
+              tableHeaders: ["Service Name", "Cluster Region", "Status", "Latency"],
+              tableRows: [
+                ["Auth Gateway", "us-east-1", "Active", "12ms"],
+                ["Database Primary", "us-east-1", "Active", "4ms"],
+                ["AI Worker Queue", "eu-west-1", "Pending", "110ms"]
+              ]
+            }
+          },
+          'ai-bridge': {
+            title: 'Frontier AI Gateway (<universal-ai-bridge>)',
+            tag: 'universal-ai-bridge',
+            prop: 'mockMode',
+            defaultData: {
+              endpoint: "/api/generate",
+              targetComponent: "saas-dashboard",
+              mockMode: true
+            }
+          }
+        };
+
+        let currentComponentKey = 'data-table';
+        let currentElementInstance = null;
+
+        const viewport = document.getElementById('isolated-viewport');
+        const activeTitle = document.getElementById('active-component-title');
+        const jsonEditor = document.getElementById('json-editor');
+        const jsonStatus = document.getElementById('json-status');
+        const themeSelect = document.getElementById('sandbox-theme-select');
+        const btnFormat = document.getElementById('btn-format-json');
+        const btnReset = document.getElementById('btn-reset-json');
+
+        // Render Isolated Component
+        function renderComponent(key) {
+          currentComponentKey = key;
+          const config = PRESETS[key];
+          if (!config) return;
+
+          activeTitle.textContent = config.title;
+          viewport.innerHTML = '';
+
+          // Instantiate Custom Element
+          currentElementInstance = document.createElement(config.tag);
+          viewport.appendChild(currentElementInstance);
+
+          // Populate JSON Editor
+          const jsonStr = JSON.stringify(config.defaultData, null, 2);
+          jsonEditor.value = jsonStr;
+          updateComponentPayload(jsonStr);
+        }
+
+        // Apply JSON Payload to Component Instance
+        function updateComponentPayload(rawJsonStr) {
+          const config = PRESETS[currentComponentKey];
+          if (!config || !currentElementInstance) return;
+
+          try {
+            const parsed = JSON.parse(rawJsonStr);
+            jsonStatus.textContent = 'JSON Valid ✅';
+            jsonStatus.className = 'status-badge status-valid';
+
+            if (config.prop === 'payload') {
+              currentElementInstance.payload = parsed;
+            } else if (config.prop === 'schema') {
+              currentElementInstance.schema = parsed;
+            } else if (config.prop === 'plans') {
+              currentElementInstance.plans = parsed;
+            } else if (config.prop === 'state') {
+              currentElementInstance.state = parsed;
+            } else if (config.prop === 'mockMode') {
+              if (parsed.endpoint) currentElementInstance.setAttribute('endpoint', parsed.endpoint);
+              if (parsed.targetComponent) currentElementInstance.setAttribute('target-component', parsed.targetComponent);
+              if (parsed.mockMode) currentElementInstance.setAttribute('mock-mode', '');
+            }
+          } catch (err) {
+            jsonStatus.textContent = 'JSON Syntax Error ⚠️';
+            jsonStatus.className = 'status-badge status-invalid';
+          }
+        }
+
+        // Menu Button Listener
+        document.querySelectorAll('.component-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.component-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderComponent(btn.dataset.component);
+          });
+        });
+
+        // Live Real-Time JSON Input Listener
+        jsonEditor.addEventListener('input', (e) => {
+          updateComponentPayload(e.target.value);
+        });
+
+        // Format JSON Action
+        btnFormat.addEventListener('click', () => {
+          try {
+            const parsed = JSON.parse(jsonEditor.value);
+            jsonEditor.value = JSON.stringify(parsed, null, 2);
+            updateComponentPayload(jsonEditor.value);
+          } catch (e) {
+            // keep error badge
+          }
+        });
+
+        // Reset Contract Action
+        btnReset.addEventListener('click', () => {
+          const config = PRESETS[currentComponentKey];
+          if (config) {
+            jsonEditor.value = JSON.stringify(config.defaultData, null, 2);
+            updateComponentPayload(jsonEditor.value);
+          }
+        });
+
+        // Theme Switcher Listener
+        themeSelect.addEventListener('change', (e) => {
+          if (window.UniversalUI) {
+            window.UniversalUI.setTheme(e.target.value);
+          }
+        });
+
+        // Initial Load
+        renderComponent('data-table');
+      });
+    </script>
+  </body>
+</html>

@@ -70,6 +70,7 @@ class UniversalAppShell extends HTMLElement {
 
     if (toggleBtn) {
       toggleBtn.setAttribute('aria-expanded', String(this._drawerOpen));
+      toggleBtn.setAttribute('aria-label', 'Toggle Navigation Panel');
     }
 
     if (emitEvent) {
@@ -89,8 +90,31 @@ class UniversalAppShell extends HTMLElement {
   _setupEventListeners() {
     const toggleBtn = this.shadowRoot?.querySelector('.drawer-toggle-btn');
     const backdrop = this.shadowRoot?.querySelector('.drawer-backdrop');
+    const drawerContainer = this.shadowRoot?.querySelector('.shell-drawer');
 
     toggleBtn?.addEventListener('click', () => this.toggleDrawer());
+    
+    // Keyboard activation for toggle button
+    toggleBtn?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.toggleDrawer();
+      }
+    });
+
+    // Keyboard navigation inside side drawer
+    drawerContainer?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const target = e.target;
+        if (target && (target.tagName === 'A' || target.getAttribute('role') === 'button' || target.tagName === 'BUTTON')) {
+          if (e.key === ' ') {
+            e.preventDefault();
+            target.click();
+          }
+        }
+      }
+    });
+
     backdrop?.addEventListener('click', () => {
       if (window.innerWidth <= 768 && this._drawerOpen) {
         this.toggleDrawer();
@@ -286,7 +310,7 @@ class UniversalAppShell extends HTMLElement {
       <div class="shell-layout drawer-open">
         <header class="shell-header">
           <div class="header-left">
-            <button type="button" class="drawer-toggle-btn" aria-label="Toggle navigation drawer" aria-expanded="true">
+            <button type="button" class="drawer-toggle-btn" aria-label="Toggle Navigation Panel" aria-expanded="true">
               <svg viewBox="0 0 24 24">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
