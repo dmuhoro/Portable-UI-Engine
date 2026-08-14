@@ -12,6 +12,9 @@ import './universal-data-table.js';
 import './universal-saas-dashboard.js';
 import './universal-billing-funnel.js';
 import './universal-ai-bridge.js';
+import './elements/universal-toast.js';
+import './elements/universal-modal-dialog.js';
+import './elements/universal-badge-cloud.js';
 
 // Pre-defined Theme Presets Dictionary
 const THEME_PRESETS = {
@@ -234,7 +237,10 @@ const UniversalUI = {
       'universal-data-table',
       'universal-saas-dashboard',
       'universal-billing-funnel',
-      'universal-ai-bridge'
+      'universal-ai-bridge',
+      'universal-toast',
+      'universal-modal-dialog',
+      'universal-badge-cloud'
     ];
     return components.filter(tag => Boolean(customElements.get(tag)));
   }

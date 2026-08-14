@@ -23,6 +23,9 @@ describe('Portable UI Engine - Component Suite', () => {
       assert(Boolean(customElements.get('universal-saas-dashboard')), '<universal-saas-dashboard> must be registered');
       assert(Boolean(customElements.get('universal-billing-funnel')), '<universal-billing-funnel> must be registered');
       assert(Boolean(customElements.get('universal-ai-bridge')), '<universal-ai-bridge> must be registered');
+      assert(Boolean(customElements.get('universal-toast')), '<universal-toast> must be registered');
+      assert(Boolean(customElements.get('universal-modal-dialog')), '<universal-modal-dialog> must be registered');
+      assert(Boolean(customElements.get('universal-badge-cloud')), '<universal-badge-cloud> must be registered');
     });
 
     it('instantiates elements and attaches Shadow DOM cleanly', () => {
@@ -116,6 +119,89 @@ describe('Portable UI Engine - Component Suite', () => {
       assert(rows.length === 2, 'Should parse 2 tbody rows from light DOM table');
 
       document.body.removeChild(tableComponent);
+    });
+  });
+
+  describe('Good First Issue Primitives', () => {
+    it('showToast appends toast and emits toast-dismiss on manual close', (done) => {
+      const toastHost = document.createElement('universal-toast');
+      document.body.appendChild(toastHost);
+
+      const id = toastHost.showToast({ type: 'success', title: 'Saved', message: 'Changes applied.' });
+      assert(toastHost.toasts.length === 1, 'showToast should append one toast');
+      assert(toastHost.shadowRoot.querySelector('.toast-item') !== null, 'Toast item should render');
+
+      toastHost.addEventListener('toast-dismiss', (e) => {
+        try {
+          assert(e.detail.toastId === id, 'Dismiss event should include toastId');
+          assert(e.detail.type === 'success', 'Dismiss event should include type');
+          document.body.removeChild(toastHost);
+          done();
+        } catch (err) {
+          document.body.removeChild(toastHost);
+          done(err);
+        }
+      });
+
+      toastHost.shadowRoot.querySelector('.toast-close').click();
+    });
+
+    it('modal open() and close() emit modal-open and modal-close events', (done) => {
+      const modal = document.createElement('universal-modal-dialog');
+      modal.setAttribute('title', 'Confirm');
+      document.body.appendChild(modal);
+
+      let openReceived = false;
+
+      modal.addEventListener('modal-open', (e) => {
+        openReceived = true;
+        assert(typeof e.detail.timestamp === 'string', 'modal-open should include timestamp');
+      });
+
+      modal.addEventListener('modal-close', (e) => {
+        try {
+          assert(openReceived, 'modal-open should fire before modal-close');
+          assert(e.detail.reason === 'button', 'modal-close should include reason');
+          document.body.removeChild(modal);
+          done();
+        } catch (err) {
+          document.body.removeChild(modal);
+          done(err);
+        }
+      });
+
+      modal.open();
+      modal.close();
+    });
+
+    it('badge cloud emits tag-click and tag-remove events', () => {
+      const cloud = document.createElement('universal-badge-cloud');
+      cloud.setAttribute('removable', '');
+      cloud.tags = ['Alpha', 'Beta'];
+      document.body.appendChild(cloud);
+
+      let clickedTag = null;
+      let removedTag = null;
+
+      cloud.addEventListener('tag-click', (e) => {
+        clickedTag = e.detail.tag;
+      });
+
+      cloud.addEventListener('tag-remove', (e) => {
+        removedTag = e.detail.removedTag;
+        assert(e.detail.remainingTags.length === 1, 'remainingTags should shrink after removal');
+      });
+
+      const badges = cloud.shadowRoot.querySelectorAll('.badge');
+      badges[0].click();
+      assert(clickedTag !== null, 'tag-click should fire');
+      assert(clickedTag.label === 'Alpha', 'tag-click should include clicked tag');
+
+      cloud.shadowRoot.querySelector('.badge-remove').click();
+      assert(removedTag !== null, 'tag-remove should fire');
+      assert(removedTag.label === 'Alpha', 'tag-remove should include removed tag');
+
+      document.body.removeChild(cloud);
     });
   });
 
