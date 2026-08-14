@@ -122,6 +122,49 @@ Commercial multi-step subscription wizard (Plan Selection -> Billing Details -> 
 
 ---
 
+### 7. `<universal-toast>`
+Fixed viewport notification manager that renders auto-dismissing toast popups.
+
+* **Observed Attributes**: `position` (`top-right` | `top-left` | `bottom-right` | `bottom-left`), `duration` (number in ms, default `4000`)
+* **Properties**:
+  * `toasts` (Array): Array of `{ id, type: 'success'|'danger'|'warning'|'info', title, message, duration }`
+* **Public Methods**:
+  * `showToast({ type, title, message, duration })`: Appends a toast to the active list.
+  * `clearAll()`: Removes all active toast popups immediately.
+* **Custom Events**:
+  * `toast-dismiss`: Emitted when a toast is closed manually or via timer expiry. `e.detail = { toastId, type }`
+
+---
+
+### 8. `<universal-modal-dialog>`
+Accessible modal overlay with body scroll lock, keyboard focus trapping, Escape dismissal, and header/body/footer slots.
+
+* **Observed Attributes**: `open` (boolean attribute), `title` (string header), `size` (`sm` | `md` | `lg`)
+* **Slots**:
+  * `header`: Custom title header replace slot
+  * `default`: Main modal body content
+  * `footer`: Action buttons slot (e.g. Confirm, Cancel)
+* **Public Methods**:
+  * `open()`: Displays the modal and traps keyboard focus.
+  * `close()`: Closes the modal and restores document scroll/focus.
+* **Custom Events**:
+  * `modal-open`: Emitted when the modal opens. `e.detail = { timestamp }`
+  * `modal-close`: Emitted when the modal closes via backdrop click, Escape, or close button. `e.detail = { reason: 'backdrop'|'escape'|'button' }`
+
+---
+
+### 9. `<universal-badge-cloud>`
+Responsive badge/chip grouping component with removable tags and click events.
+
+* **Observed Attributes**: `removable` (boolean attribute), `variant` (`default` | `primary` | `outline`)
+* **Properties**:
+  * `tags` (Array | JSON String): `["JavaScript", "Web Components"]` or `[{ id, label, color }]`
+* **Custom Events**:
+  * `tag-remove`: Emitted when the close (`×`) icon on a tag is clicked. `e.detail = { removedTag, remainingTags: Array }`
+  * `tag-click`: Emitted when a tag item is clicked. `e.detail = { tag }`
+
+---
+
 ## 🎨 Theming & Design System Overrides
 
 Customize visual tokens globally by overriding CSS variables on `:root` or via the `UniversalUI` JavaScript manager:
