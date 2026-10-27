@@ -1,0 +1,35 @@
+name: Bug Report
+description: Something is not working correctly
+labels: ["bug"]
+body:
+  - type: input
+    id: screen
+    attributes:
+      label: Screen / Feature
+      placeholder: "e.g. Dashboard, SMS Parser, Sync"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open the app\n2. Tap Add Sale\n3. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device
+      options:
+        - Android Chrome (PWA installed)
+        - Android Chrome (browser)
+        - Desktop Chrome
+        - Other

@@ -1,0 +1,127 @@
+[project]
+name = "traderos"
+version = "1.3.3"
+description = "Research-first operating system for systematic traders"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy==2.5.1",
+    "pandas==3.0.5",
+    "PyYAML==6.0.3",
+    "python-dotenv==1.2.2",
+    "requests==2.33.0",
+    "matplotlib==3.11.1",
+    "seaborn==0.13.2",
+    "tabulate==0.10.0",
+]
+
+[project.scripts]
+traderos = "traderos.interfaces.cli.main:main"
+traderos-api = "traderos.interfaces.api.main:main"
+
+[project.optional-dependencies]
+api = [
+    "fastapi==0.140.7",
+    "uvicorn==0.29.0",
+    "pydantic==2.13.4",
+    "httpx==0.28.1",
+]
+alpaca = [
+    "alpaca-py==0.30.0",
+    # Explicit, not transitive-only: alpaca-py declares pytz>=2020.1 but a
+    # fresh CI resolution did not install it, breaking test collection.
+    "pytz>=2020.1",
+]
+postgres = ["psycopg2-binary==2.9.12"]
+monitoring = ["prometheus-client==0.21.1"]
+# A2 live market-data stream: the async Binance transport lazily imports
+# `websockets`; without it the factory silently runs feedless (best-effort
+# import), so production images MUST install this extra when streaming.
+streaming = ["websockets==17.0.1"]
+dev = ["pytest==9.1.1", "pytest-cov==7.1.0", "ruff==0.16.0", "pyright==1.1.411", "black==26.5.1", "isort==8.0.1"]
+all = ["traderos[api]", "traderos[alpaca]", "traderos[postgres]", "traderos[monitoring]", "traderos[streaming]"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+force_single_line = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = [
+    "B",    # bugbear
+    "N",    # naming
+    "W",    # warnings
+    "E",    # errors
+    "F",    # pyflakes
+    "UP",   # pyupgrade
+    "LOG",  # logging
+    "G",    # flake8-logging-format
+]
+ignore = ["I001"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"src/traderos/application/order_event_engine.py" = ["E501", "E701"]
+"src/traderos/infrastructure/market_stream.py" = ["E501", "E701", "E702", "BLE001"]
+"src/traderos/infrastructure/archiver.py" = ["BLE001", "S110"]
+"src/traderos/infrastructure/database/connection.py" = ["BLE001", "S110", "PLW0602"]
+"src/traderos/infrastructure/database/migrations/v004_external_order_id.py" = ["BLE001", "S110"]
+"src/traderos/infrastructure/leader_election.py" = ["BLE001", "S110", "SIM115"]
+"src/traderos/infrastructure/message_queue.py" = ["PLW2101"]
+"src/traderos/infrastructure/monitoring.py" = ["BLE001"]
+"src/traderos/infrastructure/alpaca_broker.py" = ["E501"]
+"src/traderos/interfaces/api/retail.py" = ["B008"]
+"src/traderos/interfaces/cli/main.py" = ["BLE001", "PLR1722"]
+"tests/test_sprint9_infrastructure.py" = ["E501", "E702", "FURB157"]
+"tests/performance/test_sprint9_benchmarks.py" = ["E501"]
+"tests/test_probe_scheduler.py" = ["N802"]  # BaseHTTPRequestHandler requires do_POST
+"scripts/evidence/run_oncall_drill.py" = ["N802"]
+"scripts/evidence/run_operational_health_drill.py" = ["N802"]
+"scripts/evidence/run_trigger_alerting_drill.py" = ["N802"]
+"tests/test_trigger_alerting.py" = ["N802"]
+"tests/test_oncall_providers.py" = ["N802"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --cov=traderos"
+
+[tool.coverage.run]
+source = ["src/traderos"]
+omit = ["tests/*", ".venv/*", "*.pyc"]
+
+[tool.coverage.report]
+fail_under = 100  # raised from 97 on sprint-35 completion (100% achieved; MEP §17 progression)
+show_missing = true
+
+[tool.pyright]
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownParameterType = false
+reportUnknownArgumentType = false
+reportMissingParameterType = false
+reportMissingTypeArgument = false
+reportUnknownLambdaType = false
+reportMissingImports = false
+extraPaths = ["src"]
+include = [
+    "src/traderos",
+]
+exclude = ["tests", ".venv"]
+[tool.setuptools.package-data]
+"traderos.interfaces.api.dashboard" = ["*.html", "*.js", "*.css"]

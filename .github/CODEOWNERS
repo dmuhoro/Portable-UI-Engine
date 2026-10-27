@@ -1,0 +1,22 @@
+# Code ownership for automated review assignments
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @dmuhoro
+
+# Money safety — require careful review
+src/lib/money.ts @dmuhoro
+src/lib/money.test.ts @dmuhoro
+src/screens/PosScreen.tsx @dmuhoro
+src/lib/print.ts @dmuhoro
+
+# Database schema changes
+src/lib/db.ts @dmuhoro
+supabase/ @dmuhoro
+
+# CI/CD — infrastructure changes
+.github/ @dmuhoro
+vercel.json @dmuhoro
+
+# i18n — translation changes
+src/i18n/ @dmuhoro

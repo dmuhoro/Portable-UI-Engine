@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - run: npm ci
+
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npx tsx scripts/check-i18n.ts
+      - run: npm run test:run
+      - run: npm run build
+
+      # Edge functions are Deno and excluded from tsconfig.app.json — without
+      # this step the supabase/functions/* code is never typechecked and can
+      # silently diverge from _shared/daraja/protocol.ts.
+      - name: Typecheck Supabase Edge Functions (deno)
+        run: deno check supabase/functions/stk-push/index.ts supabase/functions/lipa-na-mpesa-callback/index.ts
+
+      # The callback edge is the only place that writes M-PESA income. Its
+      # money-ordering and forgery refusals are asserted here, not just types.
+      - name: Test Supabase Edge Functions (deno)
+        run: deno test supabase/functions/
+
+      - name: Bundle size check
+        run: |
+          SIZE=$(stat -c%s dist/index.js 2>/dev/null || echo 0)
+          echo "index.js bundle size: $SIZE bytes"
+          if [ "$SIZE" -gt 300000 ]; then
+            echo "::warning::Bundle size ($SIZE bytes) exceeds 300KB budget"
+          fi
+          echo "Total dist size:"
+          du -sh dist/
+
+      # E2E tests
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          VITE_E2E: 'true'
+
+      # Production-build verification: installability (PNG manifest) + offline behavior
+      - name: Run production-build E2E tests
+        run: npm run test:e2e:prod
+        env:
+          VITE_E2E: 'true'
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel deploy hook
+        run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"

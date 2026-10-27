@@ -1,0 +1,18 @@
+{
+  "release": "1.3.1",
+  "date": "2026-10-01",
+  "head": "319581b3c6c98983288158816f447f176aca2482",
+  "artifact_files": {
+    "pyproject.toml": "3d1bf613b64a46fbbad0d9198007ccf242837a857d8aef744761143792a4c2fb",
+    "configs/settings.yaml": "c9d463a889c1edfec9574cea263eebe1c2dfd4072d623d2f440c80afda53dd2e",
+    "configs/settings.production.example.yaml": "1646ec14ceacd6306c4ec629f3fbd4ed1c621596f092fb58e46c2ad6a9274f7f",
+    "Dockerfile": "447ad50a28198b50c5dc92508170fe78e4b1062cf791c98a0bd203ed66a75b40",
+    "railway.toml": "2c7df148f96c66f3dd45390036fd384546ae0d120be35b147357d262d1833360",
+    "railway.soak.toml": "963e987c16117c12a115ecd8191eaa33a84173fbf736886bc5b65aebc5ba66b1",
+    "src/traderos/application/factory.py": "603455bd968a41bbb0168f5dd927a6e2d897d14d8e74345a87da1992c34ad0cf",
+    "src/traderos/application/orchestrator.py": "8bbfd3625e2aa54cd8a0dfb362641ba9e22013680c689836913783c39a6cc123",
+    "src/traderos/infrastructure/alpaca_broker.py": "03dc81e08fb22ef04a15725e13463b206dfa4b52891c48fa747fb3d61465becf",
+    "scripts/evidence/run_real_paper_soak.py": "295f47e9c99abd2e4a922774e3f3167c30dd7f3878a16e780aa4792d0a658372",
+    "scripts/evidence/run_unattended_paper_soak.py": "ea542b7275b08b74a5be002356d11e5e4da3557d6ac31231972e9d537038c899"
+  }
+}
