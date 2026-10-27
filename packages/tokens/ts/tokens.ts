@@ -39,6 +39,7 @@ export const tokens = {
   "color-feedback-danger-subtle": "#FEE2E2",
   "color-feedback-info": "#0369A1",
   "color-feedback-info-subtle": "#E0F2FE",
+  "color-overlay-scrim": "rgba(0, 0, 0, 0.48)",
   "spacing-3xs": "2px",
   "spacing-2xs": "4px",
   "spacing-xs": "8px",
@@ -86,7 +87,9 @@ export const tokens = {
   "motion-duration-slow": "280ms",
   "motion-easing-standard": "cubic-bezier(0.16, 1, 0.3, 1)",
   "motion-easing-entrance": "cubic-bezier(0.0, 0, 0.2, 1)",
-  "motion-easing-exit": "cubic-bezier(0.4, 0, 1, 1)"
+  "motion-easing-exit": "cubic-bezier(0.4, 0, 1, 1)",
+  "interaction-target-min": "44px",
+  "border-focus-width": "2px"
 } as const;
 
 export type TokenKey = keyof typeof tokens;

@@ -172,6 +172,12 @@
           "$value": "#E0F2FE",
           "$type": "color"
         }
+      },
+      "overlay": {
+        "scrim": {
+          "$value": "rgba(0, 0, 0, 0.48)",
+          "$type": "color"
+        }
       }
     },
     "spacing": {
@@ -388,6 +394,18 @@
           "$value": "cubic-bezier(0.4, 0, 1, 1)",
           "$type": "cubicBezier"
         }
+      }
+    },
+    "interaction": {
+      "target-min": {
+        "$value": "44px",
+        "$type": "dimension"
+      }
+    },
+    "border": {
+      "focus-width": {
+        "$value": "2px",
+        "$type": "dimension"
       }
     }
   }

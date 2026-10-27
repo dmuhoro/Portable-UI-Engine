@@ -40,6 +40,7 @@
   --color-feedback-danger-subtle: #FEE2E2;
   --color-feedback-info: #0369A1;
   --color-feedback-info-subtle: #E0F2FE;
+  --color-overlay-scrim: rgba(0, 0, 0, 0.48);
   --spacing-3xs: 2px;
   --spacing-2xs: 4px;
   --spacing-xs: 8px;
@@ -88,6 +89,8 @@
   --motion-easing-standard: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-easing-entrance: cubic-bezier(0.0, 0, 0.2, 1);
   --motion-easing-exit: cubic-bezier(0.4, 0, 1, 1);
+  --interaction-target-min: 44px;
+  --border-focus-width: 2px;
   --color-primary: var(--color-brand-primary);
   --color-primary-hover: var(--color-brand-hover);
   --color-bg-app: var(--color-canvas-default);
@@ -181,6 +184,7 @@
   --color-feedback-danger-subtle: rgba(239, 68, 68, 0.15);
   --color-feedback-info: #38BDF8;
   --color-feedback-info-subtle: rgba(56, 189, 248, 0.15);
+  --color-overlay-scrim: rgba(0, 0, 0, 0.48);
   --spacing-3xs: 2px;
   --spacing-2xs: 4px;
   --spacing-xs: 8px;
@@ -229,6 +233,8 @@
   --motion-easing-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-easing-entrance: cubic-bezier(0, 0, 0.15, 1);
   --motion-easing-exit: cubic-bezier(0.3, 0, 1, 1);
+  --interaction-target-min: 44px;
+  --border-focus-width: 2px;
   --color-primary: var(--color-brand-primary);
   --color-primary-hover: var(--color-brand-hover);
   --color-bg-app: var(--color-canvas-default);
@@ -322,6 +328,7 @@
   --color-feedback-danger-subtle: #FEF2F2;
   --color-feedback-info: #1E40AF;
   --color-feedback-info-subtle: #EFF6FF;
+  --color-overlay-scrim: rgba(0, 0, 0, 0.48);
   --spacing-3xs: 2px;
   --spacing-2xs: 4px;
   --spacing-xs: 8px;
@@ -370,6 +377,8 @@
   --motion-easing-standard: linear;
   --motion-easing-entrance: linear;
   --motion-easing-exit: linear;
+  --interaction-target-min: 44px;
+  --border-focus-width: 2px;
   --color-primary: var(--color-brand-primary);
   --color-primary-hover: var(--color-brand-hover);
   --color-bg-app: var(--color-canvas-default);
