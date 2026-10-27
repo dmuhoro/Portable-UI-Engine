@@ -25,7 +25,8 @@
     "noEmit": true
   },
   "include": [
-    "packages/tokens/ts/**/*.ts"
+    "packages/tokens/ts/**/*.ts",
+    "src/lib/constants.ts"
   ],
   "exclude": [
     "node_modules",
