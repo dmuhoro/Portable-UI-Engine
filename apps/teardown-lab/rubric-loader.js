@@ -1,16 +1,11 @@
 export default async function loadRubric() {
-  // Try fetch first (works in browsers and Node with --experimental-fetch)
+  // Load rubric from same directory
   try {
-    const res = await fetch(new URL('../../audit/rubric-v1.json', import.meta.url));
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const rubric = await res.json();
+    const rubric = await import('./rubric-v1.json', { assert: { type: 'json' } });
     console.log('Rubric loaded:', rubric.name);
-    return rubric;
+    return rubric.default;
   } catch (e) {
-    // Fallback: manual JSON import for Node environments
-    // In Node, use: const rubric = require('../../audit/rubric-v1.json');
-    // For browser, fetch above handles it
-    console.warn('Could not load rubric via fetch, using fallback');
+    console.warn('Could not load rubric, using empty fallback', e.message);
     return { name: 'Rubric v1', version: '1.0.0', criteria: [] };
   }
 }
