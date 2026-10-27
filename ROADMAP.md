@@ -1,50 +1,24 @@
-# Daftari — Product Roadmap
+# Product Roadmap
 
-## North Star Metric
-Hellen Njenga opens Daftari every day for 30 consecutive days
-because it clearly shows her today's profit.
+## Current milestone: Design System Implementation
 
-## Current Phase: Pilot Validation (July–September 2026)
+The current milestone converts the approved design handoff into a reliable, distributable Web Component system.
 
-Success gate: 10 vendors, 30 consecutive days of daily use each.
-Nothing moves to the next phase until this gate is cleared.
+### Delivered in Sprint UI-03
 
-**In scope:**
-- Core ledger: record sale, expense, withdrawal
-- M-Pesa SMS parsing
-- Dashboard: today's profit + weekly trend
-- Daily close flow
-- Cloud sync (all 7 entity types)
-- Bug fixes from real user sessions
+- Three tokenized design themes: Warm Precision, Technical Oceanic, and Swiss Minimalist.
+- Nine `ui-*` primitive elements with browser behavior tests.
+- Searchable component gallery with theme switching and a CSS token inspector.
+- Teardown Lab with saved rubric scoring, computed contrast and target-size readings, and print export.
+- Run Theater with clearly labeled simulated telemetry, operational controls, and node filtering.
+- Design lint, Chrome browser verification, strict token typechecking, and dual engine builds.
 
-**Out of scope until gate cleared:**
-- New screens
-- New payment integrations
-- New business categories
-- **Platform expansion** (Android TWA/native, iOS installed app, desktop shell) — planned in
-  `docs/platform-expansion.md` + ADR-011, built only when pilot evidence demands it
-- Any feature not requested by a real pilot user
+### Follow-up work
 
-## Phase 2: Prove Retention (October–December 2026)
-Gate: 10 vendors with 30-day retention proven.
-Focus: Daraja C2B integration, Business Health Score, first revenue.
+- Expand automated accessibility checks with axe-core and reduced-motion assertions across every component state.
+- Add API documentation and examples for every legacy `universal-*` element.
+- Add focused component tests for select collision behavior, dialog focus restoration, and assistive technology announcements.
+- Evaluate whether to replace legacy `universal-*` implementations or maintain them as a compatibility layer.
+- Establish package publication and release automation after the branch is reviewed and merged.
 
-## Phase 3: Monetize (January–March 2027)
-Gate: 100 active vendors, one lender partnership.
-Focus: Subscription tiers, lending bridge, referral growth.
-
-## Phase 4: Scale (2027+)
-Gate: 1,000 active vendors, positive unit economics.
-Focus: EasyTutor learning engine integration, second market.
-
-## Feature Backlog (waiting for Phase 2+)
-These are built and available in "Business Tools" section.
-They will be promoted to main navigation when pilot data
-shows real user demand:
-- POS mode
-- Supplier management
-- Purchase orders
-- Stock adjustments
-- Product profitability analytics
-- Thermal receipt printing
-- Barcode scanning
+Showcase telemetry is a local demonstration. It does not represent a production data pipeline or cluster connection.

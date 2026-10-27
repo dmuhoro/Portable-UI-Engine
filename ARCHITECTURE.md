@@ -1,23 +1,39 @@
-# Daftari — Architecture
+# Portable UI Engine Architecture
 
-## Sync Coverage Matrix
+Portable UI Engine is a small monorepo for an independently distributable Web Component engine, design tokens, internal quality tools, and browser-based showcase apps.
 
-| Entity | Dexie Table | Supabase Table | Push | Pull | RLS |
-|---|---|---|---|---|---|
-| Transactions | transactions | daftari_transactions | ✅ | ✅ | ✅ |
-| Business profile | business | daftari_businesses | ✅ | ✅ | ✅ |
-| Daily closes | daily_closes | daftari_daily_closes | ✅ | ✅ | ✅ |
-| Customers | customers | daftari_customers | ✅ | ✅ | ✅ |
-| Suppliers | suppliers | daftari_suppliers | ✅ | ✅ | ✅ |
-| Purchase orders | purchase_orders | daftari_purchase_orders | ✅ | ✅ | ✅ |
-| Stock adjustments | stock_adjustments | daftari_stock_adjustments | ✅ | ✅ | ✅ |
-| STK Push requests | stk_requests | daftari_stk_requests | read-only | read-only | N/A (server-owned; Edge Functions are the only writer) |
-| STK Push callbacks | stk_callbacks | daftari_stk_callbacks | N/A | N/A | N/A (service-role audit only) |
-| Sync queue | sync_queue | (local only) | N/A | N/A | N/A |
+## Boundaries
 
-Multi-device restore: all 7 entity types pull from Supabase on sign-in. Each table is
-pulled independently, so one failure does not skip the rest; tables not yet deployed are
-reported as `skipped` rather than silently omitted.
-Push: syncAllTables() pushes all 7 entity types to Supabase when online. The device also
-schedules a debounced write-through flush after each local write, so a device that is lost
-mid-shift does not take that shift's sales with it.
+```text
+packages/tokens -> generated CSS custom properties and TypeScript token map
+elements/       -> source for new engine primitives
+packages/engine -> standalone package mirror and distributable bundle
+apps/*          -> browser demos consuming the engine and tokens
+tools/*         -> lint and design-system quality gates
+design/         -> approved specifications and interaction contracts
+```
+
+The root `engine.js` remains the backward-compatible registration entry point for the existing `universal-*` components. New primitives are registered under the `ui-*` names in the design briefs. The standalone `packages/engine` package mirrors the source needed to build and run without reaching outside that package.
+
+## Component runtime
+
+- Components extend `HTMLElement` and attach open Shadow DOM roots.
+- Public state is exposed through attributes or typed JavaScript properties.
+- Component events are `CustomEvent`s with `{ bubbles: true, composed: true }`.
+- Component styles consume CSS custom properties from the generated token contract.
+- Native browser controls are used where they provide robust semantics, top-layer behavior, and focus management.
+- Engine code has no framework runtime dependency; the root workspace also contains development and showcase dependencies.
+
+## Token flow
+
+1. Warm Precision is the canonical token source in `packages/tokens/design-tokens.json`.
+2. Technical Oceanic and Swiss Minimalist are complete theme token sets in `packages/tokens/themes/`.
+3. `packages/tokens/scripts/build-tokens.js` generates the semantic CSS variables, compatibility aliases, and TypeScript token map.
+4. The generated token contract is applied after legacy global styles in `theme.css` so design themes take precedence.
+5. Showcase apps consume the same stylesheet and engine entry used by integrations.
+
+## Builds and quality gates
+
+`build.js` creates ESM and minified IIFE bundles for both the root package and `packages/engine`. Vite builds the browser showcase into `dist/site` without deleting engine bundles. CI regenerates tokens, runs strict TypeScript checking, runs the design lint, executes component and browser showcase tests, and builds both distributions and the showcase site.
+
+See [docs/architecture/OVERVIEW.md](docs/architecture/OVERVIEW.md) and the [ADRs](docs/adr/README.md) for recorded decisions.

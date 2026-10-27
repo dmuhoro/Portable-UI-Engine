@@ -20,12 +20,13 @@ tools/*          -> Development tooling and gates
 
 ## Data Flow
 1. Tokens defined in packages/tokens/design-tokens.json (W3C format)
-2. Generator produces CSS variables, TS types, Tailwind preset
+2. Generator produces CSS variables and a TypeScript token map
 3. Components consume tokens via CSS custom properties
 4. Apps compose components with tokens
 5. Design gate validates compliance
 
 ## Build System
-- Root: Vite + build.js for engine bundling
-- Packages: Independent, consumable
-- Workspaces: pnpm/npm workspaces
+- Root: Vite builds the showcase site; `build.js` builds engine bundles
+- `packages/engine`: standalone ESM/IIFE distribution and mirrored component source
+- `packages/tokens`: generated CSS/TypeScript plus source token files
+- Workspaces: pnpm workspace metadata; npm scripts provide root verification
