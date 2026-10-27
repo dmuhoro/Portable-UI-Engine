@@ -1,13 +1,5 @@
 # Teardown Lab
 
-Design quality gate and rubric scoring system. Implements evidence-based "elite" design validation.
+Teardown Lab loads rubric v1 in the browser and calculates a weighted score from reviewer-selected ratings. It saves ratings and evidence locally, measures text contrast and the candidate button's rendered target size, and provides print-to-PDF output.
 
-## Features
-- Rubric v1 scoring (visual hierarchy, typography, a11y, motion, tokens, etc.)
-- Screenshot capture and annotation
-- Axe accessibility integration
-- Contrast ratio checking
-- Design-lint CLI integration
-
-## Purpose
-Acts as the mechanical design gate - all UI changes must pass rubric checks with evidence.
+The score is a team assessment, not a claim of WCAG certification. The candidate/baseline comparison is illustrative; it does not claim measured bundle size or rendering performance. Open `/apps/teardown-lab/` through the root Vite dev server.

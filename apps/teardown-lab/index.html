@@ -1,14 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teardown Lab - Design Quality Gate</title>
-  <link rel="stylesheet" href="../../packages/tokens/css/variables.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Score and compare Portable UI Engine design components against a shared rubric">
+  <link rel="icon" href="../../assets/portable-ui-mark.svg" type="image/svg+xml">
+  <title>Teardown Lab — Portable UI Engine</title>
+  <link rel="stylesheet" href="../../theme.css">
+  <link rel="stylesheet" href="./teardown-lab.css">
+  <script type="module" src="../../engine.js"></script>
+  <script type="module" src="./app.js"></script>
 </head>
 <body>
-  <h1>Teardown Lab</h1>
-  <p>Evidence-based design quality gate powered by rubric v1</p>
-  <section id="rubric"></section>
+  <header class="topbar"><a href="../docs/">PUI <span>/</span> Teardown Lab</a><nav aria-label="Main navigation"><a href="../docs/">Components</a><a href="../run-theater/">Run Theater</a></nav><button id="export" type="button">Print / Save PDF</button></header>
+  <main>
+    <section class="audit-heading"><p class="eyebrow">DESIGN QUALITY REVIEW</p><h1>Teardown Lab</h1><p>Score a component against the shared rubric, record evidence, and compare it with a baseline. Scores are team assessments, not a compliance certification.</p><div class="audit-meta"><span>Target: <strong>&lt;ui-button&gt;</strong></span><label for="reviewer">Reviewer <input id="reviewer" autocomplete="name" placeholder="Your name"></label></div></section>
+    <div class="workbench">
+      <aside class="scorecard" aria-labelledby="score-title"><p class="eyebrow">LIVE ASSESSMENT</p><h2 id="score-title">Rubric score</h2><output id="score" aria-live="polite">0%</output><p id="grade">Not yet assessed</p><dl><div><dt>Criteria scored</dt><dd id="scored-count">0 / 12</dd></div><div><dt>Text contrast</dt><dd id="contrast">Measuring…</dd></div><div><dt>Primary target</dt><dd id="target-size">Measuring…</dd></div></dl><p class="score-note">Score reflects selected ratings and does not certify WCAG conformance.</p><ui-button id="reset" variant="secondary">Reset assessment</ui-button></aside>
+      <section class="criteria-panel" aria-labelledby="criteria-title"><div class="panel-heading"><div><p class="eyebrow">12 REVIEW POINTS</p><h2 id="criteria-title">Evaluation criteria</h2></div><span id="save-status" role="status" aria-live="polite">Autosave ready</span></div><form id="rubric-form"><div id="criteria"></div><label class="evidence-label" for="evidence">Evidence and notes<textarea id="evidence" rows="4" placeholder="Record observed behavior, test steps, and gaps…"></textarea></label></form></section>
+    </div>
+    <section class="comparison" aria-labelledby="comparison-title"><div class="panel-heading"><div><p class="eyebrow">INTERACTION BENCH</p><h2 id="comparison-title">Candidate and baseline</h2></div><div class="comparison-switch" role="group" aria-label="Comparison view"><button type="button" data-view="candidate" aria-pressed="true">Candidate</button><button type="button" data-view="baseline" aria-pressed="false">Baseline</button></div></div><div class="compare-grid"><article class="compare-card" id="candidate"><h3>Engine candidate <code>&lt;ui-button&gt;</code></h3><p>Native custom element, token styling, Shadow DOM isolation.</p><ui-button>Deploy workspace</ui-button><p id="candidate-status" role="status" aria-live="polite"></p></article><article class="compare-card" id="baseline"><h3>Platform baseline <code>&lt;button&gt;</code></h3><p>Native button without the engine component styling.</p><button type="button" id="baseline-button">Deploy workspace</button><p id="baseline-status" role="status" aria-live="polite"></p></article></div></section>
+  </main>
 </body>
 </html>
