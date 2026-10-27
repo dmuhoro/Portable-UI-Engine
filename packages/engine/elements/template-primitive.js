@@ -1,219 +1,92 @@
 /**
- * Portable UI Engine - Skeleton Primitive Template
- * Use this starter template to create new framework-agnostic Web Components.
- * 
- * Rules:
- * 1. Must extend native HTMLElement.
- * 2. Must attach open Shadow DOM.
- * 3. Must consume CSS tokens from theme.css via var(--token).
- * 4. Must handle string/object attributes defensibly using try/catch.
- * 5. Must emit standard CustomEvent objects with { bubbles: true, composed: true }.
+ * Starter template for Portable UI Engine elements.
+ * Components use Shadow DOM, generated CSS tokens, defensive parsing, and composed events.
  */
-
 export class UniversalTemplatePrimitive extends HTMLElement {
   constructor() {
     super();
-
-    // 1. Attach Shadow DOM in open mode for style encapsulation
     this.attachShadow({ mode: 'open' });
-
-    // Internal state initialization
     this._data = null;
     this._hasParseError = false;
   }
 
-  // 2. Define attributes to observe for dynamic reactivity
-  static get observedAttributes() {
-    return ['title', 'payload'];
-  }
+  static get observedAttributes() { return ['title', 'payload']; }
 
-  // 3. Attribute change callback pipeline
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
-
-    if (name === 'payload') {
-      this._parseAndSetPayload(newValue);
-    } else if (name === 'title') {
-      this._render();
-    }
+    if (name === 'payload') this._parseAndSetPayload(newValue);
+    else this._render();
   }
 
-  connectedCallback() {
+  connectedCallback() { this._render(); }
+
+  get payload() { return this._data; }
+  set payload(value) { this._parseAndSetPayload(value); }
+
+  _parseAndSetPayload(value) {
+    try {
+      this._data = typeof value === 'string' ? JSON.parse(value) : value;
+      this._hasParseError = false;
+    } catch {
+      this._data = null;
+      this._hasParseError = true;
+    }
     this._render();
   }
 
-  // 4. Public Property Getter & Setter with Defensive Type Handling
-  get payload() {
-    return this._data;
+  _emitAction(actionName, detail = {}) {
+    this.dispatchEvent(new CustomEvent(actionName, {
+      detail: { timestamp: new Date().toISOString(), ...detail },
+      bubbles: true,
+      composed: true,
+    }));
   }
 
-  set payload(val) {
-    this._parseAndSetPayload(val);
-  }
-
-  /**
-   * Safe JSON Parsing Strategy
-   * Accepts raw objects or stringified JSON with clean error recovery
-   */
-  _parseAndSetPayload(val) {
-    let parsed = val;
-    let parseError = false;
-
-    if (typeof val === 'string') {
-      try {
-        parsed = JSON.parse(val);
-      } catch (err) {
-        console.warn('UniversalTemplatePrimitive: Failed to parse JSON string.', err);
-        parsed = null;
-        parseError = true;
-      }
-    }
-
-    this._hasParseError = parseError;
-    this._data = parsed;
-    this._render();
-  }
-
-  /**
-   * Dispatch custom DOM events up to host application
-   */
-  _emitAction(actionName, detailData = {}) {
-    this.dispatchEvent(
-      new CustomEvent(actionName, {
-        detail: {
-          timestamp: new Date().toISOString(),
-          ...detailData
-        },
-        bubbles: true,
-        composed: true // Allows event to cross Shadow DOM boundary
-      })
-    );
-  }
-
-  /**
-   * Component Render Engine
-   */
   _render() {
-    const titleAttr = this.getAttribute('title') || 'Default Component Title';
-
-    // 5. Template Layout with Enforced CSS Custom Properties
-    const style = `
-      <style>
-        :host {
-          display: block;
-          font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-          color: var(--color-text-primary, #0f172a);
-          box-sizing: border-box;
-        }
-
-        .primitive-container {
-          background-color: var(--color-bg-surface, #ffffff);
-          border: 1px solid var(--color-border, #e2e8f0);
-          border-radius: var(--radius-lg, 12px);
-          padding: var(--spacing-5, 20px);
-          box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
-          transition: all var(--transition-fast, 150ms ease);
-        }
-
-        .primitive-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: var(--spacing-3, 12px);
-        }
-
-        .primitive-title {
-          font-size: var(--font-size-base, 16px);
-          font-weight: var(--font-weight-bold, 700);
-          margin: 0;
-          color: var(--color-text-primary, #0f172a);
-        }
-
-        .action-btn {
-          background-color: var(--color-primary, #2563eb);
-          color: var(--color-text-inverse, #ffffff);
-          border: none;
-          border-radius: var(--radius-md, 6px);
-          padding: var(--spacing-2, 8px) var(--spacing-4, 16px);
-          font-size: var(--font-size-xs, 12px);
-          font-weight: var(--font-weight-semibold, 600);
-          cursor: pointer;
-          transition: background-color var(--transition-fast, 150ms ease);
-        }
-
-        .action-btn:hover {
-          background-color: var(--color-primary-hover, #1d4ed8);
-        }
-
-        .empty-state {
-          padding: var(--spacing-4, 16px);
-          text-align: center;
-          border-radius: var(--radius-md, 6px);
-          font-size: var(--font-size-xs, 12px);
-        }
-
-        .empty-error {
-          background-color: var(--color-danger-bg, #fef2f2);
-          border: 1px solid rgba(220, 38, 38, 0.2);
-          color: var(--color-danger, #dc2626);
-        }
-
-        .empty-neutral {
-          background-color: var(--color-bg-app, #f8fafc);
-          color: var(--color-text-muted, #94a3b8);
-        }
-      </style>
+    const style = document.createElement('style');
+    style.textContent = `
+      :host { display: block; color: var(--color-text-primary); font-family: var(--font-sans); }
+      *, *::before, *::after { box-sizing: border-box; }
+      .container { padding: var(--spacing-lg); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); background: var(--color-surface-base); box-shadow: var(--shadow-sm); }
+      header { display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-md); margin-block-end: var(--spacing-md); }
+      h3 { margin: 0; font-size: var(--font-size-lg); }
+      button { min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-md); border: 0; border-radius: var(--radius-sm); background: var(--color-brand-primary); color: var(--color-text-inverse); cursor: pointer; transition: background var(--transition-fast); }
+      button:hover { background: var(--color-brand-hover); }
+      button:focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: var(--border-focus-width); }
+      .empty { padding: var(--spacing-md); border-radius: var(--radius-sm); background: var(--color-canvas-subtle); color: var(--color-text-secondary); }
+      .error { background: var(--color-feedback-danger-subtle); color: var(--color-feedback-danger); }
+      pre { overflow: auto; font-family: var(--font-mono); }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     `;
+    const container = document.createElement('section');
+    container.className = 'container';
+    const header = document.createElement('header');
+    const title = document.createElement('h3');
+    title.textContent = this.getAttribute('title') || 'Default Component Title';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = 'Trigger Event';
+    button.addEventListener('click', () => this._emitAction('app-primitive-action', { title: title.textContent, payload: this._data }));
+    header.append(title, button);
 
-    // Handle defensive error rendering
-    let contentMarkup = '';
-
+    const content = document.createElement('div');
     if (this._hasParseError) {
-      contentMarkup = `
-        <div class="empty-state empty-error">
-          <strong>⚠️ Invalid Data Format Provided</strong>
-          <p style="margin: 4px 0 0 0;">Failed to parse JSON string input.</p>
-        </div>
-      `;
-    } else if (!this._data) {
-      contentMarkup = `
-        <div class="empty-state empty-neutral">
-          <p style="margin: 0;">No Active Records Available</p>
-        </div>
-      `;
+      content.className = 'empty error';
+      content.setAttribute('role', 'alert');
+      content.textContent = 'Invalid data format. The JSON payload could not be parsed.';
+    } else if (this._data == null) {
+      content.className = 'empty';
+      content.textContent = 'No active records available.';
     } else {
-      contentMarkup = `
-        <div class="primitive-content">
-          <pre style="font-family: var(--font-mono, monospace); font-size: 12px; margin: 0;">${JSON.stringify(this._data, null, 2)}</pre>
-        </div>
-      `;
+      const pre = document.createElement('pre');
+      pre.textContent = JSON.stringify(this._data, null, 2);
+      content.append(pre);
     }
-
-    this.shadowRoot.innerHTML = `
-      ${style}
-      <div class="primitive-container">
-        <div class="primitive-header">
-          <h3 class="primitive-title">${titleAttr}</h3>
-          <button type="button" class="action-btn" id="trigger-action">Trigger Event</button>
-        </div>
-        ${contentMarkup}
-      </div>
-    `;
-
-    // Bind event handlers
-    const btn = this.shadowRoot.querySelector('#trigger-action');
-    if (btn) {
-      btn.addEventListener('click', () => {
-        this._emitAction('app-primitive-action', {
-          title: titleAttr,
-          payload: this._data
-        });
-      });
-    }
+    container.append(header, content);
+    this.shadowRoot.replaceChildren(style, container);
   }
 }
 
-// Guard custom element registration
 if (!customElements.get('universal-template-primitive')) {
   customElements.define('universal-template-primitive', UniversalTemplatePrimitive);
 }
