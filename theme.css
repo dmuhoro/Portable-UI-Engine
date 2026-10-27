@@ -1,4 +1,29 @@
-/* theme.css - Portable UI Engine Global Design Tokens */
+/* Generated from packages/tokens/design-tokens.json */
+:root {
+  --color-primary: #4f46e5;
+  --color-primary: #4338ca;
+  --color-bg: #0b1026;
+  --color-panel: #10162a;
+  --color-text: #e6e8ee;
+  --color-text-secondary: #b9bfd3;
+  --color-border: #263056;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --text-base: 16px;
+  --text-sm: 14px;
+  --text-lg: 18px;
+}
+
 :root {
   /* Color Palette - Neutrals */
   --color-bg-app: #f8fafc;

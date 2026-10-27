@@ -1,4 +1,4 @@
-export const tokens = {
+export const cssVariables = {
   'color-brand-primary': '#4f46e5',
   'color-brand-primaryHover': '#4338ca',
   'color-surface-background': '#0b1026',
@@ -23,4 +23,5 @@ export const tokens = {
   'typography-sizeLg': '18px',
 } as const;
 
-export type TokenKey = keyof typeof tokens;
+export const tokens = cssVariables;
+export type TokenKey = keyof typeof cssVariables;
