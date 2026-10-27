@@ -34,8 +34,13 @@ This checklist tracks the AI Studio design handoff implementation. Historical pl
 - [x] Update sprint records and version consistency checks.
 - [x] Run final local verification and record evidence in `docs/evidence/design-system/VERIFICATION.md`.
 - [x] Commit logical deliverables individually.
-- [ ] Push branch and open/confirm a PR; do not merge directly. (Publication step.)
+- [x] Push branch and open PR #3 to `main`; do not merge directly.
+- [ ] Confirm GitHub CI is green, then follow the repository review/merge process. (GitHub currently reports no checks.)
 - [ ] Tag the release only after the PR lands on `main` and CI is green, per release procedure.
+
+## Publication state
+
+Branch `audit/ui-00-baseline` is pushed and PR #3 is open. Local verification is green; `gh pr checks 3` reported no checks, so CI and the repository-controlled merge/release steps remain external.
 
 ## Explicit product boundary
 
