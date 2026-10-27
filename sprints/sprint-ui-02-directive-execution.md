@@ -1,41 +1,11 @@
-# Sprint UI-02: Directive Execution - Full Infrastructure Build
+# Sprint UI-02: Directive Execution
 
 **Status:** Complete  
-**Branch:** audit/ui-00-baseline  
-**Date:** $(date -u +%Y-%m-%d)  
-**Goal:** Execute all Opencode-scoped work per engineering directive
+**Branch:** `audit/ui-00-baseline`
 
-## Completed Layers
-
-### Layer 0-3: Foundation ✅
-- Ground truth established
-- Constitution, ADRs, architecture documented
-- Monorepo scaffolded (packages/, apps/, tools/, design/)
-- Token pipeline operational (W3C JSON → CSS/TS)
-
-### Layer 4: Primitives & A11y ✅
-- Shared a11y utilities created
-- Focus trap, reduced motion, announcer helpers
-- Mirrored to packages/engine
-
-### Layer 5: Teardown Lab + Design Gate ✅
-- apps/teardown-lab scaffolded with rubric v1
-- tools/design-lint enhanced with checks
-- Evidence structure ready
-
-### Layer 6: Documentation & Push ✅
-- Master TODO created and tracked
-- All sprints updated
-- CHANGELOG updated
-- AI Studio directive prepared
-- All commits atomic, pushed to GitHub
+This sprint established the initial monorepo, token pipeline, shared accessibility utilities, Teardown Lab scaffold, design lint, and AI Studio handoff. The first pass intentionally deferred full component and showcase implementation; that work is now delivered and verified in [Sprint UI-03](sprint-ui-03-component-system.md).
 
 ## Evidence
-- Commits: 15+ atomic commits
-- Files added: 60+
-- All infrastructure in place
-- Build system intact
-- Engine still distributable
 
-## AI Studio Handoff
-See docs/ai-studio/DIRECTIVE.md and docs/ai-studio/OPENCODE-COMPLETED.md
+- Initial infrastructure commits are in Git history.
+- Current component, showcase, type, lint, and build verification is recorded in [`docs/evidence/design-system/VERIFICATION.md`](../docs/evidence/design-system/VERIFICATION.md).

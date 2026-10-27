@@ -1,31 +1,28 @@
 # Sprint UI-03: Component System and Showcase Delivery
 
-**Status:** In Progress  
-**Date:** 2026-10-27  
-**Goal:** Turn the AI Studio design handoff into a token-backed, accessible, tested Web Component system and usable showcase apps.
+**Status:** Complete
+**Date:** 2026-10-27
+**Branch:** `audit/ui-00-baseline`
+
+## Delivered
+
+- Adopted the three supplied design directions and made generated design tokens the source of truth.
+- Implemented and registered nine Shadow DOM `ui-*` primitives, retaining the existing `universal-*` elements.
+- Added keyboard, focus, reduced-motion, form participation, and composed-event behavior with component tests.
+- Built the searchable component gallery and token inspector, rubric-based Teardown Lab, and explicitly simulated Run Theater.
+- Added browser interaction and axe-core checks across the showcase pages and theme directions.
+- Updated package distribution, CI gates, release metadata, and documentation.
 
 ## Design decisions
 
-- Direction 1 (Warm Precision) is the default light theme because the docs gallery and teardown lab use it.
-- Direction 2 (Technical Oceanic) is the dark operational theme for Run Theater.
-- Direction 3 (Swiss Minimalist) is retained as an optional high-contrast theme.
-- Existing `universal-*` elements remain compatible. New reusable primitives use the `ui-*` names from the approved design briefs.
-- Token JSON remains the source of truth. CSS and TypeScript are generated artifacts.
+- Warm Precision is the default light theme; Technical Oceanic is the dark operational theme; Swiss Minimalist remains an optional high-contrast theme.
+- Existing `universal-*` elements remain compatible. New primitives use the `ui-*` names from the supplied briefs.
+- Token JSON is authoritative; CSS and TypeScript are generated artifacts.
 
-## Delivery layers
+## Acceptance and evidence
 
-1. **Design handoff and token contract:** track the supplied briefs, resolve semantic tokens and theme presets, verify generated output.
-2. **Primitive batch A:** button, input, checkbox, select; accessible keyboard behavior, Shadow DOM, reflected attributes, composed events, and behavior tests.
-3. **Primitive batches B/C:** dialog, tooltip, toast, tabs, menu; implement documented interactions and reduced-motion behavior with tests.
-4. **Design gate:** lint all engine elements and add reproducible evidence; make errors actionable and ensure the gate passes.
-5. **Showcase apps:** docs gallery, teardown lab scoring/comparison, and Run Theater operational demo with responsive layouts and real interactions.
-6. **Release and closeout:** documentation, sprint and changelog, full verification, atomic commits, push, and report.
+All nine primitives are registered and have automated behavior coverage. Token generation, design lint, strict TypeScript checks, component and showcase browser tests, and production builds are recorded in [`docs/evidence/design-system/VERIFICATION.md`](../docs/evidence/design-system/VERIFICATION.md).
 
-## Acceptance criteria
+## Follow-up boundary
 
-- All nine design-brief primitives are registered and documented.
-- Each primitive has keyboard/accessibility behavior and automated tests for its public contract.
-- All component styling uses generated tokens; reduced-motion and visible focus behavior are present.
-- The design gate, token generation, tests, and production build pass.
-- Showcase apps implement the behaviors stated in their composition docs without claiming unmeasured compliance or performance.
-- Sprint status, task list, changelog, and evidence match the verified repository state.
+Run Theater currently displays simulated telemetry and does not connect to a production cluster. WCAG browser scans are automated checks, not a certification. Future product work should be planned as a new sprint rather than left as untracked work in this completed delivery.

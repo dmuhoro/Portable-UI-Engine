@@ -1,24 +1,15 @@
-# Sprint UI-01: Infrastructure Foundation - Monorepo, Tokens, Design Gate
+# Sprint UI-01: Infrastructure Foundation
 
-**Status:** In Progress  
-**Branch:** audit/ui-00-baseline (will transition)  
-**Goal:** Transform Portable UI Engine into a monorepo-based design system with token pipeline and design gate infrastructure.
+**Status:** Complete
+**Branch:** `audit/ui-00-baseline`
 
-## Objectives
-1. Establish monorepo structure (packages/, apps/, tools/, design/)
-2. Create W3C Design Token pipeline from existing theme.css
-3. Scaffold Teardown Lab and design-lint tool
-4. Add evidence tracking and sprint documentation
-5. Maintain backward compatibility for engine distribution
+## Delivered
 
-## Layers
-- Layer 0: Ground Truth (Done)
-- Layer 1: Constitution & ADRs (Done)  
-- Layer 2: Monorepo Scaffold (In Progress)
-- Layer 3: Token Pipeline
-- Layer 4: Primitives & A11y Groundwork
-- Layer 5: Teardown Lab + Design Gate
-- Layer 6: Documentation, Commits, Push
+- Established the monorepo layout for engine, tokens, apps, design handoff, and design lint.
+- Added the JSON token source and generated CSS/TypeScript artifacts.
+- Added the Teardown Lab foundation and documented its design-gate role.
+- Preserved the root engine distribution while making `packages/engine` independently buildable.
 
 ## Evidence
-All work tracked in docs/evidence/ and committed atomically.
+
+The current gates are recorded in [`docs/evidence/design-system/VERIFICATION.md`](../docs/evidence/design-system/VERIFICATION.md). Atomic history is available in Git on `audit/ui-00-baseline`.
