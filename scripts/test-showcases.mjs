@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
-import { puppeteerCore } from '@web/test-runner-chrome';
+import { chromeLauncher } from '@web/test-runner-chrome';
 
 const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '4173', '--strictPort'], { stdio: 'ignore' });
 let browser;
@@ -14,7 +14,7 @@ try {
     catch { await delay(250); }
   }
   if (!ready) throw new Error('Vite showcase server did not start.');
-  browser = await puppeteerCore.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  browser = await chromeLauncher({ launchOptions: { headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] } }).launchBrowser();
 
   async function checkAccessibility(page, route) {
     const violations = await page.evaluate(async () => {

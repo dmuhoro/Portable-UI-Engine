@@ -5,7 +5,6 @@ export default {
   nodeResolve: true,
   browsers: [chromeLauncher({
     launchOptions: {
-      executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome',
       args: ['--no-sandbox', '--disable-dev-shm-usage'],
     },
   })],

@@ -20,6 +20,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Install Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
       - name: Generate design tokens
         run: node packages/tokens/scripts/build-tokens.js
       - name: Check release version metadata
@@ -32,6 +35,8 @@ jobs:
         run: git diff --exit-code -- packages/tokens/css/variables.css packages/tokens/ts/tokens.ts theme.css packages/engine/theme.css
       - name: Component and showcase browser tests
         run: npm test
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
       - name: Production build
         run: npm run build
       - name: Verify distributable artifacts
