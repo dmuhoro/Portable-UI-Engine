@@ -1,0 +1,329 @@
+const sharedStyles = `
+  :host { display: inline-block; color: var(--color-text-primary); font-family: var(--font-sans); }
+  *, *::before, *::after { box-sizing: border-box; }
+  button, input, select { font: inherit; }
+  button { color: inherit; }
+  :focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: var(--border-focus-width); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+`;
+
+function emit(element, name, detail = {}) {
+  element.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
+}
+
+function safeItems(value, fallback = []) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const result = JSON.parse(value);
+      return Array.isArray(result) ? result : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+}
+
+function escapeMarkup(value) {
+  return String(value).replace(/[&<>\"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' })[character]);
+}
+
+function mount(host, css, markup) {
+  host.shadowRoot.innerHTML = `<style>${sharedStyles}${css}</style>${markup}`;
+}
+
+export class UIButton extends HTMLElement {
+  static observedAttributes = ['variant', 'size', 'disabled', 'type'];
+  constructor() { super(); this.attachShadow({ mode: 'open' }); }
+  connectedCallback() { this.render(); }
+  attributeChangedCallback() { if (this.isConnected) this.render(); }
+  render() {
+    mount(this, `
+      button { min-height: var(--spacing-3xl); padding: var(--spacing-xs) var(--spacing-md); border: 1px solid transparent; border-radius: var(--radius-sm); background: var(--color-text-primary); color: var(--color-text-inverse); cursor: pointer; transition: background var(--transition-fast); }
+      button:hover:not(:disabled) { background: var(--color-brand-hover); }
+      button:disabled { opacity: .55; cursor: not-allowed; }
+      :host([size="small"]) button { min-height: var(--spacing-2xl); }
+      :host([size="large"]) button { min-height: var(--interaction-target-min); }
+      :host([variant="secondary"]) button { background: var(--color-surface-base); border-color: var(--color-border-default); color: var(--color-text-primary); }
+      :host([variant="outline"]) button { background: transparent; border-color: var(--color-border-default); color: var(--color-text-primary); }
+      :host([variant="ghost"]) button { background: transparent; color: var(--color-text-primary); }
+      :host([variant="danger"]) button { background: var(--color-feedback-danger); }
+    `, `<button part="button" type="${escapeMarkup(this.getAttribute('type') || 'button')}"><slot></slot></button>`);
+    const button = this.shadowRoot.querySelector('button');
+    button.disabled = this.hasAttribute('disabled');
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      if (!button.disabled) emit(this, 'ui-button-click', { variant: this.getAttribute('variant') || 'primary' });
+    });
+  }
+}
+
+export class UIInput extends HTMLElement {
+  static observedAttributes = ['label', 'value', 'type', 'placeholder', 'disabled', 'required', 'error', 'name'];
+  constructor() { super(); this.attachShadow({ mode: 'open' }); this._value = ''; }
+  connectedCallback() { this.render(); }
+  attributeChangedCallback(name, _old, value) {
+    if (name === 'value') this._value = value || '';
+    if (this.isConnected) this.render();
+  }
+  get value() { return this.shadowRoot.querySelector('input')?.value ?? this._value; }
+  set value(value) { this._value = String(value ?? ''); if (this.isConnected) this.render(); }
+  render() {
+    const id = escapeMarkup(`field-${this.getAttribute('name') || 'input'}`);
+    const label = this.getAttribute('label') || '';
+    const error = this.getAttribute('error') || '';
+    mount(this, `
+      :host { position: relative; display: block; }
+      label { display: grid; gap: var(--spacing-2xs); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+      input { width: 100%; min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-base); color: var(--color-text-primary); }
+      input[aria-invalid="true"] { border-color: var(--color-feedback-danger); }
+      .error { color: var(--color-feedback-danger); font-size: var(--font-size-xs); }
+    `, `<label>${label ? `<span>${escapeMarkup(label)}</span>` : ''}<input id="${id}" type="${escapeMarkup(this.getAttribute('type') || 'text')}" name="${escapeMarkup(this.getAttribute('name') || '')}" placeholder="${escapeMarkup(this.getAttribute('placeholder') || '')}" aria-invalid="${Boolean(error)}" ${this.hasAttribute('required') ? 'required' : ''} ${this.hasAttribute('disabled') ? 'disabled' : ''} />${error ? `<span class="error" role="alert">${escapeMarkup(error)}</span>` : ''}</label>`);
+    const input = this.shadowRoot.querySelector('input');
+    input.value = this._value || this.getAttribute('value') || '';
+    input.addEventListener('input', () => { this._value = input.value; emit(this, 'ui-input-change', { name: input.name, value: input.value }); });
+    input.addEventListener('change', () => { this._value = input.value; emit(this, 'change', { name: input.name, value: input.value }); });
+  }
+}
+
+export class UICheckbox extends HTMLElement {
+  static observedAttributes = ['label', 'checked', 'disabled', 'indeterminate', 'name', 'value'];
+  constructor() { super(); this.attachShadow({ mode: 'open' }); }
+  connectedCallback() { this.render(); }
+  attributeChangedCallback() { if (this.isConnected) this.render(); }
+  get checked() { return this.shadowRoot.querySelector('input')?.checked ?? this.hasAttribute('checked'); }
+  set checked(value) { this.toggleAttribute('checked', Boolean(value)); }
+  render() {
+    mount(this, `
+      :host { display: inline-block; }
+      label { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-height: var(--interaction-target-min); cursor: pointer; }
+      input { width: var(--spacing-md); height: var(--spacing-md); accent-color: var(--color-brand-primary); }
+      input:disabled + span { opacity: .6; cursor: not-allowed; }
+    `, `<label><input type="checkbox" name="${escapeMarkup(this.getAttribute('name') || '')}" value="${escapeMarkup(this.getAttribute('value') || 'on')}" /><span>${this.hasAttribute('label') ? escapeMarkup(this.getAttribute('label')) : '<slot></slot>'}</span></label>`);
+    const input = this.shadowRoot.querySelector('input');
+    input.checked = this.hasAttribute('checked');
+    input.indeterminate = this.hasAttribute('indeterminate');
+    input.disabled = this.hasAttribute('disabled');
+    input.addEventListener('change', () => {
+      this.toggleAttribute('checked', input.checked);
+      emit(this, 'ui-checkbox-change', { checked: input.checked, indeterminate: input.indeterminate, name: input.name, value: input.value });
+    });
+  }
+}
+
+export class UISelect extends HTMLElement {
+  static observedAttributes = ['label', 'value', 'placeholder', 'disabled', 'required', 'name', 'options'];
+  constructor() { super(); this.attachShadow({ mode: 'open' }); this._options = []; this._value = ''; }
+  connectedCallback() { this.render(); }
+  attributeChangedCallback(name, _old, value) {
+    if (name === 'value') this._value = value || '';
+    if (name === 'options') this._options = safeItems(value);
+    if (this.isConnected) this.render();
+  }
+  get options() { return this._options; }
+  set options(value) { this._options = safeItems(value); if (this.isConnected) this.render(); }
+  get value() { return this._value; }
+  set value(value) { this._value = String(value ?? ''); if (this.isConnected) this.render(); }
+  render() {
+    const options = this._options.length ? this._options : [...this.querySelectorAll('option')].map(option => ({ label: option.textContent.trim(), value: option.value }));
+    mount(this, `
+      :host { display: block; }
+      label { display: grid; gap: var(--spacing-2xs); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+      input { width: 100%; min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-base); color: var(--color-text-primary); }
+      [role="listbox"] { position: absolute; z-index: 1; max-height: 14rem; overflow: auto; min-width: 12rem; margin: var(--spacing-2xs) 0 0; padding: var(--spacing-2xs); list-style: none; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-overlay); box-shadow: var(--shadow-md); }
+      [role="option"] { min-height: var(--interaction-target-min); padding: var(--spacing-xs); cursor: pointer; }
+      [role="option"][aria-selected="true"], [role="option"]:hover { background: var(--color-surface-sunken); }
+      [hidden] { display: none; }
+    `, `<label>${escapeMarkup(this.getAttribute('label') || '')}<input role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="options" placeholder="${escapeMarkup(this.getAttribute('placeholder') || 'Choose an option')}" ${this.hasAttribute('disabled') ? 'disabled' : ''} ${this.hasAttribute('required') ? 'required' : ''} /><ul id="options" role="listbox" hidden></ul></label>`);
+    const input = this.shadowRoot.querySelector('input');
+    const list = this.shadowRoot.querySelector('ul');
+    input.value = options.find(item => item.value === this._value)?.label || this._value;
+    const draw = query => {
+      list.replaceChildren();
+      options.filter(item => String(item.label).toLowerCase().includes(query.toLowerCase())).forEach((item, index) => {
+        const option = document.createElement('li');
+        option.setAttribute('role', 'option'); option.tabIndex = -1; option.setAttribute('aria-selected', String(String(item.value) === this._value)); option.dataset.index = String(index); option.textContent = String(item.label);
+        option.addEventListener('mousedown', event => event.preventDefault());
+        option.addEventListener('click', () => { this._value = String(item.value); input.value = String(item.label); close(); emit(this, 'ui-select-change', { name: this.getAttribute('name') || '', value: this._value }); });
+        list.append(option);
+      });
+    };
+    const open = () => { draw(input.value === (options.find(item => item.value === this._value)?.label || '') ? '' : input.value); list.hidden = false; input.setAttribute('aria-expanded', 'true'); };
+    const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); };
+    input.addEventListener('focus', open);
+    input.addEventListener('input', () => { open(); emit(this, 'ui-select-search', { query: input.value }); });
+    input.addEventListener('keydown', event => {
+      const items = [...list.querySelectorAll('[role="option"]')];
+      const active = this.shadowRoot.activeElement;
+      const current = items.indexOf(active);
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); open(); (items[Math.max(0, Math.min(items.length - 1, current + (event.key === 'ArrowDown' ? 1 : -1)))] || items[0])?.focus(); }
+      if (event.key === 'Escape') close();
+      if (event.key === 'Enter' && !list.hidden) { event.preventDefault(); items.find(item => item === this.shadowRoot.activeElement)?.click(); }
+    });
+    this.shadowRoot.addEventListener('focusout', event => { if (!event.relatedTarget || !this.shadowRoot.contains(event.relatedTarget)) close(); });
+    this.shadowRoot.addEventListener('keydown', event => {
+      if (event.target?.getAttribute?.('role') !== 'option') return;
+      const items = [...list.querySelectorAll('[role="option"]')]; const index = items.indexOf(event.target);
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); items[(index + (event.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length]?.focus(); }
+      if (event.key === 'Enter') event.target.click();
+    });
+    list.addEventListener('focusout', event => { if (event.relatedTarget !== input && !list.contains(event.relatedTarget)) close(); });
+  }
+}
+
+export class UIDialog extends HTMLElement {
+  static observedAttributes = ['open', 'label'];
+  constructor() { super(); this.attachShadow({ mode: 'open' }); }
+  connectedCallback() { this.render(); }
+  attributeChangedCallback() { if (this.isConnected) this.render(); }
+  show() { this.setAttribute('open', ''); }
+  close() { const dialog = this.shadowRoot.querySelector('dialog'); if (dialog?.open) dialog.close(); this.removeAttribute('open'); }
+  render() {
+    mount(this, `
+      dialog { width: min(36rem, calc(100vw - var(--spacing-lg))); max-height: calc(100vh - var(--spacing-2xl)); overflow: auto; padding: var(--spacing-lg); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); background: var(--color-surface-base); color: var(--color-text-primary); box-shadow: var(--shadow-lg); }
+      dialog::backdrop { background: var(--color-overlay-scrim); backdrop-filter: blur(var(--spacing-2xs)); }
+      header { display: flex; justify-content: space-between; align-items: start; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
+      h2 { margin: 0; font-size: var(--font-size-lg); }
+      button { min-width: var(--interaction-target-min); min-height: var(--interaction-target-min); border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; }
+      @media (prefers-reduced-motion: no-preference) { dialog { transition: opacity var(--transition-fast), transform var(--transition-fast); } }
+    `, `<dialog aria-labelledby="dialog-title"><header><h2 id="dialog-title"></h2><button type="button" aria-label="Close dialog">×</button></header><section><slot></slot></section></dialog>`);
+    const dialog = this.shadowRoot.querySelector('dialog');
+    this.shadowRoot.querySelector('h2').textContent = this.getAttribute('label') || '';
+    this.shadowRoot.querySelector('button').addEventListener('click', () => this.close());
+    dialog.addEventListener('cancel', event => { event.preventDefault(); this.close(); });
+    dialog.addEventListener('close', () => emit(this, 'ui-dialog-close'));
+    if (this.hasAttribute('open') && !dialog.open) dialog.showModal();
+    if (!this.hasAttribute('open') && dialog.open) dialog.close();
+  }
+}
+
+export class UITooltip extends HTMLElement {
+  static observedAttributes = ['text', 'placement'];
+  constructor() { super(); this.attachShadow({ mode: 'open' }); this.timer = 0; }
+  connectedCallback() { this.render(); }
+  attributeChangedCallback(_name, oldValue, newValue) { if (this.isConnected && oldValue !== newValue && !this._reflecting) this.render(); }
+  disconnectedCallback() { clearTimeout(this.timer); }
+  render() {
+    mount(this, `
+      :host { position: relative; }
+      .tip { position: absolute; z-index: 2; bottom: calc(100% + var(--spacing-2xs)); left: 50%; transform: translateX(-50%); width: max-content; max-width: 18rem; padding: var(--spacing-2xs) var(--spacing-xs); border-radius: var(--radius-xs); background: var(--color-surface-inverse); color: var(--color-text-inverse); font-size: var(--font-size-xs); }
+      .tip[hidden] { display: none; }
+    `, `<span id="trigger"><slot></slot></span><span id="tip" class="tip" role="tooltip" hidden></span>`);
+    const trigger = this.shadowRoot.querySelector('#trigger'); const tip = this.shadowRoot.querySelector('#tip');
+    tip.textContent = this.getAttribute('text') || '';
+    const show = delay => { clearTimeout(this.timer); this.timer = window.setTimeout(() => { tip.hidden = false; trigger.setAttribute('aria-describedby', 'tip'); }, delay); };
+    const hide = () => { clearTimeout(this.timer); tip.hidden = true; trigger.removeAttribute('aria-describedby'); };
+    trigger.addEventListener('mouseenter', () => show(300)); trigger.addEventListener('mouseleave', hide);
+    trigger.addEventListener('focusin', () => show(0)); trigger.addEventListener('focusout', hide);
+  }
+}
+
+export class UIToast extends HTMLElement {
+  static observedAttributes = ['message', 'variant', 'duration'];
+  constructor() { super(); this.attachShadow({ mode: 'open' }); this.timer = 0; }
+  connectedCallback() { this.render(); }
+  disconnectedCallback() { clearTimeout(this.timer); }
+  attributeChangedCallback() { if (this.isConnected) this.render(); }
+  show(message = this.getAttribute('message') || '') { this.setAttribute('message', message); this.hidden = false; }
+  dismiss() { clearTimeout(this.timer); this.hidden = true; emit(this, 'ui-toast-dismiss'); }
+  render() {
+    const alert = this.getAttribute('variant') === 'danger';
+    mount(this, `
+      :host { display: block; }
+      .toast { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); min-width: 16rem; padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); background: var(--color-surface-base); box-shadow: var(--shadow-md); }
+      button { min-width: var(--interaction-target-min); min-height: var(--interaction-target-min); border: 0; background: transparent; cursor: pointer; }
+    `, `<div class="toast" role="${alert ? 'alert' : 'status'}" aria-live="${alert ? 'assertive' : 'polite'}"><span></span><button type="button" aria-label="Dismiss notification">×</button></div>`);
+    this.shadowRoot.querySelector('span').textContent = this.getAttribute('message') || '';
+    this.shadowRoot.querySelector('button').addEventListener('click', () => this.dismiss());
+    clearTimeout(this.timer);
+    const duration = Number(this.getAttribute('duration') || 5000);
+    if (duration > 0) this.timer = window.setTimeout(() => this.dismiss(), duration);
+    const pause = () => clearTimeout(this.timer);
+    const resume = () => { if (duration > 0) this.timer = window.setTimeout(() => this.dismiss(), duration); };
+    this.shadowRoot.querySelector('.toast').addEventListener('mouseenter', pause);
+    this.shadowRoot.querySelector('.toast').addEventListener('focusin', pause);
+    this.shadowRoot.querySelector('.toast').addEventListener('mouseleave', resume);
+    this.shadowRoot.querySelector('.toast').addEventListener('focusout', resume);
+  }
+}
+
+export class UITabs extends HTMLElement {
+  static observedAttributes = ['selected'];
+  constructor() { super(); this.attachShadow({ mode: 'open' }); this._items = []; }
+  connectedCallback() { this.render(); }
+  attributeChangedCallback(_name, oldValue, newValue) { if (this.isConnected && oldValue !== newValue && !this._reflecting) this.render(); }
+  get items() { return this._items; }
+  set items(value) { this._items = safeItems(value); if (this.isConnected) this.render(); }
+  render() {
+    const items = this._items.length ? this._items : [...this.querySelectorAll('[data-tab]')].map((node, index) => ({ label: node.getAttribute('data-tab'), content: node.textContent, id: node.id || String(index) }));
+    const selected = Math.max(0, Math.min(items.length - 1, Number(this.getAttribute('selected') || 0)));
+    mount(this, `
+      :host { display: block; }
+      [role="tablist"] { display: flex; gap: var(--spacing-2xs); overflow-x: auto; border-bottom: 1px solid var(--color-border-subtle); }
+      [role="tab"] { min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-md); border: 0; border-bottom: var(--border-focus-width) solid transparent; background: transparent; color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; }
+      [role="tab"][aria-selected="true"] { border-bottom-color: var(--color-brand-primary); color: var(--color-text-primary); }
+      [role="tabpanel"] { padding: var(--spacing-md) 0; }
+    `, `<div role="tablist" aria-label="${this.getAttribute('label') || 'Tabs'}"></div><section role="tabpanel" tabindex="0"></section>`);
+    const tablist = this.shadowRoot.querySelector('[role="tablist"]');
+    const panel = this.shadowRoot.querySelector('[role="tabpanel"]');
+    const choose = index => {
+      if (!items[index]) return;
+      [...tablist.children].forEach((tab, tabIndex) => { tab.setAttribute('aria-selected', String(index === tabIndex)); tab.tabIndex = index === tabIndex ? 0 : -1; });
+      panel.textContent = String(items[index].content ?? ''); panel.setAttribute('aria-labelledby', `tab-${index}`); this._reflecting = true; this.setAttribute('selected', String(index)); this._reflecting = false;
+      emit(this, 'ui-tab-change', { index, id: items[index].id ?? String(index) });
+    };
+    items.forEach((item, index) => {
+      const tab = document.createElement('button'); tab.type = 'button'; tab.id = `tab-${index}`; tab.setAttribute('role', 'tab'); tab.setAttribute('aria-controls', 'panel'); tab.textContent = String(item.label ?? `Tab ${index + 1}`); tab.addEventListener('click', () => choose(index));
+      tab.addEventListener('keydown', event => { let next = index; if (event.key === 'ArrowRight') next = (index + 1) % items.length; else if (event.key === 'ArrowLeft') next = (index + items.length - 1) % items.length; else if (event.key === 'Home') next = 0; else if (event.key === 'End') next = items.length - 1; else return; event.preventDefault(); choose(next); tablist.children[next].focus(); });
+      tablist.append(tab);
+    });
+    panel.id = 'panel'; choose(selected);
+  }
+}
+
+export class UIMenu extends HTMLElement {
+  static observedAttributes = ['label', 'items'];
+  constructor() { super(); this.attachShadow({ mode: 'open' }); this._items = []; }
+  connectedCallback() { this.render(); }
+  attributeChangedCallback(name, _old, value) { if (name === 'items') this._items = safeItems(value); if (this.isConnected) this.render(); }
+  get items() { return this._items; }
+  set items(value) { this._items = safeItems(value); if (this.isConnected) this.render(); }
+  render() {
+    const items = this._items.length ? this._items : [...this.querySelectorAll('[data-menu-item]')].map(node => ({ label: node.textContent.trim(), value: node.getAttribute('data-menu-item') }));
+    mount(this, `
+      :host { position: relative; }
+      button { min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-md); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-base); cursor: pointer; }
+      [role="menu"] { position: absolute; z-index: 1; top: calc(100% + var(--spacing-2xs)); right: 0; min-width: 12rem; margin: 0; padding: var(--spacing-2xs); list-style: none; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-overlay); box-shadow: var(--shadow-md); }
+      [role="menu"][hidden] { display: none; }
+      [role="menuitem"] { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: var(--interaction-target-min); padding: var(--spacing-xs); border: 0; text-align: left; background: transparent; cursor: pointer; }
+      [role="menuitem"]:hover, [role="menuitem"]:focus-visible { background: var(--color-surface-sunken); }
+      kbd { font-family: var(--font-mono); color: var(--color-text-secondary); }
+    `, `<button type="button" aria-haspopup="menu" aria-expanded="false">${this.getAttribute('label') || 'Menu'}</button><ul role="menu" hidden></ul>`);
+    const trigger = this.shadowRoot.querySelector('button'); const menu = this.shadowRoot.querySelector('[role="menu"]');
+    const close = () => { menu.hidden = true; trigger.setAttribute('aria-expanded', 'false'); };
+    const open = () => { menu.hidden = false; trigger.setAttribute('aria-expanded', 'true'); menu.querySelector('[role="menuitem"]')?.focus(); };
+    items.forEach(item => {
+      if (item.separator) { const separator = document.createElement('li'); separator.setAttribute('role', 'separator'); menu.append(separator); return; }
+      const row = document.createElement('li'); row.setAttribute('role', 'none'); const action = document.createElement('button'); action.type = 'button'; action.setAttribute('role', 'menuitem'); action.textContent = String(item.label ?? '');
+      if (item.shortcut) { const key = document.createElement('kbd'); key.textContent = String(item.shortcut); action.append(key); }
+      action.addEventListener('click', () => { close(); emit(this, 'ui-menu-select', { value: item.value ?? item.label }); }); row.append(action); menu.append(row);
+    });
+    trigger.addEventListener('click', () => menu.hidden ? open() : close());
+    trigger.addEventListener('keydown', event => { if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } });
+    menu.addEventListener('keydown', event => {
+      const actions = [...menu.querySelectorAll('[role="menuitem"]')]; const index = actions.indexOf(event.target);
+      if (event.key === 'Escape') { close(); trigger.focus(); }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); actions[(index + (event.key === 'ArrowDown' ? 1 : actions.length - 1)) % actions.length]?.focus(); }
+      if (event.key === 'Tab') close();
+    });
+    this.shadowRoot.addEventListener('focusout', event => { if (!this.shadowRoot.contains(event.relatedTarget)) close(); });
+  }
+}
+
+const components = [
+  ['ui-button', UIButton], ['ui-input', UIInput], ['ui-checkbox', UICheckbox], ['ui-select', UISelect],
+  ['ui-dialog', UIDialog], ['ui-tooltip', UITooltip], ['ui-toast', UIToast], ['ui-tabs', UITabs], ['ui-menu', UIMenu],
+];
+for (const [tag, constructor] of components) if (!customElements.get(tag)) customElements.define(tag, constructor);
+
+export const primitiveTags = components.map(([tag]) => tag);
