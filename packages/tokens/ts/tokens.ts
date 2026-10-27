@@ -89,7 +89,18 @@ export const tokens = {
   "motion-easing-entrance": "cubic-bezier(0.0, 0, 0.2, 1)",
   "motion-easing-exit": "cubic-bezier(0.4, 0, 1, 1)",
   "interaction-target-min": "44px",
-  "border-focus-width": "2px"
+  "border-focus-width": "2px",
+  "layout-toast-offset": "5rem",
+  "layout-control-height-compact": "36px",
+  "layer-popover": "20",
+  "layer-tooltip": "30",
+  "layer-toast": "40",
+  "component-dialog-max-width": "36rem",
+  "component-popup-max-height": "14rem",
+  "component-popup-min-width": "12rem",
+  "component-tooltip-max-width": "18rem",
+  "component-toast-max-width": "24rem",
+  "component-disabled-opacity": ".55"
 } as const;
 
 export type TokenKey = keyof typeof tokens;

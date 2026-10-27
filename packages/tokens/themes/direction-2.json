@@ -410,6 +410,56 @@
         "$value": "2px",
         "$type": "dimension"
       }
+    },
+    "layout": {
+      "toast-offset": {
+        "$value": "5rem",
+        "$type": "dimension"
+      },
+      "control-height-compact": {
+        "$value": "36px",
+        "$type": "dimension"
+      }
+    },
+    "layer": {
+      "popover": {
+        "$value": "20",
+        "$type": "number"
+      },
+      "tooltip": {
+        "$value": "30",
+        "$type": "number"
+      },
+      "toast": {
+        "$value": "40",
+        "$type": "number"
+      }
+    }
+  },
+  "component": {
+    "dialog-max-width": {
+      "$value": "36rem",
+      "$type": "dimension"
+    },
+    "popup-max-height": {
+      "$value": "14rem",
+      "$type": "dimension"
+    },
+    "popup-min-width": {
+      "$value": "12rem",
+      "$type": "dimension"
+    },
+    "tooltip-max-width": {
+      "$value": "18rem",
+      "$type": "dimension"
+    },
+    "toast-max-width": {
+      "$value": "24rem",
+      "$type": "dimension"
+    },
+    "disabled-opacity": {
+      "$value": ".55",
+      "$type": "number"
     }
   }
 }

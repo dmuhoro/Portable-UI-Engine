@@ -18,7 +18,7 @@ function flatten(value, prefix = '', result = {}) {
 
 const primaryTheme = JSON.parse(readFileSync(join(packageRoot, 'design-tokens.json'), 'utf8'));
 const themes = [
-  { selector: 'warm-precision', tokens: flatten(primaryTheme.tokens) },
+  { selector: 'warm-precision', tokens: flatten(primaryTheme.tokens || primaryTheme) },
 ];
 for (const filename of ['direction-2.json', 'direction-3.json']) {
   const theme = JSON.parse(readFileSync(join(packageRoot, 'themes', filename), 'utf8'));
