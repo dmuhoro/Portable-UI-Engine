@@ -62,7 +62,7 @@ if (existsSync(elementsDir)) {
   if (hasFocus) {
     console.log('   PASS: Focus state styles detected\n');
   } else {
-    console.warning('   WARN: No :focus-visible/:focus styles detected — consider adding focus styles');
+    console.warn('   WARN: No :focus-visible/:focus styles detected — consider adding focus styles');
     warnings++;
   }
 } else {
@@ -83,13 +83,13 @@ if (existsSync(elementsDir)) {
   if (hasRole) {
     console.log('   PASS: Some components have role attributes\n');
   } else {
-    console.warning('   WARN: No role attributes detected — consider adding explicit roles');
+    console.warn('   WARN: No role attributes detected — consider adding explicit roles');
     warnings++;
   }
   if (hasAriaLabel) {
     console.log('   PASS: Some components have aria-label/aria-labelledby\n');
   } else {
-    console.warning('   WARN: No aria-label/aria-labelledby detected — consider adding label associations');
+    console.warn('   WARN: No aria-label/aria-labelledby detected — consider adding label associations');
     warnings++;
   }
 } else {
