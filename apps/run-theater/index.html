@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-theme="technical-oceanic">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Simulated operational dashboard showcasing token themes and accessible engine components">
+  <link rel="icon" href="../../assets/portable-ui-mark.svg" type="image/svg+xml">
+  <title>Run Theater — Portable UI Engine</title>
+  <link rel="stylesheet" href="../../theme.css">
+  <link rel="stylesheet" href="./run-theater.css">
+  <script type="module" src="../../engine.js"></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="mission-bar"><a href="../docs/">PUI <span>/</span> Run Theater</a><div class="mission-status"><span class="pulse" aria-hidden="true"></span><span id="run-state">RUNNING · SIMULATION</span><code id="run-id">RUN-88421</code><span>Cluster <strong>US-EAST-1A</strong></span></div><div class="mission-actions"><button id="pause" type="button">Pause stream</button><ui-button id="halt" variant="danger">Halt run</ui-button></div></header>
+  <main>
+    <p class="simulation-note" role="status">Demo telemetry is simulated locally; it is not connected to a production cluster.</p>
+    <section class="kpi-grid" aria-label="Mission telemetry">
+      <article class="kpi"><p>Active nodes</p><strong id="active-nodes">128 / 128</strong><span>Operational</span></article>
+      <article class="kpi"><p>Ingestion</p><strong id="ingestion">94.2k ops/s</strong><span>Events per second</span></article>
+      <article class="kpi"><p>P99 latency</p><strong id="latency">14.2 ms</strong><span>Rolling sample</span></article>
+      <article class="kpi"><p>Error rate</p><strong id="error-rate">0.001%</strong><span>Last minute</span></article>
+    </section>
+    <div class="operations-grid">
+      <section class="panel pipeline" aria-labelledby="pipeline-title"><div class="panel-head"><div><p class="eyebrow">EXECUTION</p><h1 id="pipeline-title">Pipeline stages</h1></div><span id="progress-label">Stage 3 of 5</span></div><ol id="stages" class="stages"></ol></section>
+      <section class="panel log-panel" aria-labelledby="logs-title"><div class="panel-head"><div><p class="eyebrow">LIVE STREAM · DEMO</p><h2 id="logs-title">System log</h2></div><button id="clear-logs" type="button">Clear</button></div><div id="logs" class="logs" role="log" aria-live="polite" aria-relevant="additions text" tabindex="0"></div></section>
+    </div>
+    <section class="panel nodes" aria-labelledby="nodes-title"><div class="panel-head"><div><p class="eyebrow">CLUSTER HEALTH</p><h2 id="nodes-title">Node topology</h2></div><ui-input id="node-search" label="Filter nodes" placeholder="Node, region, or status"></ui-input></div><div class="table-scroll"><table><caption class="visually-hidden">Simulated cluster node health and resource usage</caption><thead><tr><th scope="col">Node ID</th><th scope="col">Region</th><th scope="col">Protocol</th><th scope="col">CPU usage</th><th scope="col">Memory</th><th scope="col">Active jobs</th><th scope="col">Health status</th></tr></thead><tbody id="node-rows"></tbody></table></div></section>
+  </main>
+  <ui-dialog id="halt-dialog" label="Halt this demo run?"><p>This stops the local simulation. No production operation will be affected.</p><div class="dialog-actions"><ui-button id="confirm-halt" variant="danger">Halt simulation</ui-button><ui-button id="cancel-halt" variant="secondary">Keep running</ui-button></div></ui-dialog>
+</body>
+</html>
