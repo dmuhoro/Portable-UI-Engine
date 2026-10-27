@@ -1,0 +1,39 @@
+{
+  "$schema": "https://tr.designtokens.org/format/",
+  "color": {
+    "brand": {
+      "primary": { "$value": "#4f46e5", "$type": "color" },
+      "primaryHover": { "$value": "#4338ca", "$type": "color" }
+    },
+    "surface": {
+      "background": { "$value": "#0b1026", "$type": "color" },
+      "panel": { "$value": "#10162a", "$type": "color" }
+    },
+    "text": {
+      "primary": { "$value": "#e6e8ee", "$type": "color" },
+      "secondary": { "$value": "#b9bfd3", "$type": "color" }
+    },
+    "border": { "$value": "#263056", "$type": "color" },
+    "success": { "$value": "#22c55e", "$type": "color" },
+    "warning": { "$value": "#f59e0b", "$type": "color" },
+    "danger": { "$value": "#ef4444", "$type": "color" }
+  },
+  "spacing": {
+    "xs": { "$value": "4px", "$type": "dimension" },
+    "sm": { "$value": "8px", "$type": "dimension" },
+    "md": { "$value": "16px", "$type": "dimension" },
+    "lg": { "$value": "24px", "$type": "dimension" },
+    "xl": { "$value": "32px", "$type": "dimension" }
+  },
+  "radius": {
+    "sm": { "$value": "6px", "$type": "dimension" },
+    "md": { "$value": "10px", "$type": "dimension" },
+    "lg": { "$value": "14px", "$type": "dimension" }
+  },
+  "typography": {
+    "fontSans": { "$value": "'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif", "$type": "fontFamily" },
+    "sizeBase": { "$value": "16px", "$type": "dimension" },
+    "sizeSm": { "$value": "14px", "$type": "dimension" },
+    "sizeLg": { "$value": "18px", "$type": "dimension" }
+  }
+}
