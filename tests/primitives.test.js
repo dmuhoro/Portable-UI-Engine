@@ -41,11 +41,33 @@ describe('Portable UI primitives', () => {
     assert(input.value === 'a@example.com');
   });
 
+  it('clears clearable inputs and announces the updated value', () => {
+    const input = addElement('ui-input', { label: 'Search', clearable: '' });
+    input.value = 'needle';
+    let source = '';
+    input.addEventListener('ui-input-change', event => { source = event.detail.source; });
+    input.shadowRoot.querySelector('.clear').click();
+    assert(input.value === '' && source === 'clear');
+  });
+
   it('supports checkbox state and indeterminate reflection', () => {
     const checkbox = addElement('ui-checkbox', { label: 'Select all', indeterminate: '' });
     assert(checkbox.shadowRoot.querySelector('input').indeterminate);
     checkbox.shadowRoot.querySelector('input').click();
     assert(checkbox.checked);
+  });
+
+  it('participates in native form submission and reset', () => {
+    const form = document.createElement('form');
+    form.innerHTML = '<ui-input label="Project" name="project" value="starter"></ui-input><ui-checkbox label="Updates" name="updates" value="yes" checked></ui-checkbox>';
+    document.body.append(form);
+    const input = form.querySelector('ui-input');
+    assert(new FormData(form).get('project') === 'starter');
+    assert(new FormData(form).get('updates') === 'yes');
+    input.value = 'changed';
+    assert(new FormData(form).get('project') === 'changed');
+    form.reset();
+    assert(input.value === 'starter' && form.querySelector('ui-checkbox').checked);
   });
 
   it('filters and selects options through the combobox contract', () => {
@@ -59,6 +81,29 @@ describe('Portable UI primitives', () => {
     input.dispatchEvent(new Event('input', { bubbles: true }));
     select.shadowRoot.querySelector('[role="option"]').click();
     assert(selected === 'b' && select.value === 'b');
+  });
+
+  it('flips a combobox popup above its trigger when the viewport bottom is tight', () => {
+    const select = addElement('ui-select');
+    select.options = [{ label: 'Alpha', value: 'a' }, { label: 'Beta', value: 'b' }];
+    Object.assign(select.style, { position: 'fixed', bottom: '0', left: '1rem', width: '16rem' });
+    const input = select.shadowRoot.querySelector('input');
+    input.focus();
+    const triggerTop = input.getBoundingClientRect().top;
+    const popup = select.shadowRoot.querySelector('[role="listbox"]');
+    const bounds = popup.getBoundingClientRect();
+    assert(bounds.top < triggerTop, 'popup should flip above the trigger');
+    assert(bounds.bottom <= window.innerHeight, 'popup should remain within the viewport');
+  });
+
+  it('keeps combobox keyboard focus on the input while moving the active option', () => {
+    const select = addElement('ui-select');
+    select.options = [{ label: 'Alpha', value: 'a' }, { label: 'Beta', value: 'b' }];
+    const input = select.shadowRoot.querySelector('input');
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const activeId = input.getAttribute('aria-activedescendant');
+    assert(activeId && select.shadowRoot.activeElement === input, 'combobox retains focus and exposes the active option');
   });
 
   it('changes tabs with arrow keys and emits the selected index', () => {
