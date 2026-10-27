@@ -31,7 +31,7 @@ const THEME_PRESETS = {
  * Global UniversalUI Engine Controller Namespace
  */
 const UniversalUI = {
-  version: '2.0.0-dist',
+  version: '2.1.0',
   currentTheme: 'warm-precision',
   presets: THEME_PRESETS,
 

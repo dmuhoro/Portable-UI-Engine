@@ -253,10 +253,11 @@ export class UITooltip extends HTMLElement {
       :host([placement="bottom"]) .tip { top: calc(100% + var(--spacing-2xs)); bottom: auto; }
       .tip[hidden] { display: none; }
     `, `<span id="trigger"><slot></slot></span><span id="tip" class="tip" role="tooltip" hidden></span>`);
-    const trigger = this.shadowRoot.querySelector('#trigger'); const tip = this.shadowRoot.querySelector('#tip');
+    const trigger = this.shadowRoot.querySelector('#trigger'); const slot = this.shadowRoot.querySelector('slot'); const tip = this.shadowRoot.querySelector('#tip');
     tip.textContent = this.getAttribute('text') || '';
-    const show = delay => { clearTimeout(this.timer); this.timer = window.setTimeout(() => { tip.hidden = false; trigger.setAttribute('aria-describedby', 'tip'); }, delay); };
-    const hide = () => { clearTimeout(this.timer); tip.hidden = true; trigger.removeAttribute('aria-describedby'); };
+    const describedTargets = () => slot.assignedElements({ flatten: true }).flatMap(element => [element, ...element.querySelectorAll('button, a[href], input, select, textarea, [tabindex]')]);
+    const show = delay => { clearTimeout(this.timer); this.timer = window.setTimeout(() => { tip.hidden = false; for (const target of describedTargets()) target.setAttribute('aria-describedby', 'tip'); }, delay); };
+    const hide = () => { clearTimeout(this.timer); tip.hidden = true; for (const target of describedTargets()) target.removeAttribute('aria-describedby'); };
     trigger.addEventListener('mouseenter', () => show(300)); trigger.addEventListener('mouseleave', hide);
     trigger.addEventListener('focusin', () => show(0)); trigger.addEventListener('focusout', hide);
   }
