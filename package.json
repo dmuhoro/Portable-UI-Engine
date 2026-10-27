@@ -25,7 +25,9 @@
     "build": "node build.js && vite build",
     "build:engine": "node build.js",
     "preview": "vite preview --port=3000 --host=0.0.0.0",
-    "test": "wtr tests/**/*.test.js --config web-test-runner.config.mjs",
+    "test": "npm run test:components && npm run test:showcases",
+    "test:components": "wtr tests/**/*.test.js --config web-test-runner.config.mjs",
+    "test:showcases": "node scripts/test-showcases.mjs",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
