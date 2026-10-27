@@ -1,6 +1,6 @@
 {
   "name": "@universal-ui/engine",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "main": "./dist/engine.min.js",
   "module": "./dist/engine.js",
@@ -12,6 +12,11 @@
     "./theme.css": "./theme.css",
     "./elements/*": "./elements/*"
   },
-  "files": ["dist/", "theme.css", "engine.js", "elements/"],
+  "files": [
+    "dist/",
+    "theme.css",
+    "engine.js",
+    "elements/"
+  ],
   "license": "MIT"
 }
