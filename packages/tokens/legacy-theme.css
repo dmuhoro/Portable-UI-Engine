@@ -254,5 +254,4 @@ body {
   color: var(--color-text-primary);
   line-height: var(--line-height-normal);
   -webkit-font-smoothing: antialiased;
-  transition: background-color var(--transition-normal), color var(--transition-normal);
 }

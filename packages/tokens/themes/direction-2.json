@@ -70,7 +70,7 @@
           "$type": "color"
         },
         "inverse": {
-          "$value": "#0B1120",
+          "$value": "#F8FAFC",
           "$type": "color"
         },
         "brand": {
@@ -160,11 +160,11 @@
           "$type": "color"
         },
         "danger": {
-          "$value": "#EF4444",
+          "$value": "#DC2626",
           "$type": "color"
         },
         "danger-subtle": {
-          "$value": "rgba(239, 68, 68, 0.15)",
+          "$value": "rgba(220, 38, 38, 0.15)",
           "$type": "color"
         },
         "info": {

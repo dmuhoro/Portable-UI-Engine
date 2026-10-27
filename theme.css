@@ -254,7 +254,6 @@ body {
   color: var(--color-text-primary);
   line-height: var(--line-height-normal);
   -webkit-font-smoothing: antialiased;
-  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 /* Generated token contract */
@@ -369,12 +368,8 @@ body {
   --color-bg-hover: var(--color-surface-sunken);
   --color-bg-active: var(--color-surface-sunken);
   --color-bg-stripe: var(--color-canvas-subtle);
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
   --color-text-muted: var(--color-text-tertiary);
-  --color-text-inverse: var(--color-text-inverse);
   --color-border: var(--color-border-subtle);
-  --color-border-strong: var(--color-border-strong);
   --color-success: var(--color-feedback-success);
   --color-success-bg: var(--color-feedback-success-subtle);
   --color-warning: var(--color-feedback-warning);
@@ -430,7 +425,7 @@ body {
   --color-text-primary: #F8FAFC;
   --color-text-secondary: #94A3B8;
   --color-text-tertiary: #64748B;
-  --color-text-inverse: #0B1120;
+  --color-text-inverse: #F8FAFC;
   --color-text-brand: #38BDF8;
   --color-brand-primary: #2563EB;
   --color-brand-hover: #1D4ED8;
@@ -451,8 +446,8 @@ body {
   --color-feedback-success-subtle: rgba(16, 185, 129, 0.15);
   --color-feedback-warning: #F59E0B;
   --color-feedback-warning-subtle: rgba(245, 158, 11, 0.15);
-  --color-feedback-danger: #EF4444;
-  --color-feedback-danger-subtle: rgba(239, 68, 68, 0.15);
+  --color-feedback-danger: #DC2626;
+  --color-feedback-danger-subtle: rgba(220, 38, 38, 0.15);
   --color-feedback-info: #38BDF8;
   --color-feedback-info-subtle: rgba(56, 189, 248, 0.15);
   --color-overlay-scrim: rgba(0, 0, 0, 0.48);
@@ -519,12 +514,8 @@ body {
   --color-bg-hover: var(--color-surface-sunken);
   --color-bg-active: var(--color-surface-sunken);
   --color-bg-stripe: var(--color-canvas-subtle);
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
   --color-text-muted: var(--color-text-tertiary);
-  --color-text-inverse: var(--color-text-inverse);
   --color-border: var(--color-border-subtle);
-  --color-border-strong: var(--color-border-strong);
   --color-success: var(--color-feedback-success);
   --color-success-bg: var(--color-feedback-success-subtle);
   --color-warning: var(--color-feedback-warning);
@@ -669,12 +660,8 @@ body {
   --color-bg-hover: var(--color-surface-sunken);
   --color-bg-active: var(--color-surface-sunken);
   --color-bg-stripe: var(--color-canvas-subtle);
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
   --color-text-muted: var(--color-text-tertiary);
-  --color-text-inverse: var(--color-text-inverse);
   --color-border: var(--color-border-subtle);
-  --color-border-strong: var(--color-border-strong);
   --color-success: var(--color-feedback-success);
   --color-success-bg: var(--color-feedback-success-subtle);
   --color-warning: var(--color-feedback-warning);
@@ -823,12 +810,8 @@ body {
   --color-bg-hover: var(--color-surface-sunken);
   --color-bg-active: var(--color-surface-sunken);
   --color-bg-stripe: var(--color-canvas-subtle);
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
   --color-text-muted: var(--color-text-tertiary);
-  --color-text-inverse: var(--color-text-inverse);
   --color-border: var(--color-border-subtle);
-  --color-border-strong: var(--color-border-strong);
   --color-success: var(--color-feedback-success);
   --color-success-bg: var(--color-feedback-success-subtle);
   --color-warning: var(--color-feedback-warning);
@@ -977,12 +960,8 @@ body {
   --color-bg-hover: var(--color-surface-sunken);
   --color-bg-active: var(--color-surface-sunken);
   --color-bg-stripe: var(--color-canvas-subtle);
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
   --color-text-muted: var(--color-text-tertiary);
-  --color-text-inverse: var(--color-text-inverse);
   --color-border: var(--color-border-subtle);
-  --color-border-strong: var(--color-border-strong);
   --color-success: var(--color-feedback-success);
   --color-success-bg: var(--color-feedback-success-subtle);
   --color-warning: var(--color-feedback-warning);

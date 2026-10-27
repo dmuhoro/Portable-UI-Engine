@@ -79,7 +79,7 @@ const themeAliases = {
 function declarations(tokens) {
   const lines = Object.entries(tokens).map(([name, value]) => `  --${name}: ${value};`);
   for (const [alias, source] of Object.entries(legacyAliases)) {
-    if (tokens[source] !== undefined) lines.push(`  ${alias}: var(--${source});`);
+    if (tokens[source] !== undefined && alias !== `--${source}`) lines.push(`  ${alias}: var(--${source});`);
   }
   for (const [name, value] of Object.entries(tokens)) {
     if (name.startsWith('spacing-')) lines.push(`  --space-${name.slice('spacing-'.length)}: ${value};`);
