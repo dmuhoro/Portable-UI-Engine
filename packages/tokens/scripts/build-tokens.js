@@ -1,76 +1,104 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, '..');
-const tokens = JSON.parse(readFileSync(join(root, 'design-tokens.json'), 'utf8'));
+const directory = dirname(fileURLToPath(import.meta.url));
+const packageRoot = join(directory, '..');
+const repoRoot = join(packageRoot, '..', '..');
 
-function extractVars(obj, prefix = '') {
-  const result = {};
-  for (const key in obj) {
-    if (key.startsWith('$')) continue;
-    const val = obj[key];
-    if (val && typeof val === 'object') {
-      if ('$value' in val) {
-        result[prefix ? prefix + '-' + key : key] = val.$value;
-      } else {
-        Object.assign(result, extractVars(val, prefix ? prefix + '-' + key : key));
-      }
-    }
+function flatten(value, prefix = '', result = {}) {
+  for (const [key, item] of Object.entries(value)) {
+    if (key.startsWith('$') || key === 'theme') continue;
+    const name = prefix ? `${prefix}-${key}` : key;
+    if (item && typeof item === 'object' && '$value' in item) result[name] = item.$value;
+    else if (item && typeof item === 'object') flatten(item, name, result);
   }
   return result;
 }
 
-const vars = extractVars(tokens);
-mkdirSync(join(root, 'css'), { recursive: true });
-mkdirSync(join(root, 'ts'), { recursive: true });
+const primaryTheme = JSON.parse(readFileSync(join(packageRoot, 'design-tokens.json'), 'utf8'));
+const themes = [
+  { selector: 'warm-precision', tokens: flatten(primaryTheme.tokens) },
+];
+for (const filename of ['direction-2.json', 'direction-3.json']) {
+  const theme = JSON.parse(readFileSync(join(packageRoot, 'themes', filename), 'utf8'));
+  themes.push({ selector: theme.theme, tokens: flatten(theme.tokens) });
+}
 
-// Mapping from flattened token keys to CSS custom properties
-const cssMap = {
-  'color-brand-primary': '--color-primary',
-  'color-brand-primaryHover': '--color-primary-hover',
-  'color-surface-background': '--color-bg',
-  'color-surface-panel': '--color-panel',
-  'color-text-primary': '--color-text',
-  'color-text-secondary': '--color-text-secondary',
-  'color-border': '--color-border',
-  'color-success': '--color-success',
-  'color-warning': '--color-warning',
-  'color-danger': '--color-danger',
+const legacyAliases = {
+  '--color-primary': 'color-brand-primary',
+  '--color-primary-hover': 'color-brand-hover',
+  '--color-bg-app': 'color-canvas-default',
+  '--color-bg-surface': 'color-surface-base',
+  '--color-bg-surface-elevated': 'color-surface-raised',
+  '--color-bg-hover': 'color-surface-sunken',
+  '--color-bg-active': 'color-surface-sunken',
+  '--color-bg-stripe': 'color-canvas-subtle',
+  '--color-text-primary': 'color-text-primary',
+  '--color-text-secondary': 'color-text-secondary',
+  '--color-text-muted': 'color-text-tertiary',
+  '--color-text-inverse': 'color-text-inverse',
+  '--color-border': 'color-border-subtle',
+  '--color-border-strong': 'color-border-strong',
+  '--color-success': 'color-feedback-success',
+  '--color-success-bg': 'color-feedback-success-subtle',
+  '--color-warning': 'color-feedback-warning',
+  '--color-warning-bg': 'color-feedback-warning-subtle',
+  '--color-danger': 'color-feedback-danger',
+  '--color-danger-bg': 'color-feedback-danger-subtle',
+  '--color-accent': 'color-brand-primary',
+  '--font-sans': 'typography-family-body',
+  '--font-mono': 'typography-family-mono',
+  '--font-size-xs': 'typography-scale-xs',
+  '--font-size-sm': 'typography-scale-sm',
+  '--font-size-base': 'typography-scale-base',
+  '--font-size-lg': 'typography-scale-lg',
+  '--font-size-xl': 'typography-scale-xl',
+  '--font-size-2xl': 'typography-scale-2xl',
+  '--font-size-3xl': 'typography-scale-3xl',
+  '--font-weight-normal': 'typography-weight-regular',
+  '--font-weight-medium': 'typography-weight-medium',
+  '--font-weight-semibold': 'typography-weight-semibold',
+  '--font-weight-bold': 'typography-weight-bold',
+  '--line-height-tight': 'typography-lineHeight-tight',
+  '--line-height-normal': 'typography-lineHeight-normal',
+  '--line-height-relaxed': 'typography-lineHeight-relaxed',
+  '--shadow-sm': 'elevation-sm',
+  '--shadow-md': 'elevation-md',
+  '--shadow-lg': 'elevation-lg',
+  '--transition-fast': 'motion-duration-fast',
+  '--transition-normal': 'motion-duration-normal',
 };
 
-// Generate CSS
-let css = ':root {\n';
-for (const [k, v] of Object.entries(vars)) {
-  const mapped = cssMap[k] || null;
-  if (mapped) {
-    css += `  ${mapped}: ${v};\n`;
-  } else if (k.startsWith('spacing-')) {
-    const size = k.split('-')[1];
-    css += `  --space-${size}: ${v};\n`;
-  } else if (k.startsWith('radius-')) {
-    const size = k.split('-')[1];
-    css += `  --radius-${size}: ${v};\n`;
-  } else if (k.startsWith('typography-fontSans')) {
-    css += `  --font-sans: ${v};\n`;
-  } else if (k.startsWith('typography-sizeBase')) {
-    css += `  --text-base: ${v};\n`;
-  } else if (k.startsWith('typography-sizeSm')) {
-    css += `  --text-sm: ${v};\n`;
-  } else if (k.startsWith('typography-sizeLg')) {
-    css += `  --text-lg: ${v};\n`;
+function declarations(tokens) {
+  const lines = Object.entries(tokens).map(([name, value]) => `  --${name}: ${value};`);
+  for (const [alias, source] of Object.entries(legacyAliases)) {
+    if (tokens[source] !== undefined) lines.push(`  ${alias}: var(--${source});`);
   }
+  for (const [name, value] of Object.entries(tokens)) {
+    if (name.startsWith('spacing-')) lines.push(`  --space-${name.slice('spacing-'.length)}: ${value};`);
+  }
+  return lines.join('\n');
 }
-css += '}\n';
-writeFileSync(join(root, 'css/variables.css'), css);
 
-// Generate TypeScript
-let ts = 'export const cssVariables = {\n';
-for (const [k, v] of Object.entries(vars)) {
-  ts += `  '${k}': '${v}',\n`;
-}
-ts += '} as const;\n\nexport const tokens = cssVariables;\nexport type TokenKey = keyof typeof cssVariables;\n';
-writeFileSync(join(root, 'ts/tokens.ts'), ts);
+const css = [
+  '/* Generated by packages/tokens/scripts/build-tokens.js. Do not edit. */',
+  ':root {', declarations(themes[0].tokens), '}',
+  ...themes.slice(1).flatMap(({ selector, tokens }) => [`[data-theme="${selector}"] {`, declarations(tokens), '}']),
+  '',
+].join('\n');
 
-console.log('Tokens built successfully');
+const typeSource = `/* Generated by packages/tokens/scripts/build-tokens.js. Do not edit. */\n` +
+  `export const tokens = ${JSON.stringify(themes[0].tokens, null, 2)} as const;\n\n` +
+  `export type TokenKey = keyof typeof tokens;\n`;
+
+mkdirSync(join(packageRoot, 'css'), { recursive: true });
+mkdirSync(join(packageRoot, 'ts'), { recursive: true });
+writeFileSync(join(packageRoot, 'css/variables.css'), css);
+writeFileSync(join(packageRoot, 'ts/tokens.ts'), typeSource);
+
+const existingTheme = readFileSync(join(repoRoot, 'theme.css'), 'utf8')
+  .replace(/^\/\* Generated token contract \*\/\n[\s\S]*?\n\n/, '');
+writeFileSync(join(repoRoot, 'theme.css'), `/* Generated token contract */\n${css}\n${existingTheme}`);
+writeFileSync(join(packageRoot, '..', 'engine', 'theme.css'), `/* Generated token contract */\n${css}\n${existingTheme}`);
+console.log(`Generated ${Object.keys(themes[0].tokens).length} tokens across ${themes.length} themes.`);
