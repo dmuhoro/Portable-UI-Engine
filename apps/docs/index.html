@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Portable UI Engine component gallery and token inspector">
+  <link rel="icon" href="../../assets/portable-ui-mark.svg" type="image/svg+xml">
+  <title>Portable UI Engine — Component Gallery</title>
+  <link rel="stylesheet" href="../../theme.css">
+  <link rel="stylesheet" href="./docs.css">
+  <script type="module" src="../../engine.js"></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Portable UI Engine home">PUI<span> / </span>Components</a>
+    <nav aria-label="Main navigation"><a href="#gallery">Gallery</a><a href="../teardown-lab/">Teardown Lab</a><a href="../run-theater/">Run Theater</a></nav>
+    <div class="top-actions"><label class="theme-label" for="theme">Theme</label><select id="theme"><option value="warm-precision">Warm Precision</option><option value="technical-oceanic">Technical Oceanic</option><option value="swiss-minimalist">Swiss Minimalist</option></select><button id="inspector-toggle" type="button">Inspect tokens</button></div>
+  </header>
+  <main>
+    <section class="intro"><p class="eyebrow">PORTABLE UI ENGINE · DESIGN SYSTEM</p><h1>Small, sturdy building blocks<br>for the open web.</h1><p>Framework-independent Web Components with scoped styles, clear contracts, and accessible interaction patterns.</p><a class="text-link" href="../../README.md">Read the integration guide <span aria-hidden="true">→</span></a></section>
+    <section id="gallery" aria-labelledby="gallery-title">
+      <div class="section-heading"><div><p class="eyebrow">THE LIBRARY</p><h2 id="gallery-title">Component gallery</h2></div><p id="component-count" aria-live="polite">9 components</p></div>
+      <div class="filters"><label class="search-label" for="search">Search components<input id="search" type="search" placeholder="Try “dialog” or “keyboard”"></label><div class="category-filter" role="group" aria-label="Filter by category"><button type="button" data-filter="all" aria-pressed="true">All</button><button type="button" data-filter="form" aria-pressed="false">Forms</button><button type="button" data-filter="feedback" aria-pressed="false">Feedback</button><button type="button" data-filter="navigation" aria-pressed="false">Navigation</button></div></div>
+      <div class="component-grid" id="components">
+        <article class="component-card" data-category="form" data-search="button action primary secondary outline ghost danger click"><div class="card-heading"><div><span class="tag">FORM</span><h3>Button</h3></div><code>&lt;ui-button&gt;</code></div><div class="preview button-preview"><ui-button>Save changes</ui-button><ui-button variant="secondary">Cancel</ui-button><ui-button variant="danger">Delete</ui-button></div><p>Five visual variants, disabled state, and a composed <code>ui-button-click</code> event.</p></article>
+        <article class="component-card" data-category="form" data-search="input field validation label email clear"><div class="card-heading"><div><span class="tag">FORM</span><h3>Input</h3></div><code>&lt;ui-input&gt;</code></div><div class="preview"><ui-input label="Workspace name" name="workspace" placeholder="e.g. Northstar" value="Northstar" clearable></ui-input></div><p>Native input semantics with labels, validation state, and <code>ui-input-change</code>.</p></article>
+        <article class="component-card" data-category="form" data-search="checkbox indeterminate batch selection"><div class="card-heading"><div><span class="tag">FORM</span><h3>Checkbox</h3></div><code>&lt;ui-checkbox&gt;</code></div><div class="preview"><ui-checkbox label="Send me product updates" checked></ui-checkbox></div><p>Binary and indeterminate states with an expanded touch target.</p></article>
+        <article class="component-card" data-category="form" data-search="select combobox searchable keyboard arrow"><div class="card-heading"><div><span class="tag">FORM</span><h3>Select</h3></div><code>&lt;ui-select&gt;</code></div><div class="preview"><ui-select id="demo-select" label="Region" placeholder="Choose a region"></ui-select></div><p>Searchable listbox with arrow-key navigation and selection events.</p></article>
+        <article class="component-card" data-category="feedback" data-search="dialog modal focus escape"><div class="card-heading"><div><span class="tag">FEEDBACK</span><h3>Dialog</h3></div><code>&lt;ui-dialog&gt;</code></div><div class="preview"><ui-button id="open-dialog" variant="outline">Preview dialog</ui-button><ui-dialog id="demo-dialog" label="Deployment ready"><p>Your settings are ready to apply.</p><ui-button id="close-dialog">Continue</ui-button></ui-dialog></div><p>Native top-layer dialog with modal focus management and Escape dismissal.</p></article>
+        <article class="component-card" data-category="feedback" data-search="tooltip help hover focus"><div class="card-heading"><div><span class="tag">FEEDBACK</span><h3>Tooltip</h3></div><code>&lt;ui-tooltip&gt;</code></div><div class="preview"><ui-tooltip text="The token is inherited into the component shadow root."><ui-button variant="ghost">What is this?</ui-button></ui-tooltip></div><p>Delayed pointer reveal and immediate keyboard focus reveal.</p></article>
+        <article class="component-card" data-category="feedback" data-search="toast notification alert status dismiss live"><div class="card-heading"><div><span class="tag">FEEDBACK</span><h3>Toast</h3></div><code>&lt;ui-toast&gt;</code></div><div class="preview"><ui-toast id="demo-toast" message="Changes saved" duration="0" hidden></ui-toast><ui-button id="show-toast" variant="secondary">Show toast</ui-button></div><p>Live-region notification with dismiss control and pause on hover or focus.</p></article>
+        <article class="component-card" data-category="navigation" data-search="tabs segmented underline roving tabindex"><div class="card-heading"><div><span class="tag">NAVIGATION</span><h3>Tabs</h3></div><code>&lt;ui-tabs&gt;</code></div><div class="preview"><ui-tabs id="demo-tabs" variant="segmented"></ui-tabs></div><p>Roving tabindex, arrow-key navigation, and responsive overflow.</p></article>
+        <article class="component-card" data-category="navigation" data-search="menu dropdown shortcut keyboard"><div class="card-heading"><div><span class="tag">NAVIGATION</span><h3>Menu</h3></div><code>&lt;ui-menu&gt;</code></div><div class="preview"><ui-menu id="demo-menu" label="Workspace actions"></ui-menu></div><p>Keyboard-operable action menu with shortcuts and separators.</p></article>
+      </div>
+      <p id="empty-state" hidden>No components match this search.</p>
+    </section>
+  </main>
+  <aside id="inspector" class="inspector" aria-labelledby="inspector-title" hidden><div class="inspector-head"><div><p class="eyebrow">LIVE VALUES</p><h2 id="inspector-title">Token inspector</h2></div><button id="inspector-close" type="button" aria-label="Close token inspector">×</button></div><label for="token-filter">Filter tokens<input id="token-filter" type="search" placeholder="Search CSS variables"></label><ul id="token-list"></ul><button id="copy-tokens" type="button">Copy visible tokens</button><p id="copy-status" role="status" aria-live="polite"></p></aside>
+</body>
+</html>
