@@ -1,4 +1,7 @@
 import '../elements/ui-primitives.js';
+import 'axe-core/axe.min.js';
+
+const axe = window.axe;
 
 function assert(condition, message = 'assertion failed') {
   if (!condition) throw new Error(message);
@@ -17,6 +20,16 @@ describe('Portable UI primitives', () => {
   it('registers all design brief elements', () => {
     for (const tag of ['ui-button', 'ui-input', 'ui-checkbox', 'ui-select', 'ui-dialog', 'ui-tooltip', 'ui-toast', 'ui-tabs', 'ui-menu']) {
       assert(Boolean(customElements.get(tag)), `${tag} is registered`);
+    }
+  });
+
+  it('ships visible focus and reduced-motion rules for every primitive', () => {
+    const tags = ['ui-button', 'ui-input', 'ui-checkbox', 'ui-select', 'ui-dialog', 'ui-tooltip', 'ui-toast', 'ui-tabs', 'ui-menu'];
+    for (const tag of tags) {
+      const element = addElement(tag);
+      const styles = element.shadowRoot.querySelector('style').textContent;
+      assert(styles.includes(':focus-visible'), `${tag} has a visible keyboard focus indicator`);
+      assert(styles.includes('prefers-reduced-motion: reduce'), `${tag} respects reduced motion preferences`);
     }
   });
 
@@ -137,5 +150,30 @@ describe('Portable UI primitives', () => {
     menu.shadowRoot.querySelector('button[aria-haspopup="menu"]').click();
     menu.shadowRoot.querySelector('[role="menuitem"]').click();
     assert(value === 'settings');
+  });
+
+  it('passes axe core WCAG A and AA rules on the primitive gallery', async () => {
+    const fixture = document.createElement('section');
+    fixture.innerHTML = `
+      <ui-button>Save</ui-button>
+      <ui-input label="Email" name="email"></ui-input>
+      <ui-checkbox label="Subscribe" name="subscribe"></ui-checkbox>
+      <ui-select label="Region"></ui-select>
+      <ui-dialog label="Confirm"><p>Continue?</p></ui-dialog>
+      <ui-tooltip text="Helpful information"><button type="button">Help</button></ui-tooltip>
+      <ui-toast message="Saved" hidden></ui-toast>
+      <ui-tabs></ui-tabs>
+      <ui-menu label="Actions"></ui-menu>
+    `;
+    document.body.append(fixture);
+    fixture.querySelector('ui-select').options = [{ label: 'East', value: 'east' }];
+    fixture.querySelector('ui-tabs').items = [{ label: 'Overview', content: 'Summary' }];
+    fixture.querySelector('ui-menu').items = [{ label: 'Edit', value: 'edit' }];
+    const report = await axe.run(fixture, {
+      runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] },
+      rules: { 'color-contrast': { enabled: false } },
+    });
+    const violations = report.violations.map(issue => `${issue.id}: ${issue.nodes.map(node => node.target.join(' ')).join(', ')}`);
+    assert(violations.length === 0, violations.join('\n'));
   });
 });

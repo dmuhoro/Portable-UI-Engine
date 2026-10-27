@@ -5,10 +5,10 @@ a { color: inherit; }
 :focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: var(--border-focus-width); }
 .topbar { position: sticky; z-index: 2; top: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); min-height: var(--header-height); padding-inline: var(--spacing-xl); border-bottom: 1px solid var(--color-border); background: var(--color-bg-surface); }
 .brand { font-weight: var(--font-weight-bold); text-decoration: none; white-space: nowrap; }
-.brand span, .eyebrow { color: var(--color-primary); }
+.brand span, .eyebrow { color: var(--color-border-focus); }
 nav, .top-actions { display: flex; align-items: center; gap: var(--spacing-md); }
 nav a { color: var(--color-text-secondary); text-decoration: none; }
-nav a:hover, .text-link:hover { color: var(--color-primary); }
+nav a:hover, .text-link:hover { color: var(--color-border-focus); }
 .top-actions { gap: var(--spacing-xs); }
 .top-actions select, .top-actions button, .category-filter button, .inspector button { min-height: var(--interaction-target-min); padding-inline: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-surface); color: var(--color-text-primary); cursor: pointer; }
 main { width: min(100% - var(--spacing-xl) * 2, 80rem); margin-inline: auto; }
@@ -17,7 +17,7 @@ main { width: min(100% - var(--spacing-xl) * 2, 80rem); margin-inline: auto; }
 h1, h2, h3, p { margin-top: 0; }
 h1 { max-width: 52rem; margin-bottom: var(--spacing-md); font-size: clamp(var(--font-size-3xl), 6vw, 4rem); line-height: var(--line-height-tight); letter-spacing: var(--typography-tracking-tight); }
 .intro > p:not(.eyebrow) { max-width: 42rem; color: var(--color-text-secondary); font-size: var(--font-size-lg); line-height: var(--line-height-relaxed); }
-.text-link { color: var(--color-primary); font-weight: var(--font-weight-semibold); }
+.text-link { color: var(--color-border-focus); font-weight: var(--font-weight-semibold); }
 #gallery { padding-block-end: var(--spacing-3xl); }
 .section-heading, .card-heading, .inspector-head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); }
 .section-heading h2 { margin-bottom: 0; }

@@ -5,13 +5,13 @@ a { color: inherit; }
 :focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: var(--border-focus-width); }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); min-height: var(--header-height); padding: var(--spacing-sm) var(--spacing-xl); border-bottom: 1px solid var(--color-border); background: var(--color-bg-surface); }
 .topbar > a { font-weight: var(--font-weight-bold); text-decoration: none; }
-.topbar span { color: var(--color-primary); }
+.topbar span { color: var(--color-border-focus); }
 nav { display: flex; gap: var(--spacing-md); }
 nav a { color: var(--color-text-secondary); }
 .topbar > button, .comparison-switch button { min-height: var(--interaction-target-min); padding-inline: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-surface); color: var(--color-text-primary); cursor: pointer; }
 main { width: min(calc(100% - var(--spacing-xl) * 2), 88rem); margin-inline: auto; padding-block-end: var(--spacing-3xl); }
 .audit-heading { padding-block: var(--spacing-2xl) var(--spacing-lg); }
-.eyebrow { margin: 0 0 var(--spacing-xs); color: var(--color-primary); font-family: var(--font-mono); font-size: var(--font-size-xs); letter-spacing: var(--typography-tracking-wide); }
+.eyebrow { margin: 0 0 var(--spacing-xs); color: var(--color-border-focus); font-family: var(--font-mono); font-size: var(--font-size-xs); letter-spacing: var(--typography-tracking-wide); }
 h1, h2, h3, p { margin-top: 0; }
 .audit-heading h1 { margin-bottom: var(--spacing-xs); font-size: var(--font-size-3xl); }
 .audit-heading > p:not(.eyebrow) { max-width: 58rem; color: var(--color-text-secondary); line-height: var(--line-height-relaxed); }
@@ -23,7 +23,7 @@ h1, h2, h3, p { margin-top: 0; }
 .scorecard { position: sticky; top: var(--spacing-md); }
 .scorecard h2, .panel-heading h2 { margin-bottom: var(--spacing-xs); font-size: var(--font-size-lg); }
 #score { display: block; margin-block: var(--spacing-md); font-family: var(--font-mono); font-size: var(--font-size-3xl); font-variant-numeric: tabular-nums; }
-#grade { color: var(--color-primary); font-weight: var(--font-weight-semibold); }
+#grade { color: var(--color-border-focus); font-weight: var(--font-weight-semibold); }
 dl { margin-block: var(--spacing-lg); }
 dl div { display: flex; justify-content: space-between; gap: var(--spacing-sm); padding-block: var(--spacing-xs); border-top: 1px solid var(--color-border); }
 dt { color: var(--color-text-secondary); }

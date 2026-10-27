@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { puppeteerCore } from '@web/test-runner-chrome';
 
@@ -15,12 +16,22 @@ try {
   if (!ready) throw new Error('Vite showcase server did not start.');
   browser = await puppeteerCore.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
 
+  async function checkAccessibility(page, route) {
+    const violations = await page.evaluate(async () => {
+      const result = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] } });
+      return result.violations.map(issue => `${issue.id}: ${issue.nodes.map(node => `${node.target.join(' ')} ${node.failureSummary || ''}`).join('\n')}`);
+    });
+    if (violations.length) throw new Error(`${route} accessibility violations:\n${violations.join('\n')}`);
+  }
+
   async function pageAt(route, check) {
     const page = await browser.newPage();
     page.on('pageerror', error => failures.push(`${route}: ${error.message}`));
     page.on('console', message => { if (message.type() === 'error') failures.push(`${route}: ${message.text()}`); });
     await page.goto(`http://127.0.0.1:4173${route}`, { waitUntil: 'networkidle0' });
     await page.waitForFunction(() => window.UniversalUI?.getRegisteredComponents().includes('ui-button'));
+    await page.addScriptTag({ path: path.resolve('node_modules/axe-core/axe.min.js') });
+    await checkAccessibility(page, route);
     await check(page);
     await page.close();
   }
@@ -35,6 +46,12 @@ try {
     await page.click('#inspector-close');
     await page.select('#theme', 'technical-oceanic');
     if (await page.$eval('html', element => element.dataset.theme) !== 'technical-oceanic') throw new Error('Theme switch did not update the active theme.');
+    await new Promise(resolve => setTimeout(resolve, 250));
+    await checkAccessibility(page, '/apps/docs/ (Technical Oceanic)');
+    await page.select('#theme', 'swiss-minimalist');
+    await new Promise(resolve => setTimeout(resolve, 250));
+    await checkAccessibility(page, '/apps/docs/ (Swiss Minimalist)');
+    await page.select('#theme', 'warm-precision');
     await page.click('#search', { clickCount: 3 });
     await page.keyboard.press('Backspace');
     await page.click('#open-dialog');

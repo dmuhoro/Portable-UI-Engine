@@ -38,7 +38,7 @@ main { width: min(calc(100% - var(--spacing-xl) * 2), 96rem); margin-inline: aut
 .log-panel .panel-head > button { min-height: var(--interaction-target-min); padding-inline: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-surface); color: var(--color-text-primary); cursor: pointer; }
 .logs { display: flex; flex-direction: column; gap: var(--spacing-2xs); height: 20rem; overflow: auto; padding: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-app); color: var(--color-text-secondary); font-family: var(--font-mono); font-size: var(--font-size-xs); }
 .log-line { display: grid; grid-template-columns: auto auto 1fr; gap: var(--spacing-xs); }
-.log-line time { color: var(--color-text-muted); }
+.log-line time { color: var(--color-text-secondary); }
 .log-line[data-level="WARN"] strong { color: var(--color-feedback-warning); }
 .log-line[data-level="ERROR"] strong { color: var(--color-feedback-danger); }
 .nodes .panel-head { align-items: end; }
