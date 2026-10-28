@@ -317,24 +317,28 @@ export class UIDialog extends HTMLElement {
 
 export class UITooltip extends HTMLElement {
   static observedAttributes = ['text', 'placement'];
-  constructor() { super(); this.attachShadow({ mode: 'open' }); this.timer = 0; }
+  constructor() { super(); this.attachShadow({ mode: 'open' }); this.timer = 0; this._tipId = `tip-${Math.random().toString(36).slice(2, 6)}`; }
   connectedCallback() { this.render(); }
   attributeChangedCallback(_name, oldValue, newValue) { if (this.isConnected && oldValue !== newValue && !this._reflecting) this.render(); }
   disconnectedCallback() { clearTimeout(this.timer); }
   render() {
     mount(this, `
-      :host { position: relative; }
-      .tip { position: absolute; z-index: var(--layer-tooltip); bottom: calc(100% + var(--spacing-2xs)); left: 50%; transform: translateX(-50%); width: max-content; max-width: var(--component-tooltip-max-width); padding: var(--spacing-2xs) var(--spacing-xs); border-radius: var(--radius-xs); background: var(--color-surface-inverse); color: var(--color-text-inverse); font-size: var(--font-size-xs); pointer-events: none; }
+      :host { position: relative; font-family: var(--typography-family-body, var(--font-sans)); }
+      .tip { position: absolute; z-index: var(--layer-tooltip); bottom: calc(100% + var(--spacing-2xs)); left: 50%; transform: translateX(-50%); width: max-content; max-width: var(--component-tooltip-max-width, 280px); padding: var(--spacing-2xs) var(--spacing-xs); border-radius: var(--radius-xs); background: var(--color-surface-inverse, #1C1917); color: var(--color-text-inverse, #FFFFFF); font-size: var(--font-size-xs); pointer-events: none; white-space: normal; }
       :host([placement="bottom"]) .tip { top: calc(100% + var(--spacing-2xs)); bottom: auto; }
+      :host([placement="left"]) .tip { right: calc(100% + var(--spacing-2xs)); left: auto; bottom: 50%; transform: translateY(50%); }
+      :host([placement="right"]) .tip { left: calc(100% + var(--spacing-2xs)); bottom: 50%; transform: translateY(50%); }
       .tip[hidden] { display: none; }
-    `, `<span id="trigger"><slot></slot></span><span id="tip" class="tip" role="tooltip" hidden></span>`);
-    const trigger = this.shadowRoot.querySelector('#trigger'); const slot = this.shadowRoot.querySelector('slot'); const tip = this.shadowRoot.querySelector('#tip');
+      @media (prefers-reduced-motion: reduce) { .tip { transition: none !important; } }
+    `, `<span id="trigger"><slot></slot></span><span id="${this._tipId}" class="tip" role="tooltip" hidden></span>`);
+    const trigger = this.shadowRoot.querySelector('#trigger'); const slot = this.shadowRoot.querySelector('slot'); const tip = this.shadowRoot.querySelector('.tip');
     tip.textContent = this.getAttribute('text') || '';
-    const describedTargets = () => slot.assignedElements({ flatten: true }).flatMap(element => [element, ...element.querySelectorAll('button, a[href], input, select, textarea, [tabindex]')]);
-    const show = delay => { clearTimeout(this.timer); this.timer = window.setTimeout(() => { tip.hidden = false; for (const target of describedTargets()) target.setAttribute('aria-describedby', 'tip'); }, delay); };
+    const describedTargets = () => slot.assignedElements({ flatten: true }).flatMap(element => [element, ...element.querySelectorAll('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"]), [role="button"]')]);
+    const show = delay => { clearTimeout(this.timer); this.timer = window.setTimeout(() => { tip.hidden = false; for (const target of describedTargets()) target.setAttribute('aria-describedby', this._tipId); }, delay); };
     const hide = () => { clearTimeout(this.timer); tip.hidden = true; for (const target of describedTargets()) target.removeAttribute('aria-describedby'); };
     trigger.addEventListener('mouseenter', () => show(300)); trigger.addEventListener('mouseleave', hide);
     trigger.addEventListener('focusin', () => show(0)); trigger.addEventListener('focusout', hide);
+    trigger.addEventListener('touchstart', hide, { passive: true });
   }
 }
 
