@@ -78,7 +78,7 @@ export class UIButton extends HTMLElement {
 
 export class UIInput extends HTMLElement {
   static formAssociated = true;
-  static observedAttributes = ['label', 'value', 'type', 'placeholder', 'disabled', 'required', 'error', 'name', 'clearable', 'aria-label'];
+  static observedAttributes = ['label', 'value', 'type', 'placeholder', 'disabled', 'required', 'error', 'name', 'clearable', 'aria-label', 'help', 'maxlength'];
   constructor() { super(); this.attachShadow({ mode: 'open' }); this._value = ''; this._formDisabled = false; try { this._internals = this.attachInternals(); } catch { this._internals = null; } }
   connectedCallback() { this.render(); }
   attributeChangedCallback(name, _old, value) {
@@ -88,25 +88,35 @@ export class UIInput extends HTMLElement {
   get value() { return this.shadowRoot.querySelector('input')?.value ?? this._value; }
   set value(value) { this._value = String(value ?? ''); if (this.isConnected) this.render(); }
   render() {
-    const id = escapeMarkup(`field-${this.getAttribute('name') || 'input'}`);
+    const id = escapeMarkup(`field-${this.getAttribute('name') || 'input'}-${Math.random().toString(36).slice(2, 6)}`);
     const label = this.getAttribute('label') || '';
     const error = this.getAttribute('error') || '';
+    const help = this.getAttribute('help') || '';
+    const hasValue = Boolean(this._value || this.getAttribute('value'));
     mount(this, `
-      :host { position: relative; display: block; }
-      label { display: grid; gap: var(--spacing-2xs); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
-      input { width: 100%; min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-base); color: var(--color-text-primary); }
+      :host { position: relative; display: block; font-family: var(--typography-family-body, var(--font-sans)); }
+      .wrapper { display: grid; gap: var(--spacing-2xs); }
+      .label { color: var(--color-text-secondary); font-size: var(--font-size-sm); font-weight: var(--typography-weight-medium, 500); }
+      .field-wrap { position: relative; display: flex; align-items: center; gap: var(--spacing-2xs); }
+      input { width: 100%; min-height: 44px; padding: var(--spacing-xs) var(--spacing-sm); padding-inline-end: ${this.hasAttribute('clearable') ? 'calc(var(--interaction-target-min) + var(--spacing-xs))' : 'var(--spacing-sm)'}; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-base); color: var(--color-text-primary); font-size: var(--typography-scale-sm, var(--font-size-sm)); }
+      input::placeholder { color: var(--color-text-tertiary); }
+      input:hover:not(:disabled) { border-color: var(--color-border-default); }
+      input:focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: 2px; }
       input[aria-invalid="true"] { border-color: var(--color-feedback-danger); }
+      input:disabled { opacity: 0.45; cursor: not-allowed; }
       .error { color: var(--color-feedback-danger); font-size: var(--font-size-xs); }
-      .field-wrap { display: flex; align-items: center; gap: var(--spacing-2xs); }
-      .field-wrap input { flex: 1; min-width: 0; }
-      .clear { min-width: var(--interaction-target-min); min-height: var(--interaction-target-min); border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; }
-    `, `<label>${label ? `<span>${escapeMarkup(label)}</span>` : ''}<span class="field-wrap"><input id="${id}" type="${escapeMarkup(this.getAttribute('type') || 'text')}" name="${escapeMarkup(this.getAttribute('name') || '')}" placeholder="${escapeMarkup(this.getAttribute('placeholder') || '')}" aria-label="${escapeMarkup(this.getAttribute('aria-label') || label || 'Text input')}" aria-invalid="${Boolean(error)}" ${error ? `aria-describedby="${id}-error"` : ''} ${this.hasAttribute('required') ? 'required' : ''} ${this.hasAttribute('disabled') || this._formDisabled ? 'disabled' : ''} />${this.hasAttribute('clearable') ? '<button class="clear" type="button" aria-label="Clear value">×</button>' : ''}</span>${error ? `<span class="error" id="${id}-error" role="alert">${escapeMarkup(error)}</span>` : ''}</label>`);
+      .help { color: var(--color-text-tertiary); font-size: var(--font-size-xs); }
+      .clear { position: absolute; right: var(--spacing-2xs); min-width: var(--interaction-target-min); min-height: var(--interaction-target-min); border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; color: var(--color-text-secondary); touch-action: manipulation; }
+      .clear:hover { background: var(--color-surface-sunken); }
+      slot[name="icon-start"], slot[name="icon-end"] { display: inline-flex; align-items: center; color: var(--color-text-secondary); }
+      @media (prefers-reduced-motion: reduce) { input, .clear { transition: none !important; } }
+    `, `<div class="wrapper"><label class="label" for="${id}">${label ? escapeMarkup(label) : '<slot name="label"></slot>'}</label><div class="field-wrap"><slot name="icon-start"></slot><input id="${id}" type="${escapeMarkup(this.getAttribute('type') || 'text')}" name="${escapeMarkup(this.getAttribute('name') || '')}" placeholder="${escapeMarkup(this.getAttribute('placeholder') || '')}" aria-label="${escapeMarkup(this.getAttribute('aria-label') || label || 'Text input')}" aria-invalid="${Boolean(error)}" ${error ? `aria-describedby="${id}-error ${id}-help"` : help ? `aria-describedby="${id}-help"` : ''} ${this.hasAttribute('required') ? 'required' : ''} ${this.hasAttribute('disabled') || this._formDisabled ? 'disabled' : ''} ${this.getAttribute('maxlength') ? `maxlength="${escapeMarkup(this.getAttribute('maxlength'))}"` : ''} /><slot name="icon-end"></slot>${this.hasAttribute('clearable') && hasValue ? `<button class="clear" type="button" aria-label="Clear value">×</button>` : ''}</div>${error ? `<span class="error" id="${id}-error" role="alert">${escapeMarkup(error)}</span>` : ''}${help && !error ? `<span class="help" id="${id}-help">${escapeMarkup(help)}</span>` : ''}</div>`);
     const input = this.shadowRoot.querySelector('input');
     input.value = this._value || this.getAttribute('value') || '';
     this._updateFormValue(input);
-    input.addEventListener('input', () => { this._value = input.value; this._updateFormValue(input); emit(this, 'ui-input-change', { name: input.name, value: input.value }); });
+    input.addEventListener('input', () => { this._value = input.value; this._updateFormValue(input); if (this.hasAttribute('clearable')) this.render(); emit(this, 'ui-input-change', { name: input.name, value: input.value }); });
     input.addEventListener('change', () => { this._value = input.value; emit(this, 'change', { name: input.name, value: input.value }); });
-    this.shadowRoot.querySelector('.clear')?.addEventListener('click', () => { input.value = ''; this._value = ''; this._updateFormValue(input); input.focus(); emit(this, 'ui-input-change', { name: input.name, value: '', source: 'clear' }); });
+    this.shadowRoot.querySelector('.clear')?.addEventListener('click', () => { input.value = ''; this._value = ''; this._updateFormValue(input); input.focus(); if (this.hasAttribute('clearable')) this.render(); emit(this, 'ui-input-change', { name: input.name, value: '', source: 'clear' }); });
   }
   _updateFormValue(input) {
     if (!this._internals) return;
@@ -116,7 +126,7 @@ export class UIInput extends HTMLElement {
   }
   formResetCallback() { this._value = this.getAttribute('value') || ''; if (this.isConnected) this.render(); }
   formStateRestoreCallback(state) { this.value = String(state ?? ''); }
-  formDisabledCallback(disabled) { this._formDisabled = disabled; const input = this.shadowRoot.querySelector('input'); if (input) input.disabled = disabled; }
+  formDisabledCallback(disabled) { this._formDisabled = disabled; if (this.isConnected) this.render(); }
 }
 
 export class UICheckbox extends HTMLElement {
