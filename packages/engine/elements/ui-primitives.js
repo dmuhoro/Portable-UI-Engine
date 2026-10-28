@@ -360,26 +360,31 @@ export class UIToast extends HTMLElement {
   connectedCallback() { toastInstances.add(this); this.render(); repositionToasts(); }
   disconnectedCallback() { clearTimeout(this.timer); toastInstances.delete(this); repositionToasts(); }
   attributeChangedCallback() { if (this.isConnected) this.render(); }
-  show(message = this.getAttribute('message') || '') { this.setAttribute('message', message); this.hidden = false; repositionToasts(); }
+  show(message = this.getAttribute('message') || '') { this.setAttribute('message', message); this.hidden = false; repositionToasts(); clearTimeout(this.timer); const duration = Number(this.getAttribute('duration') || 5000); if (duration > 0) this.timer = window.setTimeout(() => this.dismiss(), duration); }
   dismiss() { clearTimeout(this.timer); this.hidden = true; repositionToasts(); emit(this, 'ui-toast-dismiss'); }
   render() {
-    const alert = this.getAttribute('variant') === 'danger';
+    const alert = this.getAttribute('variant') === 'danger' || this.getAttribute('role') === 'alert';
     mount(this, `
-      :host { position: fixed; right: var(--spacing-md); bottom: var(--spacing-md); z-index: var(--layer-toast); width: min(var(--component-toast-max-width), calc(100vw - var(--spacing-lg))); }
+      :host { position: fixed; right: var(--spacing-md); bottom: var(--spacing-md); z-index: var(--layer-toast); width: min(var(--component-toast-max-width, 360px), calc(100vw - var(--spacing-lg))); font-family: var(--typography-family-body, var(--font-sans)); }
       .toast { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); min-width: min(100%, var(--component-popup-min-width)); padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); background: var(--color-surface-base); box-shadow: var(--shadow-md); }
-      button { min-width: var(--interaction-target-min); min-height: var(--interaction-target-min); border: 0; background: transparent; cursor: pointer; }
-    `, `<div class="toast" role="${alert ? 'alert' : 'status'}" aria-live="${alert ? 'assertive' : 'polite'}"><span></span><button type="button" aria-label="Dismiss notification">×</button></div>`);
-    this.shadowRoot.querySelector('span').textContent = this.getAttribute('message') || '';
+      .message { flex: 1; }
+      button { min-width: 44px; min-height: 44px; border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; color: var(--color-text-secondary); touch-action: manipulation; }
+      button:hover { background: var(--color-surface-sunken); }
+      button:focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: 2px; }
+      @media (prefers-reduced-motion: reduce) { .toast, button { transition: none !important; } }
+    `, `<div class="toast" role="${alert ? 'alert' : 'status'}" aria-live="${alert ? 'assertive' : 'polite'}"><span class="message"></span><button type="button" aria-label="Dismiss notification">×</button></div>`);
+    this.shadowRoot.querySelector('.message').textContent = this.getAttribute('message') || '';
     this.shadowRoot.querySelector('button').addEventListener('click', () => this.dismiss());
     clearTimeout(this.timer);
     const duration = Number(this.getAttribute('duration') || 5000);
-    if (duration > 0) this.timer = window.setTimeout(() => this.dismiss(), duration);
+    if (!this.hidden && duration > 0) this.timer = window.setTimeout(() => this.dismiss(), duration);
     const pause = () => clearTimeout(this.timer);
-    const resume = () => { if (duration > 0) this.timer = window.setTimeout(() => this.dismiss(), duration); };
-    this.shadowRoot.querySelector('.toast').addEventListener('mouseenter', pause);
-    this.shadowRoot.querySelector('.toast').addEventListener('focusin', pause);
-    this.shadowRoot.querySelector('.toast').addEventListener('mouseleave', resume);
-    this.shadowRoot.querySelector('.toast').addEventListener('focusout', resume);
+    const resume = () => { if (duration > 0 && !this.hidden) this.timer = window.setTimeout(() => this.dismiss(), duration); };
+    const toastEl = this.shadowRoot.querySelector('.toast');
+    toastEl.addEventListener('mouseenter', pause);
+    toastEl.addEventListener('focusin', pause);
+    toastEl.addEventListener('mouseleave', resume);
+    toastEl.addEventListener('focusout', resume);
   }
 }
 
