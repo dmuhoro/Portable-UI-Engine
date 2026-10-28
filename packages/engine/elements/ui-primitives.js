@@ -441,30 +441,39 @@ export class UIMenu extends HTMLElement {
   render() {
     const items = this._items.length ? this._items : [...this.querySelectorAll('[data-menu-item]')].map(node => ({ label: node.textContent.trim(), value: node.getAttribute('data-menu-item') }));
     mount(this, `
-      :host { position: relative; }
-      button { min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-md); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-base); cursor: pointer; }
+      :host { position: relative; font-family: var(--typography-family-body, var(--font-sans)); }
+      .trigger { min-height: 44px; padding: var(--spacing-xs) var(--spacing-md); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-base); color: var(--color-text-primary); cursor: pointer; touch-action: manipulation; }
+      .trigger:hover { background: var(--color-surface-sunken); }
+      .trigger:focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: 2px; }
       [role="menu"] { position: absolute; z-index: var(--layer-popover); top: calc(100% + var(--spacing-2xs)); right: 0; min-width: var(--component-popup-min-width); margin: 0; padding: var(--spacing-2xs); list-style: none; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-overlay); box-shadow: var(--shadow-md); }
       [role="menu"][hidden] { display: none; }
-      [role="menuitem"] { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: var(--interaction-target-min); padding: var(--spacing-xs); border: 0; text-align: left; background: transparent; cursor: pointer; }
-      [role="menuitem"]:hover, [role="menuitem"]:focus-visible { background: var(--color-surface-sunken); }
-      kbd { font-family: var(--font-mono); color: var(--color-text-secondary); }
-    `, `<button type="button" aria-haspopup="menu" aria-expanded="false">${escapeMarkup(this.getAttribute('label') || 'Menu')}</button><ul role="menu" hidden></ul>`);
-    const trigger = this.shadowRoot.querySelector('button'); const menu = this.shadowRoot.querySelector('[role="menu"]');
+      [role="menuitem"] { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: var(--spacing-xs) var(--spacing-sm); border: 0; border-radius: var(--radius-xs); text-align: left; background: transparent; color: var(--color-text-primary); cursor: pointer; touch-action: manipulation; }
+      [role="menuitem"]:hover, [role="menuitem"]:focus-visible { background: var(--color-surface-sunken); outline: none; }
+      [role="separator"] { height: 1px; margin: var(--spacing-2xs) 0; background: var(--color-border-subtle); }
+      kbd { font-family: var(--font-mono); color: var(--color-text-secondary); font-size: var(--font-size-xs); }
+      @media (prefers-reduced-motion: reduce) { .trigger, [role="menuitem"] { transition: none !important; } }
+    `, `<button type="button" class="trigger" aria-haspopup="menu" aria-expanded="false">${escapeMarkup(this.getAttribute('label') || 'Menu')}</button><ul role="menu" hidden></ul>`);
+    const trigger = this.shadowRoot.querySelector('.trigger'); const menu = this.shadowRoot.querySelector('[role="menu"]');
     const close = () => { menu.hidden = true; trigger.setAttribute('aria-expanded', 'false'); };
     const open = () => { menu.hidden = false; trigger.setAttribute('aria-expanded', 'true'); menu.querySelector('[role="menuitem"]')?.focus(); };
+    menu.replaceChildren();
     items.forEach(item => {
       if (item.separator) { const separator = document.createElement('li'); separator.setAttribute('role', 'separator'); menu.append(separator); return; }
+      if (item.disabled) { const row = document.createElement('li'); row.setAttribute('role', 'none'); const action = document.createElement('button'); action.type = 'button'; action.setAttribute('role', 'menuitem'); action.disabled = true; action.textContent = String(item.label ?? ''); if (item.shortcut) { const key = document.createElement('kbd'); key.textContent = String(item.shortcut); action.append(key); } action.style.opacity = '0.45'; row.append(action); menu.append(row); return; }
       const row = document.createElement('li'); row.setAttribute('role', 'none'); const action = document.createElement('button'); action.type = 'button'; action.setAttribute('role', 'menuitem'); action.textContent = String(item.label ?? '');
       if (item.shortcut) { const key = document.createElement('kbd'); key.textContent = String(item.shortcut); action.append(key); }
-      action.addEventListener('click', () => { close(); emit(this, 'ui-menu-select', { value: item.value ?? item.label }); }); row.append(action); menu.append(row);
+      action.addEventListener('click', () => { close(); emit(this, 'ui-menu-select', { value: item.value ?? item.label, item }); }); row.append(action); menu.append(row);
     });
     trigger.addEventListener('click', () => menu.hidden ? open() : close());
-    trigger.addEventListener('keydown', event => { if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } });
+    trigger.addEventListener('keydown', event => { if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } if (event.key === 'ArrowUp') { event.preventDefault(); open(); [...menu.querySelectorAll('[role="menuitem"]:not(:disabled)')].at(-1)?.focus(); } });
     menu.addEventListener('keydown', event => {
-      const actions = [...menu.querySelectorAll('[role="menuitem"]')]; const index = actions.indexOf(event.target);
-      if (event.key === 'Escape') { close(); trigger.focus(); }
-      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); actions[(index + (event.key === 'ArrowDown' ? 1 : actions.length - 1)) % actions.length]?.focus(); }
-      if (event.key === 'Tab') close();
+      const actions = [...menu.querySelectorAll('[role="menuitem"]:not(:disabled)')]; const index = actions.indexOf(event.target);
+      if (event.key === 'Escape') { close(); trigger.focus(); event.preventDefault(); return; }
+      if (event.key === 'ArrowDown') { event.preventDefault(); if (actions.length === 0) return; actions[(index + 1 + actions.length) % actions.length]?.focus(); }
+      if (event.key === 'ArrowUp') { event.preventDefault(); if (actions.length === 0) return; actions[(index - 1 + actions.length) % actions.length]?.focus(); }
+      if (event.key === 'Home') { event.preventDefault(); actions[0]?.focus(); }
+      if (event.key === 'End') { event.preventDefault(); actions.at(-1)?.focus(); }
+      if (event.key === 'Tab') { close(); }
     });
     this.shadowRoot.addEventListener('focusout', event => { if (!this.shadowRoot.contains(event.relatedTarget)) close(); });
   }
