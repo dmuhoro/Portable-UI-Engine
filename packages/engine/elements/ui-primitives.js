@@ -183,8 +183,9 @@ export class UICheckbox extends HTMLElement {
 }
 
 export class UISelect extends HTMLElement {
+  static formAssociated = true;
   static observedAttributes = ['label', 'value', 'placeholder', 'disabled', 'required', 'name', 'options'];
-  constructor() { super(); this.attachShadow({ mode: 'open' }); this._options = []; this._value = ''; }
+  constructor() { super(); this.attachShadow({ mode: 'open' }); this._options = []; this._value = ''; this._formDisabled = false; try { this._internals = this.attachInternals(); } catch { this._internals = null; } }
   connectedCallback() { this.render(); }
   attributeChangedCallback(name, _old, value) {
     if (name === 'value') this._value = value || '';
@@ -197,26 +198,35 @@ export class UISelect extends HTMLElement {
   set value(value) { this._value = String(value ?? ''); if (this.isConnected) this.render(); }
   render() {
     const options = this._options.length ? this._options : [...this.querySelectorAll('option')].map(option => ({ label: option.textContent.trim(), value: option.value }));
+    const listId = `options-${Math.random().toString(36).slice(2, 6)}`;
     mount(this, `
-      :host { display: block; }
-      label { display: grid; gap: var(--spacing-2xs); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
-      input { width: 100%; min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-base); color: var(--color-text-primary); }
+      :host { display: block; font-family: var(--typography-family-body, var(--font-sans)); }
+      .wrapper { display: grid; gap: var(--spacing-2xs); }
+      .label { color: var(--color-text-secondary); font-size: var(--font-size-sm); font-weight: var(--typography-weight-medium, 500); }
+      input { width: 100%; min-height: 44px; padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-base); color: var(--color-text-primary); font-size: var(--typography-scale-sm, var(--font-size-sm)); }
+      input:hover:not(:disabled) { border-color: var(--color-border-default); }
+      input:focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: 2px; }
+      input:disabled { opacity: 0.45; cursor: not-allowed; }
       [role="listbox"] { position: fixed; z-index: var(--layer-popover); max-height: var(--component-popup-max-height); overflow: auto; min-width: var(--component-popup-min-width); margin: 0; padding: var(--spacing-2xs); list-style: none; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); background: var(--color-surface-overlay); box-shadow: var(--shadow-md); }
-      [role="option"] { min-height: var(--interaction-target-min); padding: var(--spacing-xs); cursor: pointer; }
-      [role="option"][aria-selected="true"], [role="option"]:hover { background: var(--color-surface-sunken); }
-      [role="option"][data-active="true"] { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: 0; }
+      [role="option"] { min-height: 44px; padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; border-radius: var(--radius-xs); }
+      [role="option"][aria-selected="true"] { background: var(--color-surface-sunken); }
+      [role="option"]:hover, [role="option"][data-active="true"] { background: var(--color-surface-sunken); }
+      [role="option"][data-active="true"] { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: -2px; }
       [hidden] { display: none; }
-    `, `<label>${escapeMarkup(this.getAttribute('label') || '')}<input role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="options" placeholder="${escapeMarkup(this.getAttribute('placeholder') || 'Choose an option')}" ${this.hasAttribute('disabled') ? 'disabled' : ''} ${this.hasAttribute('required') ? 'required' : ''} /><ul id="options" role="listbox" hidden></ul></label>`);
+      @media (prefers-reduced-motion: reduce) { input, [role="option"] { transition: none !important; } }
+    `, `<div class="wrapper"><label class="label">${escapeMarkup(this.getAttribute('label') || '')}</label><input role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${listId}" aria-haspopup="listbox" placeholder="${escapeMarkup(this.getAttribute('placeholder') || 'Choose an option')}" ${this.hasAttribute('disabled') || this._formDisabled ? 'disabled' : ''} ${this.hasAttribute('required') ? 'required' : ''} /><ul id="${listId}" role="listbox" hidden></ul></div>`);
     const input = this.shadowRoot.querySelector('input');
     const list = this.shadowRoot.querySelector('ul');
     input.value = options.find(item => item.value === this._value)?.label || this._value;
+    if (this._internals) { if (input.required && !this._value) this._internals.setValidity({ valueMissing: true }, 'Please select an option.', input); else this._internals.setValidity({}); if (this._internals.setFormValue) this._internals.setFormValue(this._value || ''); }
     const draw = query => {
       list.replaceChildren();
-      options.filter(item => String(item.label).toLowerCase().includes(query.toLowerCase())).forEach((item, index) => {
+      const q = String(query || '').toLowerCase();
+      options.filter(item => q === '' || String(item.label).toLowerCase().includes(q)).forEach((item, index) => {
         const option = document.createElement('li');
-        option.setAttribute('role', 'option'); option.id = `option-${index}`; option.tabIndex = -1; option.setAttribute('aria-selected', String(String(item.value) === this._value)); option.dataset.index = String(index); option.textContent = String(item.label);
+        option.setAttribute('role', 'option'); option.id = `${listId}-option-${index}`; option.tabIndex = -1; option.setAttribute('aria-selected', String(String(item.value) === this._value)); option.dataset.index = String(index); option.textContent = String(item.label);
         option.addEventListener('mousedown', event => event.preventDefault());
-        option.addEventListener('click', () => { this._value = String(item.value); input.value = String(item.label); close(); input.removeAttribute('aria-activedescendant'); emit(this, 'ui-select-change', { name: this.getAttribute('name') || '', value: this._value }); });
+        option.addEventListener('click', () => { this._value = String(item.value); input.value = String(item.label); if (this._internals && this._internals.setFormValue) this._internals.setFormValue(this._value); if (this._internals) this._internals.setValidity({}); close(); input.removeAttribute('aria-activedescendant'); emit(this, 'ui-select-change', { name: this.getAttribute('name') || '', value: this._value, label: item.label }); });
         list.append(option);
       });
     };
@@ -225,12 +235,12 @@ export class UISelect extends HTMLElement {
       list.hidden = false;
       input.setAttribute('aria-expanded', 'true');
       const bounds = input.getBoundingClientRect();
-      const gap = Number.parseFloat(getComputedStyle(this).getPropertyValue('--spacing-2xs')) || 0;
+      const gap = Number.parseFloat(getComputedStyle(this).getPropertyValue('--spacing-2xs')) || 4;
       const roomBelow = innerHeight - bounds.bottom - gap;
       const roomAbove = bounds.top - gap;
-      const useAbove = roomBelow < Math.min(list.scrollHeight, 160) && roomAbove > roomBelow;
-      const available = Math.max(0, useAbove ? roomAbove : roomBelow);
-      list.style.maxHeight = `${available}px`;
+      const useAbove = roomBelow < Math.min(list.scrollHeight, 200) && roomAbove > roomBelow;
+      const available = Math.max(80, useAbove ? roomAbove : roomBelow);
+      list.style.maxHeight = `${Math.min(available, 200)}px`;
       list.style.left = `${Math.max(gap, Math.min(bounds.left, innerWidth - bounds.width - gap))}px`;
       list.style.width = `${bounds.width}px`;
       list.style.top = `${useAbove ? Math.max(gap, bounds.top - Math.min(list.scrollHeight, available) - gap) : bounds.bottom + gap}px`;
@@ -243,17 +253,23 @@ export class UISelect extends HTMLElement {
         event.preventDefault();
         if (list.hidden) open();
         const items = [...list.querySelectorAll('[role="option"]')];
+        if (items.length === 0) return;
         const current = items.findIndex(option => option.id === input.getAttribute('aria-activedescendant'));
         const next = current < 0 ? (event.key === 'ArrowDown' ? 0 : items.length - 1) : (current + (event.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length;
         items.forEach((option, index) => { option.dataset.active = String(index === next); });
         if (items[next]) input.setAttribute('aria-activedescendant', items[next].id);
+        items[next].scrollIntoView({ block: 'nearest' });
       }
       if (event.key === 'Escape') { close(); input.removeAttribute('aria-activedescendant'); }
       if (event.key === 'Enter' && !list.hidden) { event.preventDefault(); list.querySelector(`#${CSS.escape(input.getAttribute('aria-activedescendant') || '')}`)?.click(); }
+      if (event.key === 'Home' && !list.hidden) { event.preventDefault(); const items = [...list.querySelectorAll('[role="option"]')]; if (items[0]) { items.forEach((o,i)=>o.dataset.active=String(i===0)); input.setAttribute('aria-activedescendant', items[0].id); items[0].scrollIntoView({block:'nearest'}); } }
+      if (event.key === 'End' && !list.hidden) { event.preventDefault(); const items = [...list.querySelectorAll('[role="option"]')]; const last = items[items.length-1]; if (last) { items.forEach((o,i)=>o.dataset.active=String(i===items.length-1)); input.setAttribute('aria-activedescendant', last.id); last.scrollIntoView({block:'nearest'}); } }
     });
     this.shadowRoot.addEventListener('focusout', event => { if (!event.relatedTarget || !this.shadowRoot.contains(event.relatedTarget)) close(); });
     list.addEventListener('focusout', event => { if (event.relatedTarget !== input && !list.contains(event.relatedTarget)) close(); });
   }
+  formResetCallback() { this._value = this.getAttribute('value') || ''; if (this.isConnected) this.render(); }
+  formDisabledCallback(disabled) { this._formDisabled = disabled; if (this.isConnected) this.render(); }
 }
 
 export class UIDialog extends HTMLElement {
