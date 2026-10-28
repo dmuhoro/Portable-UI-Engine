@@ -1,6 +1,6 @@
 # Bundle Size Measurements
 
-**Date:** 2026-10-28T13:00:10.142Z  
+**Date:** 2026-10-28T13:00:35.233Z  
 **Method:** Measured raw bytes and gzip-compressed bytes using Node.js zlib.gzipSync()
 
 ## Results
