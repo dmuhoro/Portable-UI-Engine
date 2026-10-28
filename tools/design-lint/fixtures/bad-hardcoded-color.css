@@ -1,0 +1,5 @@
+/* VIOLATION: hardcoded color */
+:host {
+  color: #ff0000;
+  background: rgb(255, 0, 0);
+}
