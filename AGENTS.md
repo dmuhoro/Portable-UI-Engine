@@ -27,6 +27,7 @@
 - Mobile-first responsive design
 - Design tokens from `packages/tokens` are the source of truth
 - Styling stays inside Shadow DOM; use CSS custom properties for theming
+- **UI Engine Skill**: See `docs/agent/UI-ENGINE-SKILL.md` for agent guidance on using ui-* primitives and tokens
 
 ## Data Flow
 - Web Components communicate via CustomEvents (bubbles: true, composed: true)
