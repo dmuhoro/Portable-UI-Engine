@@ -34,27 +34,44 @@ function mount(host, css, markup) {
 }
 
 export class UIButton extends HTMLElement {
-  static observedAttributes = ['variant', 'size', 'disabled', 'type'];
+  static observedAttributes = ['variant', 'size', 'disabled', 'type', 'loading'];
   constructor() { super(); this.attachShadow({ mode: 'open' }); }
   connectedCallback() { this.render(); }
   attributeChangedCallback() { if (this.isConnected) this.render(); }
   render() {
     mount(this, `
-      button { min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-md); border: 1px solid transparent; border-radius: var(--radius-sm); background: var(--color-text-primary); color: var(--color-text-inverse); cursor: pointer; transition: background var(--transition-fast); }
-      button:hover:not(:disabled) { background: var(--color-brand-hover); }
-      button:disabled { opacity: var(--component-disabled-opacity); cursor: not-allowed; }
-      :host([size="small"]) button { min-height: var(--layout-control-height-compact); }
-      :host([size="large"]) button { min-height: var(--interaction-target-min); }
-      :host([variant="secondary"]) button { background: var(--color-surface-base); border-color: var(--color-border-default); color: var(--color-text-primary); }
+      :host { display: inline-flex; }
+      button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-2xs); box-sizing: border-box; min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-md); border: 1px solid transparent; border-radius: var(--radius-sm); background: var(--color-brand-primary, var(--color-text-primary)); color: var(--color-text-inverse); cursor: pointer; font-family: var(--typography-family-body, var(--font-sans)); font-size: var(--typography-scale-sm, var(--font-size-sm)); font-weight: var(--typography-weight-medium, 500); letter-spacing: -0.01em; transition: background var(--motion-duration-fast, var(--transition-fast)) var(--motion-easing-standard, ease); user-select: none; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; touch-action: manipulation; }
+      button:hover:not(:disabled):not([aria-busy="true"]) { background: var(--color-brand-hover, #292524); }
+      button:active:not(:disabled):not([aria-busy="true"]) { background: var(--color-brand-active, #44403C); transform: scale(0.98); }
+      button:disabled, button[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+      button[aria-busy="true"] { cursor: wait; }
+      :host([size="small"]) button { min-height: var(--layout-control-height-compact, 30px); padding: var(--spacing-2xs) var(--spacing-sm); font-size: var(--font-size-xs); }
+      :host([size="large"]) button { min-height: 44px; padding: var(--spacing-sm) var(--spacing-lg); }
+      :host([variant="secondary"]) button { background: var(--color-surface-sunken, #F4F4F5); border-color: var(--color-border-subtle); color: var(--color-text-primary); }
+      :host([variant="secondary"]) button:hover:not(:disabled):not([aria-busy="true"]) { background: var(--color-surface-base); }
       :host([variant="outline"]) button { background: transparent; border-color: var(--color-border-default); color: var(--color-text-primary); }
-      :host([variant="ghost"]) button { background: transparent; color: var(--color-text-primary); }
-      :host([variant="danger"]) button { background: var(--color-feedback-danger); }
-    `, `<button part="button" type="${escapeMarkup(this.getAttribute('type') || 'button')}"><slot></slot></button>`);
+      :host([variant="outline"]) button:hover:not(:disabled):not([aria-busy="true"]) { background: var(--color-surface-sunken); }
+      :host([variant="ghost"]) button { background: transparent; border-color: transparent; color: var(--color-text-primary); }
+      :host([variant="ghost"]) button:hover:not(:disabled):not([aria-busy="true"]) { background: var(--color-surface-sunken); }
+      :host([variant="danger"]) button { background: var(--color-feedback-danger); color: var(--color-text-inverse); }
+      :host([variant="danger"]) button:hover:not(:disabled):not([aria-busy="true"]) { filter: brightness(0.9); }
+      .spinner { width: 1em; height: 1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { button, .spinner { transition: none !important; animation: none !important; transform: none !important; } }
+    `, `<button part="button" type="${escapeMarkup(this.getAttribute('type') || 'button')}"><span class="spinner" hidden></span><slot name="icon-start"></slot><slot></slot><slot name="icon-end"></slot></button>`);
     const button = this.shadowRoot.querySelector('button');
+    const spinner = this.shadowRoot.querySelector('.spinner');
+    const loading = this.hasAttribute('loading');
     button.disabled = this.hasAttribute('disabled');
+    button.setAttribute('aria-disabled', this.hasAttribute('disabled') ? 'true' : 'false');
+    button.setAttribute('aria-busy', loading ? 'true' : 'false');
+    if (loading) spinner.removeAttribute('hidden');
+    else spinner.setAttribute('hidden', '');
+    button.onclick = null;
     button.addEventListener('click', event => {
-      event.preventDefault();
-      if (!button.disabled) emit(this, 'ui-button-click', { variant: this.getAttribute('variant') || 'primary' });
+      if (button.disabled || loading) { event.preventDefault(); event.stopPropagation(); return; }
+      emit(this, 'ui-button-click', { originalEvent: event, variant: this.getAttribute('variant') || 'primary' });
     });
   }
 }
