@@ -1,0 +1,469 @@
+# Changelog
+
+> All notable changes to the Kay's Wellness Centre engine. Follows
+> [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions. Chronological, newest last.
+
+---
+
+## [Unreleased] — Sprint 45 — Accessibility Hardening & Session Architecture Refactor
+
+### Added
+
+- **Accessibility fixes for `/admin/login` page (Lighthouse a11y 88 → 100).** Footer heading hierarchy: added `sr-only` `<h2>Footer</h2>` section root, changed `h4` → `h3` for "Explore", "Legal", "Specialties", "Reach Us". Social icon links: added `aria-label` per platform (Instagram/Facebook/X) and `aria-hidden="true"` on icons. Contact form select: removed explicit `id` from `<select>` so `FormControl` (via Radix `Slot`) forwards generated `formItemId`, allowing `FormLabel htmlFor={formItemId}` to correctly associate. (`Footer.tsx`, `ReachUs.tsx`.)
+
+### Changed
+
+- **Session architecture refactor** — split `session.server.ts` into two modules to resolve TanStack Start import-protection error (`@tanstack/react-start/server` denied in client environment):
+  - `session.server.ts` — Pure crypto utilities (`signToken`, `verifyToken`, `hashPassword`, `verifyPassword`). Safe for client bundle.
+  - `session-cookie.server.ts` — Server-only cookie reading (`getCookie`), session validation (`getSession`, `getCurrentOrgId`, `getCurrentUserId`, `getCurrentUserRole`), revocation checks (`isSessionActive`, `requireActiveRole`). Only imported by server functions.
+  - `session.server.ts` re-exports cookie functions for backward compatibility with existing tests.
+  - **18 files migrated** to import from correct module: `tenant.server.ts`, `permissions.server.ts`, `auth.server.ts`, `diagnostics.server.ts`, `billing.server.ts`, `leads.server.ts`, `contact.server.ts`, `mpesa.server.ts`, `registration.server.ts`, `checkout.server.ts`, `reconciliation.server.ts`, `trials.server.ts`, `telemetry.server.ts`, `marketing/leads.server.ts`, `marketing/automation.server.ts`, `marketing/reviews.server.ts`, `auth-check.server.ts`, `webhooks.server.ts`, `exports.server.ts`.
+
+### Tests
+
+- Full suite: **762 passing across 75 files**, `tsc --noEmit` exit 0, ESLint 0 errors, production build OK.
+- All regression tests pass: `tenant-isolation-p0.test.ts` (22), `require-org-revocation.test.ts` (3), `contact-message.test.ts` (13), `alerts.test.ts` (5).
+
+---
+
+## [Unreleased] — Sprint 45 — Production Readiness (Password Reset + Owner Alert Dispatch)
+
+### Added
+
+- **Password reset flow (Layer 1).** `requestPasswordReset` / `verifyResetToken` / `resetPassword` server functions in `src/lib/password-reset.server.ts` — tokens hashed with SHA-256, 15-min TTL, single-use, rate-limited by email (`password_reset:email`, 3/60s). UI routes `/forgot-password` (email entry) and `/reset-password` (token + new password) with Zod-validated search params; "Forgot password?" link added to admin login page. (`password-reset.server.ts`, `forgot-password.tsx`, `reset-password.tsx`, `admin/login.tsx`.)
+- **Owner alert dispatch (Layer 2).** Multi-channel `dispatchAlert` in `src/lib/alert-dispatch.server.ts` — sends to WhatsApp (via existing `dispatchWithBreaker`), email (SendGrid/Resend/SMTP), and Slack (incoming webhook). All channels read config from `organizations.settings` (`alert_phone`, `alert_email`, `slack_webhook_url`). Deduping + cooldown via `alert_events` table (fingerprint = `type:key`). Backward-compatible `pageOwner` re-export in `owner-alerts.server.ts` for existing callers. (`alert-dispatch.server.ts`, `owner-alerts.server.ts`, `alerts.test.ts` updated.)
+- **AdminLayout shared header** on all admin pages — ThemeToggle (light/dark/system), user menu with logout, nav links. Theme toggle now available everywhere in admin. (`AdminLayout.tsx`, applied to all admin routes.)
+- **Setup script for local development.** `setup-env.sh` creates `.env` template with Supabase `DATABASE_URL` placeholder for the user. Seed demo adds `hellodannymuhoro@gmail.com` as second admin.
+
+### Changed
+
+- **`owner-alerts.server.ts` refactored** — thin wrapper around new `dispatchAlert`; error handling added so `pageOwner` never throws (catches and returns `delivery_failed`).
+- **`alerts.test.ts` rewritten** to mock `dispatchAlert` instead of `dispatchWithBreaker`; all 5 tests pass.
+
+### Tests
+
+- New: `alert-dispatch.server.ts` tested indirectly via `alerts.test.ts` (5 tests for `pageOwner` wrapper: success, no phone, dedupe, delivery_failed, never throws).
+- Full suite: **762 passing across 75 files**, `tsc --noEmit` exit 0, ESLint 0 errors, production build OK.
+
+---
+
+## [Unreleased] — Sprint 44 — 80/20 Execution Hardening (RBAC + Demo Data + PII + M-Pesa CSV)
+
+### Added
+
+- **Server-side RBAC on all critical mutation paths (80/20: 8 functions).** `requireRole(CLINIC_OWNER)` now enforced on `submitLead`, `updateLead`, `deleteLead`, `bookSlot`, `cancelSlot`, `reserveSlot`, `scheduleAppointment`, `dispatchLeadMessage`. Staff can read (triage desk) but cannot mutate owner data. (`leads.server.ts`, `scheduling.server.ts`, `resources.server.ts`, `dispatch.server.ts`; `rbac-completeness.test.ts` updated.)
+- **Demo seed data for Dr. Jackie walkthrough.** `npm run db:seed-demo` creates 15 leads across pipeline stages, 5 invoices (2 paid via STK), 3 messages, 2 reviews, automation state. Every screen tells a story. (`seed-demo.server.ts`, `db-seed-demo.ts`.)
+- **Owner→Staff invite flow.** `/admin/settings/operations` "Invite Staff" modal → `inviteStaff` server fn creates `staff` user with temp password; role enforced on server. (`auth.server.ts`, `operations.tsx`.)
+- **M-Pesa CSV staging reconciliation test.** Real Safaricom Daraja CSV format parsed and reconciled against issued invoices; idempotent replay verified. (`mpesa-csv-staging.test.ts`.)
+- **PII encryption on message ledger.** `from_address`/`to_address` encrypted at rest; decrypted on read. (`messaging.server.ts`; `messaging.test.ts` mocks updated.)
+- **Reconciliation idempotency on CSV path.** Duplicate CSV rows return existing reconciliation (no double-charge). (`reconciliation.server.ts`, `reconciliation.test.ts` updated.)
+
+### Changed
+
+- **All reconciliation tests updated** for idempotency check mock (762 tests green).
+- **RBAC completeness test flipped** from "allows staff" to "forbidden for staff" — documents gap closure.
+
+---
+
+## [Unreleased] — Sprint 43 — Full Verification & Production Go-Live Readiness
+
+### Verified
+
+- **Full Verification Sweep across 5 Architectural Layers.** Complete verification of unit test suite (756 tests across 74 files green), `tsc --noEmit` exit 0, ESLint 0 errors on touched files, production build OK, and Playwright E2E 5/5 revenue path smoke green.
+- **Dr. Jackie Operational Readiness.** Confirmed operator access guide (`docs/kwc-os-access-guide.md`), PII encryption contract (ADR-015), multi-tenant session revocation on all 48 call sites, and fail-closed WhatsApp delivery.
+- **Documentation & Sprint Artifacts Finalized.** Added `sprint-43-verification-and-production-golive-readiness.md` and updated `sprint-cross-reference.md`, `current-state.md`, and `release-readiness.md`.
+
+---
+
+## [Unreleased] — Sprint 42 — Tier 5 Execution Hardening (Honest Delivery + App-Wide Revocation)
+
+### Added
+
+- **App-wide session revocation (the real boundary).** `requireOrg()` is now async and re-verifies
+  the `user_sessions` row (`isSessionActive`, fail closed) on **every** tenant-scoped server call;
+  `requireRole()` is async and awaits it. All ~48 call sites across 18 files now `await
+  requireOrg()` / `await requireRole()`. A logged-out / revoked session is rejected everywhere —
+  not just at the diagnostics gate. (`tenant.server.ts`, `permissions.server.ts`;
+  `require-org-revocation.test.ts`, 3 tests.)
+- **Dead client-side passcode gate removed.** `PasscodeGate.tsx` (hardcoded `"0726"`, no server
+  validation) is deleted; diagnostics is gated by server RBAC + session revocation only.
+  `security.md`, `decisions.md` D3, `release-readiness.md` #16, and `code-standards.md` updated.
+- **Dashboard "Live telemetry" is real.** `/admin/dashboard` now subscribes to the SSE stream and
+  silently refetches analytics for live-relevant events (`lead:acquired`, `lead:stage_changed`,
+  `lead:updated`, `invoice:created`, `payment:recorded`, `stk_push:paid`,
+  `reconciliation:matched`); the badge tooltip states exactly what it does.
+- **Automation orchestrator cron scheduled.** `vercel.json` adds `/api/cron/automation-orchestrator`
+  `*/15 * * * *` (heartbeat stays `*/5 * * * *`); both cron routes fail closed in production
+  without `CRON_SECRET` (503, no dev-secret fallback).
+- **Three-mode theme (light/dark/system).** `Theme` type widened, `resolveTheme()` follows
+  `prefers-color-scheme` live with a matchMedia listener, pre-paint script in `__root.tsx` handles
+  system mode, `ThemeToggle` cycles Light → Dark → System with a Monitor icon.
+- **Real-UI tests** for previously untested screens: `booking-widget.test.tsx` (full 3-step flow →
+  exact submit payload + success screen), `pipeline-board-render.test.tsx` (columns, message
+  dispatch via real mutation path, terminal-confirm → update + drag-log + invoice, priority change),
+  `theme-toggle.test.tsx` (system default, full cycle, stored-preference load). happy-dom + real
+  React root + real `QueryClient`.
+- **Settings data export/import paywall-gated.** `/admin/settings/data` export + bulk-import are
+  wrapped in `SubscriptionGuard feature="bulk_operations"`; `PaywallModal` upgrade buttons are real
+  `mailto:ceo@kayswellnesscentre.org` links (no fake checkout).
+- **Operator guide.** `docs/kwc-os-access-guide.md` — OS access (env, login, roles/tiers) + the
+  end-to-end screen tour + honest not-live status.
+
+### Changed
+
+- **Automation sends once, honestly.** `automation.server.ts` routes every send branch through
+  `dispatchWithBreaker` and writes the `message_ledger` (with automation metadata); the duplicate
+  `enqueueNotification` `msg_*` sends are removed.
+- **WhatsApp fails closed in production.** `sendWhatsApp` returns
+  `{success:false, provider:"unconfigured"}` with an ERROR log when no provider is configured in
+  production; dev/test keep the `{success:true, provider:"log"}` harness. No fake successes.
+- **Failed M-Pesa STK callbacks page the owner** (new `stk_callback_failed` alert type, deduped by
+  `stk:<requestId>` fingerprint).
+
+### Tests
+
+- New: `require-org-revocation.test.ts` (3), `booking-widget.test.tsx` (2),
+  `pipeline-board-render.test.tsx` (4), `theme-toggle.test.tsx` (3); strengthened
+  `automation.test.ts` (9, no-double-send assertion), `dispatch.test.ts` (16, production
+  fail-closed), `mpesa-stk-push.test.ts` (12, owner paging), `session-revocation.test.ts`;
+  `theme.test.ts` kept for module exports.
+- Full suite: **756 passing across 74 files**, `tsc --noEmit` exit 0, ESLint 0 errors on touched
+  files, production build OK, Playwright E2E 5/5.
+
+---
+
+## [Unreleased] — Sprint 41 — Tier 4 Release Polish (Doc Accuracy + Public Contact Intake)
+
+### Added
+
+- **Public "Send us a message" intake writes a real tenant-scoped lead.**
+  `src/lib/api/contact.server.ts` adds `submitContactMessage` (POST, Zod-validated) delegating to
+  the exported `ingestContactMessage` core. Anonymous visitors no longer need a session cookie: the
+  handler resolves the public org by slug (`PUBLIC_ORG_SLUG`, default `kays-wellness`), **fails
+  closed** when the org row is missing (`unavailable`, no write), rate-limits per email
+  (`contact:<email>`, 5/60s), encrypts `name`/`email` via `encryptFields` (ADR-015), and inserts a
+  pipeline-ready lead (`status='new'`, `channel='web_form'`, `service='Contact Message'` with the
+  message body in `raw_payload`) — plus a `lead_interactions` `new` row, a `lead:acquired` SSE
+  publish, a `LEAD_INGESTED` audit entry, and the staff notification enqueue. The `src/routes/
+  contact.tsx` form now drives it through `useMutation` and surfaces every result (created /
+  rate_limited / unavailable / db_unavailable); failures never silently drop the message or clear
+  the form.
+- **`docs/current-state.md`** — the orientation doc AGENTS.md rule 6 required: run/verify commands,
+  the public lead-path reality, security posture, and the ASPIRATIONAL capability list.
+
+### Changed
+
+- **`docs/architecture.md` gaps table brought current.** The two stale rows (no CI pipeline, no
+  login rate limiting) are now marked Resolved with citations (`.github/workflows/ci.yml`;
+  `auth.server.ts:114`); the four still-true gaps are kept with `file:line` evidence; the header,
+  CI/CD row, `registration.server.ts` one-liner, and test totals (730/69 → 743/70) were refreshed.
+- **`docs/db-contracts.md`** tracks the new anonymous writer (`api/contact.server.ts` on
+  `clinic_leads` + `lead_interactions`) and documents the public-intake tenant-resolution contract
+  (AGENTS rule 2).
+
+### Tests
+
+- `src/__tests__/contact-message.test.ts` (13 tests) — schema rules; real-core write-path proofs
+  (INSERT bound to the resolved org, encrypted PII, plaintext absent, message in `raw_payload`);
+  fail-closed proofs (missing org → one query + zero INSERTs, DB down → `getDb` never called,
+  rate limit → INSERT never fired); side-effect assertions.
+- Full suite: **743 passing across 70 files**, `tsc --noEmit` exit 0, ESLint 0 errors on touched
+  files, production build OK, Playwright E2E 5/5.
+
+---
+
+## [Unreleased] — Sprint 40 — Tier 3 E2E Smoke (Revenue Path)
+
+### Added
+
+- **Full-stack Playwright smoke.** `tests/e2e/revenue-path.spec.ts` (5 serial tests) drives the
+  real app from staff sign-in → client booking via the contact widget → triage to checked-in →
+  issued invoice in the ledger → payment marked paid with a receipt number. Runs against the
+  **production build** (Vite `node-server` preset + Nitro) served by Node with Postgres swapped for
+  an embedded in-process PGlite (`KWC_E2E_DB=1`); no request, server function, or store is mocked.
+  Run with `npm run e2e`.
+- **E2E DB adapter.** `src/lib/db.e2e.server.ts` re-exposes the app's single `getDb().unsafe()`
+  entry point over PGlite using the real schema blocks (`db.schema.server.ts`), keeping every query
+  on real Postgres semantics. Wired by a Vite root alias that is active only when `KWC_E2E_DB=1`;
+  production keeps the real Postgres driver.
+
+### Fixed
+
+- **Converted check-ins now reliably generate an invoice.** The pipeline board passed
+  `onSuccess`/`onError` as `mutate(variables, options)`; this stack's React Query build returns
+  `undefined` from `mutate`, so the callbacks — including invoice generation — never ran and the
+  failure was swallowed by a `.catch(() => {})`. `LeadCard.safeUpdate` now uses `mutateAsync` and
+  chains on the returned promise (`src/components/leads/PipelineBoard.tsx`).
+- **Billing ledger no longer shows `ENC:{...}` blobs as customer names.** `getInvoices` decrypted
+  `lead_phone` but forgot `lead_name`; both are now decrypted on the read path
+  (`src/lib/api/billing.server.ts`).
+- **Client-graph-safe permission helpers.** New `src/lib/permissions.ts` (roles/gates) with
+  `permissions.server.ts` re-exporting for server code; the admin finance/dashboard routes now
+  import the client-safe module, removing a server-only chunk (`session.server` → node `crypto`)
+  from the client bundle graph.
+
+### Tests
+
+- `tests/e2e/revenue-path.spec.ts` (5 tests) — sign-in + booking widget + pipeline conversion +
+  invoice issuance + payment; assertions are overlap-tolerant (exact placeholders, overlay-scoped
+  confirms).
+- Full suite: **730 passing across 69 files**, `tsc --noEmit` exit 0, ESLint 0 errors on touched
+  files.
+
+---
+
+## [Unreleased] — Sprint 39 — Live Client Events (SSE Real-Time Subscriptions)
+
+### Added
+
+- **Triage desk subscribes to live lead/interaction events.** `useLiveEvents` in
+  `src/routes/admin/triage.tsx` invalidates the `["leads"]` query key on `lead:acquired`,
+  `lead:stage_changed`, and `lead:updated`, and refreshes pending replies when an
+  `interaction:created` event arrives. The 30s `refetchInterval` on the leads query is removed.
+- **Billing ledger subscribes to live invoice/payment events.** `useLiveEvents` in
+  `src/components/finance/BillingLedger.tsx` invalidates `["invoices"]` / `["payments"]` on
+  `invoice:created`, `payment:recorded`, `stk_push:paid`, and `reconciliation:matched`. The 30s
+  invoice `refetchInterval` is removed.
+
+### Changed
+
+- **SSE wire protocol simplified (uniform frames).** The endpoint now emits every frame as a plain
+  `id:` + `data:` pair (no `event:` prefix); the event type lives inside the JSON payload and a single
+  `EventSource.onmessage` handler receives everything (including the `connected` frame, which still
+  carries `eventType: "connected"` in-band). Browser `Last-Event-ID` auto-resume on reconnect plus a
+  `?lastEventId=` query param backed by `sessionStorage` (`kwc_sse_last_event_id`) for page reloads.
+- **`useLiveEvents(typesToKeys, onEvent?)` hook replaces manual polling.** Client-side hook maps SSE
+  event types → TanStack Query keys, invalidates them on arrival, invokes an optional callback, and
+  reconnects with capped exponential backoff (max 5). Runs only in the browser (`typeof EventSource`).
+- Triage and billing no longer poll every 30s; resilience falls back to manual refresh and the
+  pipeline activity desk's own interval.
+
+### Removed
+
+- 30s `refetchInterval` polling for the leads query (triage) and the invoices query (billing ledger).
+
+### Tests
+
+- `live-updates-endpoint.test.ts` (4 tests) — real-path protocol test against the actual h3 GET
+  handler: 401 without a session org, SSE headers + `connected` frame with **no** `event:`-prefixed
+  lines, polled rows delivered as `id:`+`data:` frames resuming from the `Last-Event-ID` header, and
+  query-param fallback (`?lastEventId=9`).
+- `use-live-events.test.tsx` (4 tests) — fake `EventSource` drives the real hook in a real
+  `QueryClient`: subscribes + invalidates mapped keys only, persists `lastEventId` on every frame,
+  resumes via `?lastEventId=` from `sessionStorage`, and reconnects with backoff after a network error.
+- Full suite: **730 passing across 69 files** (baseline 695/62), `tsc --noEmit` exit 0, ESLint 0
+  errors on touched files.
+
+---
+
+## [Unreleased] — Pilot Hardening (v1.1.0-pilot) — Sprint 38
+
+### Added
+
+- **Production database connected.** Root cause of the long-standing blocker: the Supabase direct
+  host is IPv6-only and unreachable from Vercel; the correct route is the **transaction pooler**
+  `aws-1-eu-west-1.pooler.supabase.com:6543` (the CLI's linked project revealed `aws-1`, not
+  `aws-0`). The owner's new password authenticates. Connection string verified through the app's
+  own `postgres` driver.
+- **All 12 Vercel env vars set** (DATABASE_URL, SESSION_SECRET, NODE_ENV, admin creds, M-Pesa
+  sandbox vars) across production/preview/development.
+- **Org + admin seeded in production Supabase** — org "Kay's Wellness Centre" (`kays-wellness`),
+  admin `admin@kayswellnesscentre.org`, default Mon–Sat availability. **Login verified end-to-end**
+  via the production `/_serverFn/*` RPC (200, `set-cookie`, role admin). All 28 tenant tables
+  created.
+- **WhatsApp delivery enabled with real credentials.** `WHATSAPP_TOKEN` + `WHATSAPP_PHONE_NUMBER_ID`
+  set in all three Vercel environments (raise: 14 vars total). Live test send to a real Kenya number
+  delivered (`wamid.HBgMMjU0NzAzOTM5MjM2FQIAERgSRjlFMURDRjhFQTk2MEEyNDI1AA==`). Token A is
+  short-lived (expires 2026-08-27T17:00:00 UTC); converting to a permanent system-user token is an
+  owner follow-up.
+- **M-Pesa STK push from a paid invoice.** Billing ledger rows for unpaid/issued invoices carry an
+  emerald "M-Pesa" button that opens an STK prompt modal (phone pre-filled from the decrypted
+  `lead_phone`, account reference derived from the invoice number) and sends the push via
+  `initiateStkPush`. Server-side STK (sandbox `ResponseCode: 0`) validated under
+  `mpesa-stk-push.test.ts`; the UI trigger is covered by a new happy-dom render test.
+- **Circuit breaker on the live dispatch path.** `dispatchWithBreaker` wraps `sendWithFallback`
+  (WhatsApp primary, honest SMS = no fake adapter) so `dispatchLeadMessage` and the queue worker's
+  `dispatchNotification` both fail closed when all channels are circuit-open, and report real
+  delivery status instead of claiming a fallback that doesn't exist.
+- **Message ledger audit trail.** Every outbound WhatsApp dispatch now writes an `outbound` row via
+  `logMessage` (status `sent`/`failed`, provider + event metadata); ledger failures are logged and
+  never break the dispatch.
+
+### Fixed
+
+- **"Invalid lazy handler" 500 on every `/api/*` route.** Nitro 3 beta's Vercel web-format lazy
+  handler resolves only a module's **default export**; our route files exported named `GET`/`POST`
+  only. Added default method-dispatch exports to all 6 API route handlers. Verified: health → 200,
+  mpesa GET → 405, whatsapp GET → 403.
+- **"Cannot find package 'postgres'" on every DB access.** `db.server.ts` imported postgres via an
+  obfuscated dynamic import that hid the specifier from the server bundler too, leaving it
+  externalized in the serverless bundle. Switched to a literal `import("postgres")` + client-env
+  rollup external. `/api/health` now returns `{"status":"healthy","dbAvailable":true}` from the
+  deployed function.
+- **`/api/health` reports real connectivity.** Added `pingDb()` (runs `SELECT 1`, updates state);
+  the endpoint no longer reads a passive flag that only turned true after any DB query.
+- **Stock Unsplash photos still diverged from Lovable.** Copy and theme matched, but home, our-story
+  and resources rendered generic Unsplash stock photos while Lovable served the clinic's own branded
+  imagery. Wired the repo's local `src/assets` images (byte-identical to Lovable's, MD5-verified) into
+  every component: `hero-clinic.jpg` (home hero + carousel), `dr-jackie.jpg` (home + our-story),
+  `team-1/2/3.jpg` (our-story), `wellness-1/2/3.jpg` (resources). The hero carousel now renders light
+  text on the plain page background (matching Lovable) instead of overlaying text on a dark photo.
+  og:image/twitter:image now point to the stable `https://kays-wellness-centre.vercel.app/og/hero-clinic.jpg`
+  instead of an Unsplash URL. Built asset hashes now match Lovable's exactly
+  (`hero-clinic-CjGQtwC_.jpg`, `dr-jackie-BPEGanEG.jpg`, `team-1-BpnzEXNC.jpg`, `wellness-1-CgFIaApR.jpg`).
+- **Elite "Warm Midnight Forest" dark theme.** The dark mode was the generic dark-green palette the
+  site shipped with (Lovable has no dark mode, so it was designed from scratch). New warm
+  charcoal-forest ground carries the brand's savannah-olive DNA with a luminous sage-olive primary,
+  burnished terracotta ember accent and warm gold highlights. Added `color-scheme` (light/dark),
+  theme-aware glass border, dark `text-gradient`, slim on-theme scrollbars, accent selection,
+  premium focus ring, and a smooth cross-fade on theme toggle. 40+ `dark:text-*-400` variants keep
+  status colors legible on the dark ground; all hardcoded `gray-*` swapped for theme tokens. Light
+  theme verified byte-identical to the Lovable deploy in compiled CSS. Admin Operations Dashboard
+  gained an "At a glance." header, live-telemetry indicator and card-lift hover.
+
+### Changed
+
+- **Vercel UI now matches the Lovable deploy.** Two causes fixed permanently: (1) theme defaulted
+  to the OS color-scheme (dark systems rendered the whole site dark) — now defaults to light,
+  matching Lovable; (2) home + services copy was the older "Premium Functional Medicine / Nairobi"
+  version — aligned to Lovable's "Holistic Medical Care in Kenya": hero slides (Root-Cause
+  Medicine, Whole-Person Care, Global Mission), Our Focus (4 areas), Global Mission section,
+  Start Your Journey, and the "From firefighting illness to true wellness" CTA. Services page now
+  shows Specialized Treatments (4 conditions), Functional Medicine Delivered, and Clinic Offerings.
+  Removed the Specialty-modal grid from home. Updated titles/OG/Twitter meta.
+
+### Verified
+
+- `/api/health` → healthy (DB connected) in production.
+- All 6 API routes functional in production.
+- Org + admin login verified in production.
+- Vercel home + services render the Lovable copy with no dark class in SSR.
+- Vercel home, our-story and resources serve the branded local images (no Unsplash refs); built
+  asset hashes are byte-identical to Lovable's. Live production (deploy `dpl_2eWDgruP43Uimh9Btb2KnRpeQRng`)
+  serves the images byte-identical (MD5-verified over HTTPS) and `/api/health` is healthy.
+- Light theme byte-identical to Lovable in compiled CSS; new dark palette + `dark:text-*-400` rules
+  confirmed in compiled output; SSR home renders light by default.
+- WhatsApp live send delivered with real credentials; 695 tests / 62 files green (incl. new
+  STK UI render test + breaker/ledger wiring tests), tsc exit 0, eslint 0 errors, build passes.
+
+### Notes
+
+- The `/_serverFn/*` RPC requires TanStack's seroval cross-JSON payload envelope `{t, f, m}`; a raw
+  JSON body is not parseable by the server deserializer (framework behavior, not a bug).
+
+### Docs
+
+- `docs/sprints/sprint-38-production-golive-api-fixes-ui-parity.md`: full sprint record (Tier 1:
+  WhatsApp env + STK trigger + circuit-breaker dispatch + message ledger in Part 7).
+- `docs/sprints/sprint-37-production-webhook-fix-deployment.md`: superseded (blockers now resolved).
+
+---
+
+## [Unreleased] — Pilot Hardening (v1.1.0-pilot) — Sprint 37
+
+### Fixed
+
+- **Production webhook/API routes now reachable.** Root cause: TanStack Start's router does NOT
+  register raw h3 GET/POST handler files under `src/routes/api/` — all `/api/*` routes (WhatsApp,
+  M-Pesa, health, calendar-sync, SSE, cron) returned 404 in production. Moved the 6 handlers to
+  `server/routes/api/**` (Nitro `serverDir`) + `vite.config.ts` `nitro.serverDir`. Live routes went
+  from 404 → 500 (reachable, blocked only on missing env vars).
+
+### Verified
+
+- M-Pesa Daraja sandbox credentials valid; STK push initiation succeeds (`ResponseCode: 0`).
+- Automated Vercel deploys working (git integration deploys on every push to main).
+- 683 tests green, tsc exit 0, build passes, all 6 API routes in the Nitro route table.
+
+### Blocked (owner action)
+
+- Vercel env vars: `DATABASE_URL` (provided DB password rejected by Supabase pooler — owner must
+  confirm/reset), `SESSION_SECRET`, admin creds, WhatsApp token/phone-id, M-Pesa sandbox vars.
+- Full value table in `docs/evidence/2026-08-25_production_deploy_root_cause.md`.
+
+### Changed
+
+- `docs/runbooks/whatsapp.md`: documents exactly which WhatsApp token is needed
+  (`WHATSAPP_TOKEN` + `WHATSAPP_PHONE_NUMBER_ID` for +254703939236).
+- `docs/runbooks/deployment.md`: verified M-Pesa sandbox values.
+
+---
+
+## [Unreleased] — Pilot Hardening (v1.1.0-pilot) — Sprint 36
+
+### Fixed
+
+- **All TypeScript errors cleared (89 → 0)** — `npx tsc --noEmit` now exits 0. Fixed the code,
+  never weakened tsconfig. Root causes: missing `AuditActionType`/`EventType` union values,
+  `delete`-on-required-props in logger, postgres `db.unsafe` param typing (new `SqlParam` type),
+  TanStack serialization (DTOs for interactions/diagnostics/webhooks), h3 v2 `readRawBody`,
+  developer.tsx calling server-only functions (new `api/webhooks.server.ts` createServerFn layer).
+
+### Added
+
+- Lovable MCP integration: connected to `/mcp`, harvested clinic info, services, articles, FAQs.
+- Evidence: `docs/evidence/2026-08-25_lovable_vs_vercel.md`, `2026-08-25_mcp_lovable_content.md`.
+
+### Changed
+
+- **Design tokens elevated to lovable editorial palette** (Sprint 36): warm cream background
+  `#fdfcf8`, deeper ink `#131e11`, softer terracotta accent `#d97c50`, richer gold `#e3ad4b`,
+  warm sand borders `#e7e1d4`, warmer `gradient-hero`/`gradient-soft`. Applied to the shared token
+  system → elevates marketing + admin surfaces to lovable parity.
+
+### Tests
+
+- Full suite: **683 passing across 60 files**.
+- `npx tsc --noEmit` exit 0 (0 errors).
+- Lint clean on all changed files; production build passes.
+
+---
+
+## [Unreleased] — Pilot Hardening (v1.1.0-pilot) — Sprint 35
+
+### Added
+
+- Governance structure: `.ai/context/` (12 briefs), `.ai/agents/`, `.ai/VERSION`,
+  `docs/engineering/CONSTITUTION.md`, `docs/adr/` (ADR-013…016), `docs/evidence/`,
+  `docs/releases/`, `docs/runbooks/` (deployment, mpesa-stk-push, whatsapp), `CHANGELOG.md`.
+- M-Pesa STK Push (ADR-014): `mpesa_stk_push_requests` table, `api/mpesa.server.ts`
+  (`initiateStkPush`, `handleStkCallback`), webhook route `api/webhooks/mpesa.ts`, callback-secret
+  auth, idempotent payment recording via `recordPayment`.
+- PII encryption wiring (ADR-015): `clinic_leads.name/phone/email` + STK push phone encrypted on
+  write, decrypted on read; lazy migration keeps plaintext rows readable.
+- Deployment prep (ADR-016): production build verified, Supabase project linked.
+
+### Changed
+
+- Decisions: D11 reversed (encryption wired into lead + STK phone surfaces).
+- Env schema: added `MPESA_*` vars.
+- WhatsApp inbound matching now decrypt-aware (last-9-digit compare) instead of SQL LIKE.
+
+### Tests
+
+- `mpesa-stk-push.test.ts` (12 tests) — initiate, callback, idempotency, RBAC, tenant isolation.
+- `leads-encryption.test.ts` (4 tests) — encrypt on insert, decrypt on read, legacy passthrough.
+- Full suite: **683 passing across 60 files** (baseline 667/58).
+
+---
+
+## [v1.0.0] — 2026-07-12 (Sprint 34 baseline)
+
+### Added (Sprint 34 production optimization + E2E flow hardening)
+
+- Bilingual WhatsApp templates (EN/SW) with `preferred_language` on leads.
+- P0 fixes: cross-tenant timing leak, background queue scoping, diagnostics/telemetry SUPER_ADMIN
+  gates, SQL injection in `bookSlot`.
+- Production boot guard (throws on default `SESSION_SECRET`), logout endpoint, CI pipeline.
+- Rate limiting (login/lead/WhatsApp/reconciliation), RBAC completeness, Docker fix.
+- Full engine: multi-tenant schema, billing, scheduling, marketing pipeline, subscriptions,
+  metering, trials, checkout, reconciliation, encryption (infra), webhooks, SSE, exports, forecasting.
+
+### Tests
+
+- 667 tests / 58 files passing.
+- 22 adversarial tenant-isolation tests.
+
+---
+
+*Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)*

@@ -1,0 +1,107 @@
+# TraderOS v1.3.3 — G-02 Honest Deployment Release Notes
+
+**Date:** 2026-10-01 · **Status:** patch on v1.3.2 (software-complete; GO
+conditions operator-gated) · **Signed artifact:**
+`docs/evidence/releases/RELEASE_1.3.3_manifest.json` (+ `.sig`)
+
+## Why this release exists
+
+v1.3.2 fixed the soak so it closes the position it opens. This release cuts the
+two defects that were found by **deploying and measuring** v1.3.2 rather than by
+writing it. Both would have silently defeated the v1.3.2 fix, and both fail in a
+way that reports success.
+
+## What ships
+
+### 1. A checkpoint is not resumable across a change of HARNESS
+
+The resume fingerprint guarded `window_seconds`, `batch_cycles`,
+`interval_minutes` and `label` — but not the **code that produces the verdict**.
+The consequence was immediate and waiting: the fixed soak was about to be
+redeployed on top of a checkpoint whose batch 001 and 002 had been produced by
+the leaky harness. The new window would have inherited **two FAILED batches**
+and could never return PASS. The operator's only options would have been to
+accept a permanently-red window or hand-edit the checkpoint by hand.
+
+Neither is honest, and both are exactly the splicing the supersede guard exists
+to prevent — the guard simply could not see the code dimension.
+
+`_state_fingerprint` now carries a SHA-256 over the supervisor and the batch
+harness, so a change to either supersedes the checkpoint exactly as a geometry
+change does: the previous one is preserved as `.superseded` and a fresh window
+starts. Digests of the **files** rather than `git HEAD`, because the deployed
+container need not carry `.git`, and *"which revision is running"* has to be
+answerable from the volume alone.
+
+Observed in production: the redeployed runner printed `fresh window`.
+
+### 2. `traderos-soak` no longer silently re-runs a stale image
+
+The soak service has **no GitHub source connection**; its deployments are
+reported with `reason=redeploy`, i.e. Railway re-runs the **last built image**.
+Neither of these picked up the v1.3.2 fix:
+
+```
+railway redeploy -s traderos-soak
+railway redeploy -s traderos-soak --from-source
+```
+
+Two consecutive "redeploys" ran the pre-fix harness and leaked a further
+**389.29 AAPL** into the paper account (cash to −15,963.64) before it was
+caught. The production `TraderOS` service *is* connected (`reason=deploy` on
+push), so nothing in the CLI distinguishes the two.
+
+The correct deploy is:
+
+```
+railway up -s traderos-soak --detach --yes     # builds from the current checkout
+```
+
+`docs/runbooks/RAILWAY_DEPLOY.md` now documents the trap, the correct command,
+and how to tell from the batch output whether the running code is the fixed one
+— `still_resting=` / `positions_back_at_baseline=` is the new harness;
+`cancel_failures=` is the leak.
+
+### 3. A coin-flip assertion removed
+
+`test_changed_harness_supersedes_the_checkpoint_instead_of_splicing_it`
+compared the `elapsed_seconds` of two windows that both complete a full 30s
+run, so it failed roughly 1 run in 2 for reasons unrelated to what it asserts. It
+now proves the thing directly: a resume carries the old `started_at` forward, so
+a fresh window must not, and the new window must record the digest of the harness
+that produced it. Timing-independent. No threshold raised, no assertion
+loosened, nothing skipped.
+
+## Verification
+
+- **2364 tests pass (7 skipped)**; ruff, black, isort, pyright (strict) clean.
+- The harness-supersede test is shown to **fail without the digest** (it raises
+  `KeyError: harness_digest` against the pre-fix runner) and pass after.
+- **Cloud `traderos-soak` batch 001: `VERDICT: PASS`** on a fresh window, and
+  the account **independently confirmed flat** at t+0/+60/+120/+180s by reading
+  the broker directly rather than trusting the harness verdict — that gate has
+  lied before, and the whole point of Sprint 50 is that it no longer gets the
+  last word. Evidence:
+  `docs/evidence/2026-10-01_cloud_soak_batch001_independent_check.log`.
+- The paper account was reclaimed twice more (245.86 and 389.29 AAPL leaked by
+  the stale image), ending flat with no open orders.
+
+## Honest residuals
+
+- **The 72h window is still operator-run and wall-clock.** Nothing in this
+  release observes 72h of drift — that remains what the window is for.
+- **`traderos-soak` still has no GitHub source connected.** Until an operator
+  connects one, a push changes nothing on that service and the failure is
+  *silent* — the deploy reports success. This release **documents** the trap; it
+  does not fix it, because connecting the source is an operator action on the
+  platform, not a code change.
+- **G-01** (a genuine cost-adjusted edge on out-of-sample data) remains open.
+  The pilot is **DATA-VALIDATION ONLY**; no PnL claim.
+
+## Release provenance
+
+Cut as `v1.3.3`, aligned to `pyproject.toml` / `configs/settings.yaml` /
+`configs/settings.production.example.yaml`. Signed artifact in
+`docs/evidence/releases/`, generated by `scripts/governance/release_manifest.py`
+and signed with the deterministic paper key — the operator re-signs with the
+real `RELEASE_SIGNING_KEY` for GO, which is the documented step.

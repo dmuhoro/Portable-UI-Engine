@@ -1,91 +1,61 @@
-# 🛠️ Contributing to Portable UI Engine (`@universal-ui/engine`)
+# Daftari — Engineering Standards
 
-Thank you for your interest in contributing to the **Portable UI Engine**! We build framework-agnostic, zero-dependency, high-performance UI primitives using native Web Components (Custom Elements) and Shadow DOM.
+## Commit Format (Conventional Commits)
+```
+feat:        new feature
+fix:         bug fix
+chore:       tooling, deps, config
+docs:        documentation only
+refactor:    code improvement, no behaviour change
+ci:          CI/CD pipeline changes
+test:        adding or updating tests
+```
 
----
+Examples:
+```
+feat: add SMS parser pattern for Airtel Money
+fix: parseMpesa pattern C missing sender field
+chore: upgrade Dexie to v3.2
+docs: add ADR-008 for payment method selection
+```
 
-## 📜 The Golden Rules of the Engine
-
-To maintain high code quality, extreme performance, and portable browser execution, all custom elements submitted to `@universal-ui/engine` must adhere strictly to these engineering constraints:
-
-1. **Zero External Dependencies**: Never add NPM runtime dependencies (e.g., React, jQuery, Lodash, Moment, Tailwind runtime scripts). All components must run on standard ES6+ browser APIs.
-2. **Shadow DOM Encapsulation (`mode: 'open'`)**: Every visual element MUST encapsulate its markup and styles using `this.attachShadow({ mode: 'open' })`. Global application CSS must not break component layouts, and component styles must never leak into the host DOM.
-3. **CSS Variable Design Tokens**: Hardcoded HEX or RGB colors inside components are strictly prohibited. Always consume design tokens defined in `theme.css` (e.g., `var(--color-primary)`, `var(--color-bg-surface)`, `var(--font-sans)`, `var(--radius-md)`).
-4. **Data-Driven Props & Attributes**: Components must ingest data via standard HTML attributes or JavaScript properties (JSON strings or arrays/objects). Always wrap `JSON.parse()` calls inside `try / catch` blocks to prevent page crashes.
-5. **Native Event Emissions**: Components communicate state changes upwards by dispatching standard `CustomEvent` instances configured with `{ bubbles: true, composed: true }`.
-
----
-
-## 💻 Local Development Setup
-
-Follow these steps to set up your local development environment:
-
-### 1. Fork and Clone the Repository
-
+## Quality Gates (must pass before push)
 ```bash
-git clone https://github.com/dmuhoro/Portable-UI-Engine.git
-cd Portable-UI-Engine
+npm run typecheck   # zero errors
+npm run lint        # zero errors
+npm run test:run    # zero failures
+npm run build       # must succeed
 ```
 
-### 2. Install Dev Dependencies
-
+## Load Testing (optional, manual)
+Before shipping an infrastructure change, sanity-check the live deployment
+with the k6 script (drives `https://daftari-amber.vercel.app`, the canonical
+production URL):
 ```bash
-npm install
+npm install -g k6@latest   # or: brew install k6
+npm run test:load
 ```
+The scenario ramps 20 → 50 → 100 concurrent users and enforces
+`p(95) < 2000ms` and `error rate < 5%`. It only exercises the public static
+shell + PWA bundle — never Supabase auth or sync tables — so it cannot corrupt
+real user data.
 
-### 3. Launch Local Preview Server
+## Engineering Rules
+- No raw `+ - * /` arithmetic on KES amounts — use `src/lib/money.ts`
+- No direct Dexie imports in feature components — use `src/lib/repository.ts`
+- No `console.log` — use `src/lib/logger.ts`
+- No hardcoded strings in UI — all text via `t()` from `useTranslation`
+- No hardcoded table names — use `TABLES` from `src/lib/constants.ts`
+- New Dexie tables require a version bump in `db.ts`
+- Every new i18n key must be in BOTH `sw.json` and `en.json`
 
-Start the Vite development server with hot reload:
+## Testing Requirements
+- Business logic functions: unit tested in `*.test.ts` alongside the file
+- New SMS patterns: added to `parseMpesa.test.ts`
+- Money calculations: added to `money.test.ts`
 
-```bash
-npm run dev
-```
-Open `http://localhost:3000` in your browser to view the interactive showcase and test bench.
-
-### 4. Build and Verify Production Bundles
-
-Compile both the ES Module (`dist/engine.js`) and minified IIFE CDN wrapper (`dist/engine.min.js`) using `esbuild`:
-
-```bash
-npm run build:engine
-```
-
-Validate TypeScript type definitions and code rules:
-
-```bash
-npm run lint
-```
-
----
-
-## 📐 Pull Request (PR) Quality Gate Checklist
-
-Before opening a Pull Request, verify that your contribution satisfies the following requirements:
-
-| Checklist Item | Requirement Details | Status |
-| :--- | :--- | :---: |
-| **Vanilla Architecture** | Class extends `HTMLElement` with no external runtime libraries | [ ] |
-| **Shadow DOM Mode** | `this.attachShadow({ mode: 'open' })` initialized in constructor | [ ] |
-| **Design Tokens Used** | All colors, radii, fonts, and spacing use `var(--color-*)` tokens | [ ] |
-| **Defensive JSON Parsing** | All stringified attributes use `try/catch` and render error states | [ ] |
-| **Event Composition** | Custom events use `{ bubbles: true, composed: true }` | [ ] |
-| **Cross-Browser Test** | Component tested in Chrome, Firefox, and Safari | [ ] |
-| **Custom Element Check** | Guarded registration: `if (!customElements.get('element-tag'))` | [ ] |
-
----
-
-## 🧱 Creating a New Component
-
-To create a new component, copy the blueprint boilerplate from `elements/template-primitive.js`:
-
-```bash
-cp elements/template-primitive.js elements/universal-my-component.js
-```
-
-Export and register your new component inside `engine.js`:
-
-```javascript
-import './elements/universal-my-component.js';
-```
-
-Thank you for helping us make web UI portable, fast, and framework-free! 🚀
+## Accessibility
+- All interactive elements have `aria-label`
+- All form inputs have associated `<label>` elements
+- Minimum touch target: 48×48px
+- Color is never the sole indicator of meaning

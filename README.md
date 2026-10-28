@@ -1,166 +1,71 @@
-# 🚀 Portable UI Engine (`@universal-ui/engine`)
+# Portable UI Engine
 
-> **Framework-Agnostic, Zero-Dependency Native Web Component & Design System Asset Library**
-> *Ship high-performance, style-isolated UI components directly to the browser with zero build steps, zero node_modules bloat, and 100% Shadow DOM encapsulation.*
+Portable UI Engine is a framework-agnostic design system built from native Web Components. It provides token-based themes, isolated component styles, browser-native accessibility behavior, and showcase applications for trying and reviewing the system.
 
----
-
-## ⚡ The 10-Second Quick Start
-
-Simply drop our unified engine script and CSS design tokens into any HTML file or server-rendered template (Express, Django, Rails, Laravel, Go, Rust):
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <!-- 1. Load Global CSS Design Tokens -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@universal-ui/engine/theme.css" />
-  <!-- 2. Single-Line Engine Script Import -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@universal-ui/engine/engine.js"></script>
-</head>
-<body>
-
-  <!-- 3. Use Native Custom Elements Anywhere -->
-  <universal-app-shell drawer-open>
-    <a href="#" slot="brand"><strong>SaaS Control Center</strong></a>
-    
-    <universal-metric-grid id="metrics"></universal-metric-grid>
-  </universal-app-shell>
-
-  <script>
-    document.getElementById('metrics').payload = [
-      { "title": "Total Revenue", "value": "$52,840.00", "change": "+14.2%", "trend": "upward", "context": "vs last month" },
-      { "title": "Active Subscriptions", "value": "1,420", "change": "-2.1%", "trend": "downward", "context": "vs last week" }
-    ];
-  </script>
-</body>
-</html>
-```
-
----
-
-## 🏆 Why Portable UI Engine? (The Competitive Edge)
-
-| Feature | React / Shadcn UI | Material UI / Ant Design | **@universal-ui/engine** |
-| :--- | :---: | :---: | :---: |
-| **Framework Agnostic** | ❌ React Only | ❌ Framework Locked | **✅ Vanilla JS, Any Backend or JS Frame** |
-| **Bundle Footprint** | ⚠️ Heavy (React + DOM + Deps) | ❌ 100KB+ CSS/JS | **⚡ < 15KB Minified & Gzipped** |
-| **Style Isolation** | ⚠️ CSS-in-JS / Global Pollution | ❌ Global Style Clashes | **✅ 100% Shadow DOM Encapsulation** |
-| **Build Dependency** | ❌ Complex Transpilation Needed | ❌ Webpack / Vite Required | **✅ Native ESM Execution (No Build)** |
-| **Data-Driven Props** | ⚠️ Manual Prop Drilling | ⚠️ Complex State Hookups | **✅ Standard JSON Payloads & Setters** |
-
----
-
-## 🧩 Component Contracts Matrix
-
-### 1. `<universal-app-shell>`
-Responsive SaaS grid layout featuring sticky header, auto-collapsing navigation drawer, slot projection, and backdrop support.
-
-* **Observed Attributes**: `drawer-open` (boolean attribute)
-* **Slots**:
-  * `brand`: Top-left branding area
-  * `header-actions`: Top-right toolbar buttons / theme selectors
-  * `drawer`: Navigation menu links
-  * `default`: Main workspace content view
-* **Custom Events**:
-  * `drawer-toggle`: Emitted when drawer toggles open/closed. `e.detail = { open: boolean, isMobile: boolean }`
-
----
-
-### 2. `<universal-form>`
-Dynamic schema-driven form element with HTML5 client validation and real-time input error display.
-
-* **Properties / Attributes**:
-  * `schema` (Array | JSON String): Array of field objects defining name, type (`text` | `email` | `number` | `select` | `textarea` | `checkbox`), label, required, placeholder, options.
-  * `title` (String): Header title text.
-  * `submit-label` (String): Submit button text label.
-* **Custom Events**:
-  * `app-form-submit`: Emitted on valid submit. `e.detail = { formData: { key: value } }`
-* **Public Methods**:
-  * `getFormData()`: Returns raw key-value form object.
-  * `validate()`: Runs form validation and returns `boolean`.
-  * `reset()`: Resets all input fields and clears error state.
-
----
-
-### 3. `<universal-data-table>`
-Data grid with multi-column sorting, search filtering, paginated controls, CSV export, and selectable rows.
-
-* **Properties / Attributes**:
-  * `payload` (Object | JSON String): `{ headers: Array<String>, rows: Array<Array<String|Number>> }`
-* **Custom Events**:
-  * `row-select`: Emitted when row checkbox is toggled. `e.detail = { selectedRows: Array }`
-  * `table-search`: Emitted on search query change. `e.detail = { query: String }`
-
----
-
-### 4. `<universal-metric-grid>`
-Analytics card grid displaying metric values, contextual captions, and automatic trend color badges (`--color-success`, `--color-danger`).
-
-* **Properties / Attributes**:
-  * `payload` (Array | JSON String): `[{ title, value, change, trend: "upward"|"downward", context }]`
-
----
-
-### 5. `<universal-saas-dashboard>`
-Composite dashboard orchestrator that syncs `<universal-metric-grid>` and `<universal-data-table>`.
-
-* **Properties / Attributes**:
-  * `state` (Object | JSON String): `{ metrics: [...], tableHeaders: [...], tableRows: [...] }`
-* **Deep Setter**: Setting `dashboard.state = newMasterData` automatically forwards state updates to child elements synchronously.
-
----
-
-### 6. `<universal-billing-funnel>`
-Commercial multi-step subscription wizard (Plan Selection -> Billing Details -> Confirmation).
-
-* **Properties / Attributes**:
-  * `plans` (Array | JSON String): `[{ id, name, price, features: [], popular: boolean }]`
-* **Custom Events**:
-  * `app-checkout-complete`: Emitted on successful purchase. `e.detail = { transactionId, timestamp, plan, payment }`
-
----
-
-## 🎨 Theming & Design System Overrides
-
-Customize visual tokens globally by overriding CSS variables on `:root` or via the `UniversalUI` JavaScript manager:
-
-```javascript
-import { UniversalUI } from './engine.js';
-
-// Switch to a built-in theme preset:
-// 'light' | 'dark' | 'corporate' | 'cyberpunk' | 'midnight' | 'emerald'
-UniversalUI.setTheme('cyberpunk');
-
-// Or override specific tokens on the fly:
-UniversalUI.setTheme('dark', {
-  '--color-primary': '#ff0055',
-  '--color-primary-hover': '#e6004c',
-  '--radius-md': '12px'
-});
-```
-
----
-
-## 🛠️ Build & Development Commands
+## Try the showcase
 
 ```bash
-# Install local dev dependencies
 npm install
-
-# Start local preview server on port 3000
 npm run dev
-
-# Run esbuild production bundle (dist/engine.min.js)
-npm run build:engine
-
-# Lint TypeScript declarations
-npm run lint
 ```
 
----
+Open the Vite server at `http://localhost:3000`, then visit:
 
-## 📄 License
+- `/apps/docs/` — searchable component gallery and live token inspector.
+- `/apps/teardown-lab/` — rubric assessment and candidate/baseline comparison.
+- `/apps/run-theater/` — simulated operations dashboard. It does not connect to a production cluster.
 
-MIT © Portable UI Engine Team. Open-source software.
+## Use the engine
+
+The engine registers the existing `universal-*` elements and the design-system primitives:
+
+`<ui-button>`, `<ui-input>`, `<ui-checkbox>`, `<ui-select>`, `<ui-dialog>`, `<ui-tooltip>`, `<ui-toast>`, `<ui-tabs>`, and `<ui-menu>`.
+
+Load the stylesheet and ESM bundle from a built distribution or package CDN:
+
+```html
+<link rel="stylesheet" href="./theme.css">
+<script type="module" src="./engine.js"></script>
+
+<ui-button variant="primary">Save changes</ui-button>
+<ui-input label="Workspace name" name="workspace"></ui-input>
+```
+
+Components render inside open Shadow DOM roots and emit bubbling, composed `CustomEvent`s. For example, listen for `ui-button-click`, `ui-input-change`, `ui-select-change`, `ui-checkbox-change`, and `ui-tab-change` on the component or an ancestor. Properties such as `ui-select.options`, `ui-tabs.items`, and `ui-menu.items` accept arrays; their documented HTML attributes remain usable for simple values.
+
+All primitive styling reads CSS custom properties generated from `packages/tokens/design-tokens.json`. The default theme is **Warm Precision**. **Technical Oceanic** and **Swiss Minimalist** are available through the theme controller:
+
+```js
+window.UniversalUI.setTheme('technical-oceanic');
+window.UniversalUI.setTheme('swiss-minimalist');
+```
+
+Legacy theme names remain accepted: `light`, `dark`, `corporate`, `cyberpunk`, `midnight`, and `emerald` map to the corresponding design direction families.
+
+## Repository layout
+
+```text
+packages/engine  distributable Web Components package
+packages/tokens  W3C token source and generated CSS/TypeScript
+elements/        engine primitive sources
+apps/            component gallery, teardown lab, and run theater
+tools/           design-system quality gates
+design/          approved design directions, briefs, and compositions
+docs/            architecture, ADRs, and evidence
+```
+
+## Development and verification
+
+```bash
+node packages/tokens/scripts/build-tokens.js  # regenerate CSS and token types
+npm run lint                                   # strict TypeScript check
+node tools/design-lint/index.mjs               # design gate
+npm test                                       # component and showcase browser tests
+npm run build                                  # engine bundles and showcase site
+```
+
+`npm run build:engine` builds both the repository distribution and the standalone `packages/engine` distribution. The browser test runner uses the installed Chrome executable; set `CHROME_PATH` when Chrome is installed elsewhere.
+
+## Project rules
+
+See [the Constitution](docs/CONSTITUTION.md), [architecture overview](docs/architecture/OVERVIEW.md), [ADRs](docs/adr/README.md), and [engineering conventions](AGENTS.md). Product decisions and implementation status are tracked in [sprints](sprints/README.md) and [the changelog](CHANGELOG.md).

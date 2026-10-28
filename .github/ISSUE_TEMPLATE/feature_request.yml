@@ -1,0 +1,25 @@
+name: Feature Request
+description: Suggest a new feature or improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve for the user?
+      placeholder: "As a mama mboga, I need to..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: User impact
+      options:
+        - Blocks daily use
+        - Reduces daily friction
+        - Nice to have

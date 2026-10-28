@@ -1,0 +1,14 @@
+{
+  "release": "1.3.0",
+  "date": "2026-08-23",
+  "head": "b3e87e86aa3517fd1606364772eed5d3e406f995",
+  "artifact_files": {
+    "pyproject.toml": "4f2cb3b22e9fb8910230cff1e4f588bb8c5987864724845f324422667bcfc934",
+    "configs/settings.yaml": "2a836d88ddb8bc109937fc1eaa5969b2f0963ab463ead6d0a01b3be521c87564",
+    "configs/settings.production.example.yaml": "08ea93c6129f55a4cc03c4fab307428f7a0039b2c7a13ec8c6c65f5ae198affa",
+    "Dockerfile": "447ad50a28198b50c5dc92508170fe78e4b1062cf791c98a0bd203ed66a75b40",
+    "src/traderos/application/factory.py": "6dd57388787f996c0c2b2f6bfebe2375dec915c1e151c9c538ade46d04838f99",
+    "src/traderos/infrastructure/backup_scheduler.py": "b87eb80428d2358124aaa0f0f4f88cefc7aa8544ed5f115bed1007a09acb508d",
+    "src/traderos/infrastructure/alpaca_broker.py": "1faaf6230dc8aa2fc9a39953daba6f2727de6dffd6040c910ef5d39c58d2cb45"
+  }
+}

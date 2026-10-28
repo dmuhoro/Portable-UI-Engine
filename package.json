@@ -1,6 +1,6 @@
 {
   "name": "@universal-ui/engine",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "description": "Portable UI Engine - Framework-Agnostic Web Components Asset Library with Shadow DOM Isolation & AI Gateway Contracts",
   "main": "./dist/engine.min.js",
@@ -25,7 +25,10 @@
     "build": "node build.js && vite build",
     "build:engine": "node build.js",
     "preview": "vite preview --port=3000 --host=0.0.0.0",
-    "test": "wtr tests/**/*.test.js --node-resolve --playwright",
+    "test": "npm run test:components && npm run test:showcases",
+    "test:components": "wtr tests/**/*.test.js --config web-test-runner.config.mjs",
+    "test:showcases": "node scripts/test-showcases.mjs",
+    "check:version": "node scripts/check-version.mjs",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
@@ -44,7 +47,9 @@
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "@web/test-runner": "^0.18.3",
+    "@web/test-runner-chrome": "^0.16.0",
     "autoprefixer": "^10.4.21",
+    "axe-core": "^4.13.0",
     "esbuild": "^0.25.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
