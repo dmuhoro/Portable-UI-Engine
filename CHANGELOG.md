@@ -25,4 +25,12 @@
 
 ## [Unreleased]
 
-No unreleased changes.
+### Added
+- **AI Studio Design Phase 1** - Three design directions (Warm Precision/Atelier Monolith, Technical Oceanic/Electric Slate, Swiss Minimalist/High-Contrast Editorial) with complete specs in `design/directions/`
+- **Component Design Briefs** - 8 component briefs across Batch A (button, input, select, checkbox), Batch B (dialog, tooltip, toast), Batch C (tabs, menu) in `design/briefs/`
+- **Showcase App Compositions** - Detailed design specs for apps/docs, apps/teardown-lab, apps/run-theater in `design/compositions/`
+- **Infrastructure Integration** - Merged audit/ui-00-baseline infrastructure (AGENTS.md, CONSTITUTION.md, ADRs, packages/engine, packages/tokens, tools/design-lint, elements/, sprints/, tasks/, docs/evidence/) with AI Studio design work
+- **Sprint Documentation** - Added UI-04 (mergeable) and UI-05 (consumable) sprint specs with evidence framework
+
+### Changed
+- Unified branch history integrating infrastructure foundation with design specifications
