@@ -137,13 +137,26 @@ export class UICheckbox extends HTMLElement {
   attributeChangedCallback() { if (this.isConnected) this.render(); }
   get checked() { return this.shadowRoot.querySelector('input')?.checked ?? this.hasAttribute('checked'); }
   set checked(value) { this.toggleAttribute('checked', Boolean(value)); }
+  get indeterminate() { return this.shadowRoot.querySelector('input')?.indeterminate ?? this.hasAttribute('indeterminate'); }
+  set indeterminate(value) { this.toggleAttribute('indeterminate', Boolean(value)); if (this.isConnected) this.render(); }
   render() {
     mount(this, `
-      :host { display: inline-block; }
-      label { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-height: var(--interaction-target-min); cursor: pointer; }
-      input { width: var(--spacing-md); height: var(--spacing-md); accent-color: var(--color-brand-primary); }
-      input:disabled + span { opacity: .6; cursor: not-allowed; }
-    `, `<label><input type="checkbox" name="${escapeMarkup(this.getAttribute('name') || '')}" value="${escapeMarkup(this.getAttribute('value') || 'on')}" /><span>${this.hasAttribute('label') ? escapeMarkup(this.getAttribute('label')) : '<slot></slot>'}</span></label>`);
+      :host { display: inline-block; font-family: var(--typography-family-body, var(--font-sans)); }
+      label { display: inline-flex; align-items: flex-start; gap: var(--spacing-xs); min-height: 44px; cursor: pointer; touch-action: manipulation; }
+      .control { position: relative; display: inline-flex; align-items: center; justify-content: center; width: var(--spacing-md); height: var(--spacing-md); margin-top: 2px; flex-shrink: 0; }
+      input { position: absolute; opacity: 0; width: 44px; height: 44px; cursor: pointer; }
+      .box { width: var(--spacing-md); height: var(--spacing-md); border: 1px solid var(--color-border-default); border-radius: var(--radius-xs); background: var(--color-surface-base); }
+      input:checked + .box { background: var(--color-brand-primary); border-color: var(--color-brand-primary); }
+      input:indeterminate + .box { background: var(--color-brand-primary); border-color: var(--color-brand-primary); }
+      .checkmark { position: absolute; width: 12px; height: 12px; color: var(--color-text-inverse); display: none; }
+      input:checked + .box + .checkmark.check { display: block; }
+      input:indeterminate + .box + .checkmark.dash { display: block; }
+      input:focus-visible + .box { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: 2px; }
+      input:disabled { cursor: not-allowed; }
+      input:disabled + .box { opacity: 0.45; }
+      input:disabled ~ span { opacity: 0.6; cursor: not-allowed; }
+      @media (prefers-reduced-motion: reduce) { .box, input { transition: none !important; } }
+    `, `<label><span class="control"><input type="checkbox" name="${escapeMarkup(this.getAttribute('name') || '')}" value="${escapeMarkup(this.getAttribute('value') || 'on')}" aria-label="${escapeMarkup(this.getAttribute('aria-label') || this.getAttribute('label') || '')}" /><span class="box"></span><svg class="checkmark check" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,6 5,9 10,3"></polyline></svg><svg class="checkmark dash" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="9" y2="6"></line></svg></span><span>${this.hasAttribute('label') ? escapeMarkup(this.getAttribute('label')) : '<slot></slot>'}</span></label>`);
     const input = this.shadowRoot.querySelector('input');
     input.checked = this.hasAttribute('checked');
     input.indeterminate = this.hasAttribute('indeterminate');
@@ -152,8 +165,10 @@ export class UICheckbox extends HTMLElement {
     this._updateFormValue(input);
     input.addEventListener('change', () => {
       this.toggleAttribute('checked', input.checked);
+      if (input.indeterminate) this.removeAttribute('indeterminate');
+      input.indeterminate = false;
       this._updateFormValue(input);
-      emit(this, 'ui-checkbox-change', { checked: input.checked, indeterminate: input.indeterminate, name: input.name, value: input.value });
+      emit(this, 'ui-checkbox-change', { checked: input.checked, indeterminate: false, name: input.name, value: input.value });
     });
   }
   _updateFormValue(input) {
@@ -162,9 +177,9 @@ export class UICheckbox extends HTMLElement {
     if (input.required && !input.checked) this._internals.setValidity({ valueMissing: true }, 'Please select this option.', input);
     else this._internals.setValidity({});
   }
-  formResetCallback() { this.checked = this._defaultChecked; }
-  formStateRestoreCallback(state) { this.checked = state === this.getAttribute('value') || state === 'on'; }
-  formDisabledCallback(disabled) { this._formDisabled = disabled; const input = this.shadowRoot.querySelector('input'); if (input) input.disabled = disabled; }
+  formResetCallback() { this.checked = this._defaultChecked; this.indeterminate = false; if (this.isConnected) this.render(); }
+  formStateRestoreCallback(state) { this.checked = state === this.getAttribute('value') || state === 'on'; this.indeterminate = false; }
+  formDisabledCallback(disabled) { this._formDisabled = disabled; if (this.isConnected) this.render(); }
 }
 
 export class UISelect extends HTMLElement {
