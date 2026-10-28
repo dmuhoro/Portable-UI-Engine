@@ -4,10 +4,12 @@ import { gzipSync } from 'node:zlib';
 import { join } from 'node:path';
 
 const bundles = [
-  'dist/engine.js',
-  'dist/engine.min.js',
-  'packages/engine/dist/engine.js',
-  'packages/engine/dist/engine.min.js',
+  './dist/engine.js',
+  './dist/engine.min.js',
+  './packages/engine/dist/engine.js',
+  './packages/engine/dist/engine.min.js',
+  './packages/engine/engine.js',
+  './packages/engine/engine.min.js',
 ];
 
 mkdirSync('docs/evidence/ui-04', { recursive: true });
