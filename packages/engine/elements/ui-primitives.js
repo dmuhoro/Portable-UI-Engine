@@ -389,39 +389,45 @@ export class UIToast extends HTMLElement {
 }
 
 export class UITabs extends HTMLElement {
-  static observedAttributes = ['selected'];
+  static observedAttributes = ['selected', 'label', 'variant'];
   constructor() { super(); this.attachShadow({ mode: 'open' }); this._items = []; }
   connectedCallback() { this.render(); }
   attributeChangedCallback(_name, oldValue, newValue) { if (this.isConnected && oldValue !== newValue && !this._reflecting) this.render(); }
   get items() { return this._items; }
   set items(value) { this._items = safeItems(value); if (this.isConnected) this.render(); }
   render() {
-    const items = this._items.length ? this._items : [...this.querySelectorAll('[data-tab]')].map((node, index) => ({ label: node.getAttribute('data-tab'), content: node.textContent, id: node.id || String(index) }));
+    const items = this._items.length ? this._items : [...this.querySelectorAll('[data-tab]')].map((node, index) => ({ label: node.getAttribute('data-tab') || node.textContent.trim(), content: node.innerHTML, id: node.id || String(index), panel: node }));
     const selected = Math.max(0, Math.min(items.length - 1, Number(this.getAttribute('selected') || 0)));
     mount(this, `
-      :host { display: block; }
-      [role="tablist"] { display: flex; gap: var(--spacing-2xs); overflow-x: auto; border-bottom: 1px solid var(--color-border-subtle); }
-      [role="tab"] { min-height: var(--interaction-target-min); padding: var(--spacing-xs) var(--spacing-md); border: 0; border-bottom: var(--border-focus-width) solid transparent; background: transparent; color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; }
-      :host([variant="segmented"]) [role="tablist"] { padding: var(--spacing-2xs); border: 0; border-radius: var(--radius-md); background: var(--color-surface-sunken); }
-      :host([variant="segmented"]) [role="tab"] { border: 0; border-radius: var(--radius-sm); }
-      :host([variant="segmented"]) [role="tab"][aria-selected="true"] { background: var(--color-surface-base); box-shadow: var(--shadow-sm); }
+      :host { display: block; font-family: var(--typography-family-body, var(--font-sans)); }
+      [role="tablist"] { display: flex; gap: var(--spacing-2xs); overflow-x: auto; border-bottom: 1px solid var(--color-border-subtle); scrollbar-width: thin; touch-action: pan-x; }
+      [role="tab"] { min-height: 44px; padding: var(--spacing-xs) var(--spacing-md); border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; font-weight: var(--typography-weight-medium, 500); touch-action: manipulation; }
+      [role="tab"]:hover { color: var(--color-text-primary); }
+      [role="tab"]:focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: -2px; border-radius: var(--radius-xs); }
+      :host([variant="segmented"]) [role="tablist"] { padding: var(--spacing-2xs); border: 0; border-radius: var(--radius-md); background: var(--color-surface-sunken); gap: var(--spacing-2xs); }
+      :host([variant="segmented"]) [role="tab"] { border: 0; border-radius: var(--radius-sm); flex: 1; justify-content: center; }
+      :host([variant="segmented"]) [role="tab"][aria-selected="true"] { background: var(--color-surface-base); box-shadow: var(--shadow-sm); color: var(--color-text-primary); }
       [role="tab"][aria-selected="true"] { border-bottom-color: var(--color-brand-primary); color: var(--color-text-primary); }
       [role="tabpanel"] { padding: var(--spacing-md) 0; }
-    `, `<div role="tablist" aria-label="${escapeMarkup(this.getAttribute('label') || 'Tabs')}"></div><section role="tabpanel" tabindex="0"></section>`);
+      [role="tabpanel"]:focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: 2px; }
+      @media (prefers-reduced-motion: reduce) { [role="tab"], [role="tablist"] { transition: none !important; } }
+    `, `<div role="tablist" aria-label="${escapeMarkup(this.getAttribute('label') || 'Tabs')}"></div><section role="tabpanel" tabindex="0" id="panel"></section>`);
     const tablist = this.shadowRoot.querySelector('[role="tablist"]');
     const panel = this.shadowRoot.querySelector('[role="tabpanel"]');
     const choose = index => {
       if (!items[index]) return;
       [...tablist.children].forEach((tab, tabIndex) => { tab.setAttribute('aria-selected', String(index === tabIndex)); tab.tabIndex = index === tabIndex ? 0 : -1; });
-      panel.textContent = String(items[index].content ?? ''); panel.setAttribute('aria-labelledby', `tab-${index}`); this._reflecting = true; this.setAttribute('selected', String(index)); this._reflecting = false;
+      panel.innerHTML = items[index].panel ? items[index].panel.innerHTML : String(items[index].content ?? '');
+      panel.setAttribute('aria-labelledby', `tab-${index}`); this._reflecting = true; this.setAttribute('selected', String(index)); this._reflecting = false;
       emit(this, 'ui-tab-change', { index, id: items[index].id ?? String(index) });
     };
     items.forEach((item, index) => {
-      const tab = document.createElement('button'); tab.type = 'button'; tab.id = `tab-${index}`; tab.setAttribute('role', 'tab'); tab.setAttribute('aria-controls', 'panel'); tab.textContent = String(item.label ?? `Tab ${index + 1}`); tab.addEventListener('click', () => choose(index));
-      tab.addEventListener('keydown', event => { let next = index; if (event.key === 'ArrowRight') next = (index + 1) % items.length; else if (event.key === 'ArrowLeft') next = (index + items.length - 1) % items.length; else if (event.key === 'Home') next = 0; else if (event.key === 'End') next = items.length - 1; else return; event.preventDefault(); choose(next); tablist.children[next].focus(); });
+      const tab = document.createElement('button'); tab.type = 'button'; tab.id = `tab-${index}`; tab.setAttribute('role', 'tab'); tab.setAttribute('aria-controls', 'panel'); tab.textContent = String(item.label ?? `Tab ${index + 1}`); tab.tabIndex = index === selected ? 0 : -1;
+      tab.addEventListener('click', () => { choose(index); tab.focus(); });
+      tab.addEventListener('keydown', event => { let next = index; if (event.key === 'ArrowRight') next = (index + 1) % items.length; else if (event.key === 'ArrowLeft') next = (index + items.length - 1) % items.length; else if (event.key === 'Home') next = 0; else if (event.key === 'End') next = items.length - 1; else if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(index); tab.focus(); return; } else return; event.preventDefault(); choose(next); tablist.children[next].focus(); });
       tablist.append(tab);
     });
-    panel.id = 'panel'; choose(selected);
+    choose(selected);
   }
 }
 
