@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "1.0.0",
+  "name": "@universal-ui/engine",
+  "version": "2.1.0",
+  "generatedAt": "2026-10-28T13:02:39.698Z",
+  "elements": [
+    {
+      "tagName": "ui-button",
+      "attributes": [],
+      "events": [
+        "ui-button-change",
+        "ui-button-click"
+      ],
+      "slots": [],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [],
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-input",
+      "attributes": [],
+      "events": [
+        "ui-input-change",
+        "ui-input-click"
+      ],
+      "slots": [],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [],
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-checkbox",
+      "attributes": [],
+      "events": [
+        "ui-checkbox-change",
+        "ui-checkbox-click"
+      ],
+      "slots": [],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [],
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-select",
+      "attributes": [],
+      "events": [
+        "ui-select-change",
+        "ui-select-click"
+      ],
+      "slots": [],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [],
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-dialog",
+      "attributes": [],
+      "events": [],
+      "slots": [],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [],
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-tooltip",
+      "attributes": [],
+      "events": [],
+      "slots": [],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [],
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-toast",
+      "attributes": [],
+      "events": [],
+      "slots": [],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [],
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-tabs",
+      "attributes": [],
+      "events": [],
+      "slots": [],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [],
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-menu",
+      "attributes": [],
+      "events": [],
+      "slots": [],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [],
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    }
+  ]
+}
