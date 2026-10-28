@@ -274,26 +274,43 @@ export class UISelect extends HTMLElement {
 
 export class UIDialog extends HTMLElement {
   static observedAttributes = ['open', 'label'];
-  constructor() { super(); this.attachShadow({ mode: 'open' }); }
+  constructor() { super(); this.attachShadow({ mode: 'open' }); this._previousFocus = null; }
   connectedCallback() { this.render(); }
   attributeChangedCallback() { if (this.isConnected) this.render(); }
   show() { this.setAttribute('open', ''); }
   close() { const dialog = this.shadowRoot.querySelector('dialog'); if (dialog?.open) dialog.close(); this.removeAttribute('open'); }
   render() {
     mount(this, `
-      dialog { width: min(var(--component-dialog-max-width), calc(100vw - var(--spacing-lg))); max-height: calc(100vh - var(--spacing-2xl)); overflow: auto; padding: var(--spacing-lg); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); background: var(--color-surface-base); color: var(--color-text-primary); box-shadow: var(--shadow-lg); }
-      dialog::backdrop { background: var(--color-overlay-scrim); backdrop-filter: blur(var(--spacing-2xs)); }
+      :host { font-family: var(--typography-family-body, var(--font-sans)); }
+      dialog { width: min(var(--component-dialog-max-width, 640px), calc(100vw - var(--spacing-lg))); max-height: calc(100vh - var(--spacing-2xl)); overflow: auto; padding: var(--spacing-lg); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); background: var(--color-surface-base); color: var(--color-text-primary); box-shadow: var(--shadow-lg); }
+      dialog::backdrop { background: var(--color-overlay-scrim, rgba(0,0,0,0.6)); backdrop-filter: blur(4px); }
       header { display: flex; justify-content: space-between; align-items: start; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
-      h2 { margin: 0; font-size: var(--font-size-lg); }
-      button { min-width: var(--interaction-target-min); min-height: var(--interaction-target-min); border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; }
+      h2 { margin: 0; font-size: var(--font-size-lg); font-weight: var(--typography-weight-semibold, 600); }
+      .close { min-width: 44px; min-height: 44px; border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; color: var(--color-text-secondary); touch-action: manipulation; }
+      .close:hover { background: var(--color-surface-sunken); }
+      .close:focus-visible { outline: var(--border-focus-width) solid var(--color-border-focus); outline-offset: 2px; }
+      section { display: grid; gap: var(--spacing-md); }
+      footer { display: flex; justify-content: flex-end; gap: var(--spacing-sm); }
       @media (prefers-reduced-motion: no-preference) { dialog { transition: opacity var(--transition-fast), transform var(--transition-fast); } }
-    `, `<dialog aria-labelledby="dialog-title"><header><h2 id="dialog-title"></h2><button type="button" aria-label="Close dialog">×</button></header><section><slot></slot></section></dialog>`);
+      @media (prefers-reduced-motion: reduce) { dialog { transition: none !important; } }
+    `, `<dialog aria-labelledby="dialog-title"><header><h2 id="dialog-title"></h2><button class="close" type="button" aria-label="Close dialog">×</button></header><section><slot></slot></section><footer><slot name="footer"></slot></footer></dialog>`);
     const dialog = this.shadowRoot.querySelector('dialog');
-    this.shadowRoot.querySelector('h2').textContent = this.getAttribute('label') || '';
-    this.shadowRoot.querySelector('button').addEventListener('click', () => this.close());
-    dialog.addEventListener('cancel', event => { event.preventDefault(); this.close(); });
-    dialog.addEventListener('close', () => emit(this, 'ui-dialog-close'));
-    if (this.hasAttribute('open') && !dialog.open) dialog.showModal();
+    const title = this.shadowRoot.querySelector('h2');
+    const closeBtn = this.shadowRoot.querySelector('.close');
+    title.textContent = this.getAttribute('label') || '';
+    closeBtn.addEventListener('click', () => this.close());
+    dialog.addEventListener('cancel', event => { event.preventDefault(); emit(this, 'ui-dialog-cancel'); this.close(); });
+    dialog.addEventListener('close', () => { emit(this, 'ui-dialog-close'); if (this._previousFocus && typeof this._previousFocus.focus === 'function') this._previousFocus.focus(); });
+    dialog.addEventListener('keydown', event => {
+      if (event.key !== 'Tab') return;
+      const focusable = [...dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled && el.offsetWidth > 0 && el.offsetHeight > 0);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey) { if (document.activeElement === first || !dialog.contains(document.activeElement)) { event.preventDefault(); last.focus(); } }
+      else { if (document.activeElement === last) { event.preventDefault(); first.focus(); } }
+    });
+    if (this.hasAttribute('open') && !dialog.open) { this._previousFocus = document.activeElement; dialog.showModal(); }
     if (!this.hasAttribute('open') && dialog.open) dialog.close();
   }
 }
