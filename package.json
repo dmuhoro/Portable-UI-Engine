@@ -29,7 +29,10 @@
     "test:components": "wtr tests/**/*.test.js --config web-test-runner.config.mjs",
     "test:showcases": "node scripts/test-showcases.mjs",
     "check:version": "node scripts/check-version.mjs",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test:negative-gate": "node scripts/test-design-lint-negative.mjs",
+    "measure:bundles": "node scripts/measure-bundles.mjs",
+    "design:lint": "node tools/design-lint/index.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
