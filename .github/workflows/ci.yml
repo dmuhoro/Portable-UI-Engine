@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -31,13 +33,32 @@ jobs:
         run: npm run lint
       - name: Design gate
         run: node tools/design-lint/index.mjs
+      - name: Negative design-lint gate
+        run: npm run test:negative-gate
+      - name: Scope guard
+        run: npm run scope-guard -- --base origin/main
       - name: Verify generated token outputs
         run: git diff --exit-code -- packages/tokens/css/variables.css packages/tokens/ts/tokens.ts theme.css packages/engine/theme.css
-      - name: Component and showcase browser tests
-        run: npm test
-        env:
-          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
       - name: Production build
         run: npm run build
       - name: Verify distributable artifacts
         run: test -s dist/engine.js && test -s dist/engine.min.js && test -s packages/engine/dist/engine.js && test -s packages/engine/dist/engine.min.js
+      - name: Component and showcase browser tests
+        run: npm test
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+      - name: Quick-start proof
+        run: npm run test:quick-start
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+      - name: Manifest completeness
+        run: npm run test:manifest
+      - name: Packed tarball import
+        run: npm run test:pack
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+      - name: Next.js consumer build
+        working-directory: examples/nextjs-consumer
+        run: |
+          npm install
+          npm run build
