@@ -2,44 +2,62 @@
   "schemaVersion": "1.0.0",
   "name": "@universal-ui/engine",
   "version": "2.1.0",
-  "generatedAt": "2026-10-28T13:02:39.698Z",
+  "generatedAt": "2026-10-29T14:24:44.709Z",
+  "source": "packages/engine/elements/ui-primitives.js",
+  "cssCustomProperties": [
+    "--color-brand-primary",
+    "--color-text-primary",
+    "--color-surface-base",
+    "--spacing-md",
+    "--radius-sm",
+    "--motion-duration-fast"
+  ],
   "elements": [
     {
       "tagName": "ui-button",
-      "attributes": [],
-      "events": [
-        "ui-button-change",
-        "ui-button-click"
+      "attributes": [
+        {
+          "name": "variant",
+          "type": "string"
+        },
+        {
+          "name": "size",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean"
+        },
+        {
+          "name": "loading",
+          "type": "boolean"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        }
       ],
-      "slots": [],
+      "events": [
+        {
+          "name": "ui-button-click",
+          "detail": "{ originalEvent, variant }"
+        }
+      ],
+      "slots": [
+        "default",
+        "icon-start",
+        "icon-end"
+      ],
       "cssCustomProperties": [
         "--color-brand-primary",
         "--color-text-primary",
         "--spacing-md",
         "--radius-sm"
       ],
-      "cssParts": [],
-      "accessibility": {
-        "keyboard": true,
-        "focusable": true,
-        "ariaSupport": true
-      }
-    },
-    {
-      "tagName": "ui-input",
-      "attributes": [],
-      "events": [
-        "ui-input-change",
-        "ui-input-click"
+      "cssParts": [
+        "button"
       ],
-      "slots": [],
-      "cssCustomProperties": [
-        "--color-brand-primary",
-        "--color-text-primary",
-        "--spacing-md",
-        "--radius-sm"
-      ],
-      "cssParts": [],
+      "keyboard": "Enter/Space activate; disabled suppresses events",
       "accessibility": {
         "keyboard": true,
         "focusable": true,
@@ -48,40 +66,48 @@
     },
     {
       "tagName": "ui-checkbox",
-      "attributes": [],
-      "events": [
-        "ui-checkbox-change",
-        "ui-checkbox-click"
+      "attributes": [
+        {
+          "name": "checked",
+          "type": "boolean"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "string"
+        },
+        {
+          "name": "indeterminate",
+          "type": "boolean"
+        }
       ],
-      "slots": [],
+      "events": [
+        {
+          "name": "ui-checkbox-change",
+          "detail": "{ checked, indeterminate }"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
       "cssCustomProperties": [
         "--color-brand-primary",
         "--color-text-primary",
         "--spacing-md",
         "--radius-sm"
       ],
-      "cssParts": [],
-      "accessibility": {
-        "keyboard": true,
-        "focusable": true,
-        "ariaSupport": true
-      }
-    },
-    {
-      "tagName": "ui-select",
-      "attributes": [],
-      "events": [
-        "ui-select-change",
-        "ui-select-click"
+      "cssParts": [
+        "control",
+        "label"
       ],
-      "slots": [],
-      "cssCustomProperties": [
-        "--color-brand-primary",
-        "--color-text-primary",
-        "--spacing-md",
-        "--radius-sm"
-      ],
-      "cssParts": [],
+      "keyboard": "Space toggles",
       "accessibility": {
         "keyboard": true,
         "focusable": true,
@@ -90,16 +116,38 @@
     },
     {
       "tagName": "ui-dialog",
-      "attributes": [],
-      "events": [],
-      "slots": [],
+      "attributes": [
+        {
+          "name": "open",
+          "type": "boolean"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-dialog-close",
+          "detail": "{}"
+        }
+      ],
+      "slots": [
+        "default",
+        "header",
+        "footer"
+      ],
       "cssCustomProperties": [
         "--color-brand-primary",
         "--color-text-primary",
         "--spacing-md",
         "--radius-sm"
       ],
-      "cssParts": [],
+      "cssParts": [
+        "dialog",
+        "backdrop"
+      ],
+      "keyboard": "Escape closes; focus trapped while open",
       "accessibility": {
         "keyboard": true,
         "focusable": true,
@@ -107,53 +155,68 @@
       }
     },
     {
-      "tagName": "ui-tooltip",
-      "attributes": [],
-      "events": [],
-      "slots": [],
+      "tagName": "ui-input",
+      "attributes": [
+        {
+          "name": "label",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean"
+        },
+        {
+          "name": "required",
+          "type": "boolean"
+        },
+        {
+          "name": "clearable",
+          "type": "boolean"
+        },
+        {
+          "name": "error",
+          "type": "string"
+        },
+        {
+          "name": "help",
+          "type": "string"
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-input-change",
+          "detail": "{ value }"
+        }
+      ],
+      "slots": [
+        "default",
+        "prefix",
+        "suffix"
+      ],
       "cssCustomProperties": [
         "--color-brand-primary",
         "--color-text-primary",
         "--spacing-md",
         "--radius-sm"
       ],
-      "cssParts": [],
-      "accessibility": {
-        "keyboard": true,
-        "focusable": true,
-        "ariaSupport": true
-      }
-    },
-    {
-      "tagName": "ui-toast",
-      "attributes": [],
-      "events": [],
-      "slots": [],
-      "cssCustomProperties": [
-        "--color-brand-primary",
-        "--color-text-primary",
-        "--spacing-md",
-        "--radius-sm"
+      "cssParts": [
+        "field",
+        "label",
+        "input"
       ],
-      "cssParts": [],
-      "accessibility": {
-        "keyboard": true,
-        "focusable": true,
-        "ariaSupport": true
-      }
-    },
-    {
-      "tagName": "ui-tabs",
-      "attributes": [],
-      "events": [],
-      "slots": [],
-      "cssCustomProperties": [
-        "--color-brand-primary",
-        "--color-text-primary",
-        "--spacing-md",
-        "--radius-sm"
-      ],
-      "cssParts": [],
+      "keyboard": "Standard text input; Escape clears when clearable",
       "accessibility": {
         "keyboard": true,
         "focusable": true,
@@ -162,16 +225,200 @@
     },
     {
       "tagName": "ui-menu",
-      "attributes": [],
-      "events": [],
-      "slots": [],
+      "attributes": [
+        {
+          "name": "open",
+          "type": "boolean"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-menu-select",
+          "detail": "{ value }"
+        }
+      ],
+      "slots": [
+        "default",
+        "trigger"
+      ],
       "cssCustomProperties": [
         "--color-brand-primary",
         "--color-text-primary",
         "--spacing-md",
         "--radius-sm"
       ],
-      "cssParts": [],
+      "cssParts": [
+        "menu",
+        "item"
+      ],
+      "keyboard": "Arrow keys navigate; Enter activates; Escape closes",
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-select",
+      "attributes": [
+        {
+          "name": "label",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean"
+        },
+        {
+          "name": "placeholder",
+          "type": "string"
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-select-change",
+          "detail": "{ value }"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [
+        "trigger",
+        "listbox",
+        "option"
+      ],
+      "keyboard": "Arrow keys navigate; Enter selects; Escape closes; typeahead filters",
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-tabs",
+      "attributes": [
+        {
+          "name": "value",
+          "type": "string"
+        },
+        {
+          "name": "orientation",
+          "type": "string"
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-tab-change",
+          "detail": "{ value }"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [
+        "tablist",
+        "tab",
+        "panel"
+      ],
+      "keyboard": "Arrow keys move; Home/End jump; roving tabindex",
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-toast",
+      "attributes": [
+        {
+          "name": "open",
+          "type": "boolean"
+        },
+        {
+          "name": "variant",
+          "type": "string"
+        },
+        {
+          "name": "duration",
+          "type": "number"
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-toast-dismiss",
+          "detail": "{}"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [
+        "toast"
+      ],
+      "keyboard": "Pause on focus; Escape dismisses when focused",
+      "accessibility": {
+        "keyboard": true,
+        "focusable": true,
+        "ariaSupport": true
+      }
+    },
+    {
+      "tagName": "ui-tooltip",
+      "attributes": [
+        {
+          "name": "content",
+          "type": "string"
+        },
+        {
+          "name": "placement",
+          "type": "string"
+        }
+      ],
+      "events": [],
+      "slots": [
+        "default"
+      ],
+      "cssCustomProperties": [
+        "--color-brand-primary",
+        "--color-text-primary",
+        "--spacing-md",
+        "--radius-sm"
+      ],
+      "cssParts": [
+        "tooltip"
+      ],
+      "keyboard": "Shown on focus; suppressed when hover unavailable",
       "accessibility": {
         "keyboard": true,
         "focusable": true,
