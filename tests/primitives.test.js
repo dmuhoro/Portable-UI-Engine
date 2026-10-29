@@ -1,0 +1,179 @@
+import '../elements/ui-primitives.js';
+import 'axe-core/axe.min.js';
+
+const axe = window.axe;
+
+function assert(condition, message = 'assertion failed') {
+  if (!condition) throw new Error(message);
+}
+
+function addElement(tag, attributes = {}) {
+  const element = document.createElement(tag);
+  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
+  document.body.append(element);
+  return element;
+}
+
+describe('Portable UI primitives', () => {
+  afterEach(() => { document.body.replaceChildren(); });
+
+  it('registers all design brief elements', () => {
+    for (const tag of ['ui-button', 'ui-input', 'ui-checkbox', 'ui-select', 'ui-dialog', 'ui-tooltip', 'ui-toast', 'ui-tabs', 'ui-menu']) {
+      assert(Boolean(customElements.get(tag)), `${tag} is registered`);
+    }
+  });
+
+  it('ships visible focus and reduced-motion rules for every primitive', () => {
+    const tags = ['ui-button', 'ui-input', 'ui-checkbox', 'ui-select', 'ui-dialog', 'ui-tooltip', 'ui-toast', 'ui-tabs', 'ui-menu'];
+    for (const tag of tags) {
+      const element = addElement(tag);
+      const styles = element.shadowRoot.querySelector('style').textContent;
+      assert(styles.includes(':focus-visible'), `${tag} has a visible keyboard focus indicator`);
+      assert(styles.includes('prefers-reduced-motion: reduce'), `${tag} respects reduced motion preferences`);
+    }
+  });
+
+  it('emits a composed button action and honors disabled state', () => {
+    const button = addElement('ui-button');
+    let received = 0;
+    button.addEventListener('ui-button-click', event => { received += 1; assert(event.bubbles && event.composed); });
+    button.shadowRoot.querySelector('button').click();
+    button.setAttribute('disabled', '');
+    button.shadowRoot.querySelector('button').click();
+    assert(received === 1, 'only enabled activation emits');
+  });
+
+  it('reflects input values and emits user edits', () => {
+    const input = addElement('ui-input', { label: 'Email', name: 'email' });
+    let detail;
+    input.addEventListener('ui-input-change', event => { detail = event.detail; });
+    const field = input.shadowRoot.querySelector('input');
+    field.value = 'a@example.com';
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    assert(detail.name === 'email' && detail.value === 'a@example.com');
+    assert(input.value === 'a@example.com');
+  });
+
+  it('clears clearable inputs and announces the updated value', () => {
+    const input = addElement('ui-input', { label: 'Search', clearable: '' });
+    input.value = 'needle';
+    let source = '';
+    input.addEventListener('ui-input-change', event => { source = event.detail.source; });
+    input.shadowRoot.querySelector('.clear').click();
+    assert(input.value === '' && source === 'clear');
+  });
+
+  it('supports checkbox state and indeterminate reflection', () => {
+    const checkbox = addElement('ui-checkbox', { label: 'Select all', indeterminate: '' });
+    assert(checkbox.shadowRoot.querySelector('input').indeterminate);
+    checkbox.shadowRoot.querySelector('input').click();
+    assert(checkbox.checked);
+  });
+
+  it('participates in native form submission and reset', () => {
+    const form = document.createElement('form');
+    form.innerHTML = '<ui-input label="Project" name="project" value="starter"></ui-input><ui-checkbox label="Updates" name="updates" value="yes" checked></ui-checkbox>';
+    document.body.append(form);
+    const input = form.querySelector('ui-input');
+    assert(new FormData(form).get('project') === 'starter');
+    assert(new FormData(form).get('updates') === 'yes');
+    input.value = 'changed';
+    assert(new FormData(form).get('project') === 'changed');
+    form.reset();
+    assert(input.value === 'starter' && form.querySelector('ui-checkbox').checked);
+  });
+
+  it('filters and selects options through the combobox contract', () => {
+    const select = addElement('ui-select');
+    select.options = [{ label: 'Alpha', value: 'a' }, { label: 'Beta', value: 'b' }];
+    let selected;
+    select.addEventListener('ui-select-change', event => { selected = event.detail.value; });
+    const input = select.shadowRoot.querySelector('input');
+    input.focus();
+    input.value = 'Beta';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    select.shadowRoot.querySelector('[role="option"]').click();
+    assert(selected === 'b' && select.value === 'b');
+  });
+
+  it('flips a combobox popup above its trigger when the viewport bottom is tight', () => {
+    const select = addElement('ui-select');
+    select.options = [{ label: 'Alpha', value: 'a' }, { label: 'Beta', value: 'b' }];
+    Object.assign(select.style, { position: 'fixed', bottom: '0', left: '1rem', width: '16rem' });
+    const input = select.shadowRoot.querySelector('input');
+    input.focus();
+    const triggerTop = input.getBoundingClientRect().top;
+    const popup = select.shadowRoot.querySelector('[role="listbox"]');
+    const bounds = popup.getBoundingClientRect();
+    assert(bounds.top < triggerTop, 'popup should flip above the trigger');
+    assert(bounds.bottom <= window.innerHeight, 'popup should remain within the viewport');
+  });
+
+  it('keeps combobox keyboard focus on the input while moving the active option', () => {
+    const select = addElement('ui-select');
+    select.options = [{ label: 'Alpha', value: 'a' }, { label: 'Beta', value: 'b' }];
+    const input = select.shadowRoot.querySelector('input');
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const activeId = input.getAttribute('aria-activedescendant');
+    assert(activeId && select.shadowRoot.activeElement === input, 'combobox retains focus and exposes the active option');
+  });
+
+  it('changes tabs with arrow keys and emits the selected index', () => {
+    const tabs = addElement('ui-tabs');
+    tabs.items = [{ label: 'Overview', content: 'Summary' }, { label: 'Logs', content: 'Events' }];
+    let selected;
+    tabs.addEventListener('ui-tab-change', event => { selected = event.detail.index; });
+    tabs.shadowRoot.querySelector('[role="tab"]').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    assert(selected === 1 && tabs.shadowRoot.querySelector('[role="tabpanel"]').textContent === 'Events');
+  });
+
+  it('opens native dialog and dismisses toast through public methods', () => {
+    const dialog = addElement('ui-dialog', { label: 'Confirmation' });
+    dialog.show();
+    assert(dialog.shadowRoot.querySelector('dialog').open);
+    dialog.close();
+    assert(!dialog.shadowRoot.querySelector('dialog').open);
+
+    const toast = addElement('ui-toast', { message: 'Saved', duration: '0' });
+    let dismissed = false;
+    toast.addEventListener('ui-toast-dismiss', () => { dismissed = true; });
+    toast.dismiss();
+    assert(toast.hidden && dismissed);
+  });
+
+  it('opens menu and emits the selected action', () => {
+    const menu = addElement('ui-menu');
+    menu.items = [{ label: 'Settings', value: 'settings', shortcut: '⌘,' }];
+    let value;
+    menu.addEventListener('ui-menu-select', event => { value = event.detail.value; });
+    menu.shadowRoot.querySelector('button[aria-haspopup="menu"]').click();
+    menu.shadowRoot.querySelector('[role="menuitem"]').click();
+    assert(value === 'settings');
+  });
+
+  it('passes axe core WCAG A and AA rules on the primitive gallery', async () => {
+    const fixture = document.createElement('section');
+    fixture.innerHTML = `
+      <ui-button>Save</ui-button>
+      <ui-input label="Email" name="email"></ui-input>
+      <ui-checkbox label="Subscribe" name="subscribe"></ui-checkbox>
+      <ui-select label="Region"></ui-select>
+      <ui-dialog label="Confirm"><p>Continue?</p></ui-dialog>
+      <ui-tooltip text="Helpful information"><button type="button">Help</button></ui-tooltip>
+      <ui-toast message="Saved" hidden></ui-toast>
+      <ui-tabs></ui-tabs>
+      <ui-menu label="Actions"></ui-menu>
+    `;
+    document.body.append(fixture);
+    fixture.querySelector('ui-select').options = [{ label: 'East', value: 'east' }];
+    fixture.querySelector('ui-tabs').items = [{ label: 'Overview', content: 'Summary' }];
+    fixture.querySelector('ui-menu').items = [{ label: 'Edit', value: 'edit' }];
+    const report = await axe.run(fixture, {
+      runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] },
+      rules: { 'color-contrast': { enabled: false } },
+    });
+    const violations = report.violations.map(issue => `${issue.id}: ${issue.nodes.map(node => node.target.join(' ')).join(', ')}`);
+    assert(violations.length === 0, violations.join('\n'));
+  });
+});

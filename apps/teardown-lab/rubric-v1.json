@@ -1,0 +1,18 @@
+{
+  "name": "Portable UI Engine Rubric v1",
+  "version": "1.0.0",
+  "criteria": [
+    {"id": "visual_hierarchy", "name": "Visual Hierarchy & Layout", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "typography", "name": "Typography Scale & Rhythm", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "color_contrast", "name": "Color & Contrast (WCAG AA)", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "spacing", "name": "Spacing System Consistency", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "interaction_states", "name": "Interaction States", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "motion", "name": "Motion (purposeful, reduced-motion)", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "keyboard", "name": "Keyboard Operability & Focus", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "a11y_semantics", "name": "Screen-reader Semantics", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "responsive", "name": "Responsiveness (320,768,1280)", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "tokens", "name": "Theming & Token Discipline", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "api_clarity", "name": "API Contract Clarity", "weight": 1, "scale": [0,1,2,3,4]},
+    {"id": "performance", "name": "Performance & Bundle Weight", "weight": 1, "scale": [0,1,2,3,4]}
+  ]
+}

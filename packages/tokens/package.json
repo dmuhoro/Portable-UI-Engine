@@ -1,0 +1,13 @@
+{
+  "name": "@universal-ui/tokens",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./ts/tokens.ts",
+  "exports": {
+    ".": "./ts/tokens.ts",
+    "./css": "./css/variables.css",
+    "./tokens.json": "./design-tokens.json"
+  },
+  "files": ["css/", "ts/", "design-tokens.json", "scripts/"],
+  "license": "MIT"
+}

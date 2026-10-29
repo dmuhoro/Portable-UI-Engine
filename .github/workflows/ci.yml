@@ -1,0 +1,43 @@
+name: Portable UI Engine CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+      - name: Generate design tokens
+        run: node packages/tokens/scripts/build-tokens.js
+      - name: Check release version metadata
+        run: npm run check:version
+      - name: Strict TypeScript check
+        run: npm run lint
+      - name: Design gate
+        run: node tools/design-lint/index.mjs
+      - name: Verify generated token outputs
+        run: git diff --exit-code -- packages/tokens/css/variables.css packages/tokens/ts/tokens.ts theme.css packages/engine/theme.css
+      - name: Component and showcase browser tests
+        run: npm test
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+      - name: Production build
+        run: npm run build
+      - name: Verify distributable artifacts
+        run: test -s dist/engine.js && test -s dist/engine.min.js && test -s packages/engine/dist/engine.js && test -s packages/engine/dist/engine.min.js

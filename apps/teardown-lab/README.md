@@ -1,10 +1,5 @@
-# Teardown Lab (`apps/teardown-lab`) Specification
+# Teardown Lab
 
-Please refer to the complete Phase 1 design composition specification at:
-[`../../design/compositions/teardown-lab.md`](../../design/compositions/teardown-lab.md)
+Teardown Lab loads rubric v1 in the browser and calculates a weighted score from reviewer-selected ratings. It saves ratings and evidence locally, measures text contrast and the candidate button's rendered target size, and provides print-to-PDF output.
 
-### Summary of Composition:
-- **Purpose**: Rubric evaluation, automated scoring cards, and side-by-side component comparisons.
-- **Breakpoints**: 320px (stacked compact scorecards), 768px (horizontal KPI strip + criteria list), 1280px (sticky sidebar score + criteria matrix + split benchmark comparison bench).
-- **Core Components**: `<ui-checkbox>`, `<ui-button>`, `<ui-tabs>`, `<universal-data-table>`.
-- **Token System**: W3C Design Tokens consumed via CSS custom properties in Shadow DOM roots.
+The score is a team assessment, not a claim of WCAG certification. The candidate/baseline comparison is illustrative; it does not claim measured bundle size or rendering performance. Open `/apps/teardown-lab/` through the root Vite dev server.
