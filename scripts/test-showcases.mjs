@@ -84,7 +84,18 @@ try {
 
   if (failures.length) throw new Error(failures.join('\n'));
   console.log('Showcase browser checks passed: docs gallery, theme/token inspector, teardown rubric, and run theater.');
+  process.exitCode = 0;
+} catch (error) {
+  console.error(error);
+  process.exitCode = 1;
 } finally {
-  if (browser) await browser.close();
-  server.kill('SIGTERM');
+  if (browser) {
+    try { await browser.close(); } catch { /* ignore close races */ }
+  }
+  if (server.pid) {
+    try { process.kill(server.pid, 'SIGTERM'); } catch { /* sandbox or already exited */ }
+    try { process.kill(server.pid, 'SIGKILL'); } catch { /* already gone */ }
+  }
+  // Vite can keep the event loop alive via open handles; force a clean exit.
+  setTimeout(() => process.exit(process.exitCode ?? 0), 100).unref();
 }
