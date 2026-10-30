@@ -31,7 +31,7 @@
 - **Showcase App Compositions** - Detailed design specs for apps/docs, apps/teardown-lab, apps/run-theater in `design/compositions/`
 - **Infrastructure Integration** - Merged audit/ui-00-baseline infrastructure (AGENTS.md, CONSTITUTION.md, ADRs, packages/engine, packages/tokens, tools/design-lint, elements/, sprints/, tasks/, docs/evidence/) with AI Studio design work
 - **Sprint Documentation** - Added UI-04 (mergeable) and UI-05 (consumable) sprint specs with evidence framework
-- **UI-05: Consumable** - Manifest (`design/contracts/components.json`), package contract tests (pack/import), Next.js consumer proof (`examples/nextjs-consumer`), scope guard, agent skill (`docs/agent/UI-ENGINE-SKILL.md`)
+- **UI-05: Consumable** - Manifest (`design/contracts/components.json`), package contract tests (pack/import), Next.js consumer proof (`examples/nextjs-consumer`), scope guard, agent skill (`docs/agent/UI-ENGINE-SKILL.md`), consuming guide updates
 - **UI-04: Mergeable & Trusted** - CI gates (lint/design:lint/negative-gate/quick-start/bundle-size), preflight/diagnosis evidence, merge-commit flow
 
 ### Changed
