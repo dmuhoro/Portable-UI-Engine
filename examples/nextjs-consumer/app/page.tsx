@@ -1,19 +1,24 @@
-import { EngineLoader } from './engine-loader';
+'use client';
+
+import './engine-loader';
 
 export default function Page() {
   return (
-    <main style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
-      <EngineLoader />
-      <h1>Next.js consumer</h1>
+    <main>
+      <h1>Portable UI Engine — Next.js consumer</h1>
       <p>Client-only registration of Portable UI Engine primitives.</p>
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        {/* @ts-ignore */}
         <ui-button variant="primary">Save</ui-button>
+        {/* @ts-ignore */}
         <ui-input label="Workspace" name="workspace" />
       </div>
+      {/* @ts-ignore */}
       <ui-dialog label="Confirm">
-        <p>Dialog content projected from React.</p>
+        <p>Dialog content</p>
       </ui-dialog>
-      <ui-tabs />
+      {/* @ts-ignore */}
+      <ui-tabs></ui-tabs>
     </main>
   );
 }
