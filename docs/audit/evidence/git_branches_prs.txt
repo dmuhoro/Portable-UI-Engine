@@ -1,0 +1,39 @@
+=== git branch -a ===
+* audit/readiness-20261030
+  audit/ui-00-baseline
+  chore/ci-bootstrap
+  feat/ui-05-consumable
+  main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/audit/readiness-20261030
+  remotes/origin/audit/ui-00-baseline
+  remotes/origin/chore/ci-bootstrap
+  remotes/origin/feat/ui-05-consumable
+  remotes/origin/main
+
+=== gh pr list ===
+6	audit: readiness assessment for real-world/Software Factory consumption	audit/readiness-20261030	OPEN	2026-10-30T12:35:04Z
+5	ui-05: consumable delivery	feat/ui-05-consumable	OPEN	2026-10-29T17:32:50Z
+4	ci: bootstrap pull request quality workflow	chore/ci-bootstrap	MERGED	2026-10-27T20:31:53Z
+3	Portable UI Engine 2.1.0 design system delivery	audit/ui-00-baseline	MERGED	2026-10-27T19:41:58Z
+2	Implement toast, modal, and badge-cloud primitives (refs #1)	ghostdev508:feature/good-first-issue-primitives	OPEN	2026-08-14T06:47:39Z
+
+=== gh pr view 5 ===
+title:	ui-05: consumable delivery
+state:	OPEN
+author:	dmuhoro (dmuhoro)
+labels:	
+assignees:	
+reviewers:	
+projects:	
+milestone:	
+number:	5
+url:	https://github.com/dmuhoro/Portable-UI-Engine/pull/5
+additions:	1412
+deletions:	201
+auto-merge:	disabled
+--
+UI-05 consumable delivery: manifest, pack contract, Next.js consumer, agent skill/docs. Evidence in docs/evidence/ui-05/VERIFICATION.md
+
+=== gh pr checks 5 ===
+verify	fail	1m2s	https://github.com/dmuhoro/Portable-UI-Engine/actions/runs/41051935410/job/124049885708	
