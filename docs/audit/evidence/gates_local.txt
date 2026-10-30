@@ -1,0 +1,77 @@
+=== lint ===
+
+> @universal-ui/engine@2.1.0 lint
+> tsc --noEmit
+
+
+=== design:lint ===
+
+> @universal-ui/engine@2.1.0 design:lint
+> node tools/design-lint/index.mjs
+
+[design-lint] Starting design gate checks...
+
+1. Checking token usage...
+   Done.
+
+2. Checking reduced motion support...
+   PASS: Reduced motion queries detected
+
+3. Checking focus states...
+   PASS: Focus state styles detected
+
+4. Checking accessibility basics...
+   PASS: Some components have role attributes
+
+   PASS: Some components have aria-label/aria-labelledby
+
+PASS: 0 error(s), 0 warning(s)
+
+
+=== test:negative-gate ===
+
+> @universal-ui/engine@2.1.0 test:negative-gate
+> node scripts/test-design-lint-negative.mjs
+
+✓ bad-hardcoded-color.css: correctly failed with exit code 1
+✓ bad-no-focus.css: correctly failed with exit code 1
+✓ bad-no-reduced-motion.css: correctly failed with exit code 1
+
+Negative gate tests: 3 passed, 0 failed
+
+=== test:manifest ===
+
+> @universal-ui/engine@2.1.0 test:manifest
+> node scripts/test-manifest.mjs
+
+test-manifest: PASS (9 elements; 9 required covered)
+
+=== test:pack ===
+
+> @universal-ui/engine@2.1.0 test:pack
+> node scripts/test-pack-import.mjs
+
+test-pack: PASS (universal-ui-engine-2.1.0.tgz)
+
+=== test:quick-start ===
+
+> @universal-ui/engine@2.1.0 test:quick-start
+> node scripts/test-quick-start.mjs
+
+Quick-start proof passed: README snippet registers and renders ui-button and ui-input.
+
+=== build ===
+
+> @universal-ui/engine@2.1.0 build
+> node build.js && vite build
+
+Built root and standalone engine distributions.
+vite v6.4.5 building for production...
+transforming...
+✓ 15 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/site/index.html                  32.38 kB │ gzip:  6.85 kB
+dist/site/assets/index-UQvb8o5g.css   26.31 kB │ gzip:  3.89 kB
+dist/site/assets/index-C64nYAnz.js   117.51 kB │ gzip: 25.54 kB
+✓ built in 2.72s
