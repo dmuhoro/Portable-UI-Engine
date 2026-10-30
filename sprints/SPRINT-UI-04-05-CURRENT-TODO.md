@@ -1,6 +1,6 @@
 
-## PENDING: Remove Google AI Studio fingerprints
-- [ ] Audit all references to "AI Studio", "Google AI Studio" across repo
+## PENDING: Remove fingerprints
+- [ ] Audit all references to "AI Studio" across repo
 - [ ] Remove/update docs/ai-studio/ directory or sanitize
 - [ ] Update .env.example to remove AI Studio references
 - [ ] Update ADRs, sprints, CHANGELOG references where appropriate (preserve history if needed)
