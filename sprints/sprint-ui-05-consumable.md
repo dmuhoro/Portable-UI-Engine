@@ -66,6 +66,9 @@ Drop in this order: T7, T6, T5 (shorten, don't delete). **Never drop T1 to T4 or
 
 Stop, commit, push and report if: PR #3 is not merged; the git identity check fails; CI is red after 4 fix attempts; a step needs history rewriting, merging, secrets, or edits outside the allowed paths; or the 25-minute time-box ends.
 
+## 9. Active execution tracking
+**[SPRINT-UI-04-05-CURRENT-TODO.md](./SPRINT-UI-04-05-CURRENT-TODO.md)** - Live checklist for closing out UI-04/UI-05. All gates passing locally; PR #5 open for human review. PR must remain unmerged.
+
 ## 8. Final report (return only this)
 
 PR link and CI status, commits pushed (hash and subject), what was cut or failing, the manifest path, and one line: "Ready for human merge: yes/no."

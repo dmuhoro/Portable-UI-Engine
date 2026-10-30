@@ -1,13 +1,29 @@
 {
   "name": "@universal-ui/tokens",
-  "version": "0.1.0",
+  "version": "2.1.0",
   "type": "module",
+  "description": "W3C design tokens and generated CSS/TypeScript for Portable UI Engine",
   "main": "./ts/tokens.ts",
+  "types": "./ts/tokens.ts",
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
-    ".": "./ts/tokens.ts",
+    ".": {
+      "types": "./ts/tokens.ts",
+      "import": "./ts/tokens.ts",
+      "default": "./ts/tokens.ts"
+    },
     "./css": "./css/variables.css",
-    "./tokens.json": "./design-tokens.json"
+    "./css/variables.css": "./css/variables.css",
+    "./tokens.json": "./design-tokens.json",
+    "./package.json": "./package.json"
   },
-  "files": ["css/", "ts/", "design-tokens.json", "scripts/"],
+  "files": [
+    "css/",
+    "ts/",
+    "design-tokens.json",
+    "scripts/"
+  ],
   "license": "MIT"
 }

@@ -9,7 +9,8 @@ async function buildTarget(directory) {
   const packageJson = JSON.parse(readFileSync(path.join(directory, 'package.json'), 'utf8'));
   const dist = path.join(directory, 'dist');
   mkdirSync(dist, { recursive: true });
-  const banner = `/* @universal-ui/engine v${packageJson.version} | MIT License */`;
+  const bannerEsm = `/* @universal-ui/engine v${packageJson.version} | MIT License | ESM */`;
+  const bannerIife = `/* @universal-ui/engine v${packageJson.version} | MIT License | IIFE */`;
   await build({
     absWorkingDir: directory,
     entryPoints: ['engine.js'],
@@ -19,7 +20,7 @@ async function buildTarget(directory) {
     sourcemap: true,
     format: 'esm',
     target: ['es2020', 'chrome80', 'firefox78', 'safari14'],
-    banner: { js: `${banner} ESM` },
+    banner: { js: bannerEsm },
   });
   await build({
     absWorkingDir: directory,
@@ -31,7 +32,7 @@ async function buildTarget(directory) {
     format: 'iife',
     globalName: 'UniversalUIEngine',
     target: ['es2020', 'chrome80', 'firefox78', 'safari14'],
-    banner: { js: `${banner} IIFE` },
+    banner: { js: bannerIife },
   });
 }
 

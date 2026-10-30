@@ -2,20 +2,33 @@
   "name": "@universal-ui/engine",
   "version": "2.1.0",
   "type": "module",
+  "description": "Portable UI Engine — framework-agnostic Web Components with Shadow DOM isolation",
   "main": "./dist/engine.min.js",
   "module": "./dist/engine.js",
+  "types": "./engine.d.ts",
+  "sideEffects": [
+    "./dist/engine.js",
+    "./dist/engine.min.js",
+    "./engine.js",
+    "./elements/**/*.js",
+    "./universal-*.js",
+    "*.css"
+  ],
   "exports": {
     ".": {
+      "types": "./engine.d.ts",
       "import": "./dist/engine.js",
       "default": "./dist/engine.min.js"
     },
     "./theme.css": "./theme.css",
-    "./elements/*": "./elements/*"
+    "./elements/*": "./elements/*",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist/",
     "theme.css",
     "engine.js",
+    "engine.d.ts",
     "elements/"
   ],
   "license": "MIT"

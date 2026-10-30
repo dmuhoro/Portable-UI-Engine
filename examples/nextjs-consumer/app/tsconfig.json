@@ -1,0 +1,7 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "preserve"
+  },
+  "include": ["**/*.ts", "**/*.tsx", "../uie.generated.d.ts", "../global.d.ts", "../types/jsx.d.ts"]
+}

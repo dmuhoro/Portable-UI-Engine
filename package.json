@@ -31,7 +31,13 @@
     "check:version": "node scripts/check-version.mjs",
     "lint": "tsc --noEmit",
     "test:negative-gate": "node scripts/test-design-lint-negative.mjs",
+    "test:quick-start": "node scripts/test-quick-start.mjs",
     "measure:bundles": "node scripts/measure-bundles.mjs",
+    "manifest": "node scripts/generate-manifest.mjs",
+    "test:manifest": "node scripts/test-manifest.mjs",
+    "test:pack": "node scripts/test-pack-import.mjs",
+    "verify:clean-clone": "bash scripts/verify-clean-clone.sh",
+    "scope-guard": "node tools/scope-guard.mjs",
     "design:lint": "node tools/design-lint/index.mjs"
   },
   "dependencies": {

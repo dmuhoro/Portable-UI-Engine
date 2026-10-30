@@ -1,34 +1,54 @@
-# UI Engine Skill File for AI Agents
+# UI Engine Skill — Portable UI Engine
 
-## Purpose
-Guide coding agents (Opencode, Codex, Claude) to correctly use the Portable UI Engine.
+Use this skill whenever you build or change UI in a repo that consumes Portable UI Engine.
 
-## Rules
-1. **Use ui-* primitives only** - Import from `@universal-ui/engine` or local packages
-2. **Use design tokens** - Never hardcode colors, spacing, or motion. Use CSS custom properties from `packages/tokens`
-3. **Shadow DOM aware** - Components are encapsulated; style via CSS custom properties
-4. **Design gate required** - Run `design-lint` before closing any UI task
-5. **A11y first** - Follow keyboard navigation and ARIA patterns from briefs
+## Non-negotiables
 
-## Manifest
-Component manifest: `design/contracts/components.json`
+1. Use **`ui-*` primitives** from `@universal-ui/engine` (or the mirrored `elements/` / `packages/engine` sources). Do not invent parallel components.
+2. Style only through **design tokens** — CSS custom properties generated from `packages/tokens/design-tokens.json`. Never hard-code colors, spacing, radii, or motion durations.
+3. Respect **Shadow DOM**: theme via custom properties on ancestors / `data-theme`; do not pierce internals except documented CSS parts.
+4. Run **`npm run design:lint`** (or `node tools/design-lint/index.mjs`) before closing any UI task. The gate must pass.
+5. Prefer evidence over claims: browser tests, axe checks, and sprint evidence files.
+
+## Where things live
+
+| Need | Path |
+| --- | --- |
+| Component inventory | `design/contracts/components.json` (`npm run manifest`) |
+| Token source | `packages/tokens/design-tokens.json` |
+| Generated CSS/TS | `packages/tokens/css/variables.css`, `packages/tokens/ts/tokens.ts` |
+| Primitive source | `elements/ui-primitives.js` (mirrored under `packages/engine/elements/`) |
+| Agent conventions | `AGENTS.md`, `docs/CONSTITUTION.md` |
+| Consumption | `docs/consuming.md`, `examples/nextjs-consumer/` |
 
 ## Commands
+
 ```bash
-npm run design:lint      # Check design gate
-npm run build:engine     # Build engine
-npm run test            # Run tests
+node packages/tokens/scripts/build-tokens.js
+npm run design:lint
+npm run test:negative-gate   # proves the gate can fail
+npm test
+npm run test:quick-start
+npm run test:manifest
+npm run test:pack
+npm run build:engine
 ```
 
-## Forbidden Patterns
-❌ `color: #ff0000` or hardcoded hex/rgb
-✅ `color: var(--color-text-primary)`
+## Forbidden vs correct
 
-❌ `padding: 16px`
-✅ `padding: var(--spacing-md)`
+❌ `color: #ff0000` / `padding: 16px` / `transition: all 0.3s` without tokens or reduced-motion  
+✅ `color: var(--color-text-primary)` / `padding: var(--spacing-md)` / motion tokens + `@media (prefers-reduced-motion: reduce)`
 
-## Correct Usage
-```html
-<ui-button variant="primary">Click me</ui-button>
-<ui-input label="Email" type="email"></ui-input>
+❌ New one-off `<button class="primary">` in product UI  
+✅ `<ui-button variant="primary">Save</ui-button>`
+
+## Copy-paste preamble for agents
+
+```
+You are working in the Portable UI Engine ecosystem.
+Use ui-* primitives and packages/tokens only.
+Never hard-code colors, spacing, or motion.
+Run design-lint before finishing.
+Consult design/contracts/components.json for the element inventory.
+Follow docs/CONSTITUTION.md, ADRs, and docs/architecture/OVERVIEW.md.
 ```

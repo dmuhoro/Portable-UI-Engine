@@ -31,6 +31,15 @@ Load the stylesheet and ESM bundle from a built distribution or package CDN:
 <ui-input label="Workspace name" name="workspace"></ui-input>
 ```
 
+Measured distributable size (gzip, after `npm run build:engine`; method in [`docs/evidence/ui-04/bundle-size.md`](docs/evidence/ui-04/bundle-size.md)):
+
+| Artifact | Raw | Gzip |
+| --- | ---: | ---: |
+| `dist/engine.min.js` | 102.71 KB | **20.77 KB** |
+| `packages/engine/dist/engine.min.js` | 115.18 KB | 22.94 KB |
+
+Consumption guide: [`docs/consuming.md`](docs/consuming.md). Component manifest: [`design/contracts/components.json`](design/contracts/components.json).
+
 Components render inside open Shadow DOM roots and emit bubbling, composed `CustomEvent`s. For example, listen for `ui-button-click`, `ui-input-change`, `ui-select-change`, `ui-checkbox-change`, and `ui-tab-change` on the component or an ancestor. Properties such as `ui-select.options`, `ui-tabs.items`, and `ui-menu.items` accept arrays; their documented HTML attributes remain usable for simple values.
 
 All primitive styling reads CSS custom properties generated from `packages/tokens/design-tokens.json`. The default theme is **Warm Precision**. **Technical Oceanic** and **Swiss Minimalist** are available through the theme controller:
@@ -69,3 +78,9 @@ npm run build                                  # engine bundles and showcase sit
 ## Project rules
 
 See [the Constitution](docs/CONSTITUTION.md), [architecture overview](docs/architecture/OVERVIEW.md), [ADRs](docs/adr/README.md), and [engineering conventions](AGENTS.md). Product decisions and implementation status are tracked in [sprints](sprints/README.md) and [the changelog](CHANGELOG.md).
+
+## Release
+
+- **Latest release:** [v2.1.0](https://github.com/dmuhoro/Portable-UI-Engine/releases/tag/v2.1.0)
+- **Package:** [`@universal-ui/engine`](packages/engine)
+- **Consumption:** [docs/consuming.md](docs/consuming.md)

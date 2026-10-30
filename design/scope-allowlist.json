@@ -1,0 +1,32 @@
+{
+  "description": "Permissive starting allowlist for tools/scope-guard.mjs. Replace '*' with explicit path prefixes to tighten per sprint.",
+  "allow": [
+    "*"
+  ],
+  "recommendedTightenTo": [
+    ".github/",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "apps/",
+    "design/",
+    "docs/",
+    "elements/",
+    "engine.js",
+    "examples/",
+    "package-lock.json",
+    "package.json",
+    "packages/",
+    "scripts/",
+    "sprints/",
+    "tasks/",
+    "tests/",
+    "theme.css",
+    "tools/",
+    "web-test-runner.config.mjs",
+    "build.js",
+    "tsconfig.json",
+    "vite.config.ts",
+    "index.html"
+  ]
+}
