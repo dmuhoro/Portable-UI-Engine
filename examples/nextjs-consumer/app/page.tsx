@@ -14,11 +14,11 @@ export default function Page() {
         <ui-input label="Workspace" name="workspace" />
       </div>
       {/* @ts-ignore */}
-      <ui-dialog label="Confirm">
+      {/* @ts-ignore */}<ui-dialog label="Confirm">
         <p>Dialog content</p>
       </ui-dialog>
       {/* @ts-ignore */}
-      <ui-tabs></ui-tabs>
+      {/* @ts-ignore */}<ui-tabs></ui-tabs>
     </main>
   );
 }
