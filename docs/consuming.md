@@ -57,6 +57,8 @@ See `examples/nextjs-consumer/`.
 
 `next build` for the example is enforced in CI.
 
+**Offline note:** If `npm install` fails with `ENETUNREACH`/missing `next` binary in offline environments, use cached deps or a local workaround. See `examples/nextjs-consumer/README.md`.
+
 ## SSR notes / pitfalls
 
 - Custom Elements and Shadow DOM are browser APIs — registering during SSR throws or no-ops incorrectly.
