@@ -1,0 +1,53 @@
+verify	Next.js consumer build	﻿2026-10-30T11:59:28.5877091Z ##[group]Run npm install
+verify	Next.js consumer build	2026-10-30T11:59:28.5877617Z ^[[36;1mnpm install^[[0m
+verify	Next.js consumer build	2026-10-30T11:59:28.5878021Z ^[[36;1mnpm run build^[[0m
+verify	Next.js consumer build	2026-10-30T11:59:28.5921434Z shell: /usr/bin/bash -e {0}
+verify	Next.js consumer build	2026-10-30T11:59:28.5922203Z ##[endgroup]
+verify	Next.js consumer build	2026-10-30T11:59:38.9368971Z 
+verify	Next.js consumer build	2026-10-30T11:59:38.9369833Z added 30 packages, and audited 32 packages in 10s
+verify	Next.js consumer build	2026-10-30T11:59:38.9370352Z 
+verify	Next.js consumer build	2026-10-30T11:59:38.9370625Z 6 packages are looking for funding
+verify	Next.js consumer build	2026-10-30T11:59:38.9371099Z   run `npm fund` for details
+verify	Next.js consumer build	2026-10-30T11:59:38.9776928Z 
+verify	Next.js consumer build	2026-10-30T11:59:38.9777671Z 2 vulnerabilities (1 moderate, 1 high)
+verify	Next.js consumer build	2026-10-30T11:59:38.9778101Z 
+verify	Next.js consumer build	2026-10-30T11:59:38.9778505Z To address all issues (including breaking changes), run:
+verify	Next.js consumer build	2026-10-30T11:59:38.9779142Z   npm audit fix --force
+verify	Next.js consumer build	2026-10-30T11:59:38.9779400Z 
+verify	Next.js consumer build	2026-10-30T11:59:38.9779604Z Run `npm audit` for details.
+verify	Next.js consumer build	2026-10-30T11:59:39.1419952Z 
+verify	Next.js consumer build	2026-10-30T11:59:39.1420752Z > uie-nextjs-consumer@0.0.0 build
+verify	Next.js consumer build	2026-10-30T11:59:39.1421341Z > next build
+verify	Next.js consumer build	2026-10-30T11:59:39.1421558Z 
+verify	Next.js consumer build	2026-10-30T11:59:39.7405303Z  ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+verify	Next.js consumer build	2026-10-30T11:59:39.7407250Z  We detected multiple lockfiles and selected the directory of /home/runner/work/Portable-UI-Engine/Portable-UI-Engine/package-lock.json as the root directory.
+verify	Next.js consumer build	2026-10-30T11:59:39.7409276Z  To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+verify	Next.js consumer build	2026-10-30T11:59:39.7411053Z    See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+verify	Next.js consumer build	2026-10-30T11:59:39.7412441Z  Detected additional lockfiles: 
+verify	Next.js consumer build	2026-10-30T11:59:39.7413751Z    * /home/runner/work/Portable-UI-Engine/Portable-UI-Engine/examples/nextjs-consumer/package-lock.json
+verify	Next.js consumer build	2026-10-30T11:59:39.7414533Z 
+verify	Next.js consumer build	2026-10-30T11:59:39.7423777Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+verify	Next.js consumer build	2026-10-30T11:59:39.7524249Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+verify	Next.js consumer build	2026-10-30T11:59:39.7525710Z This information is used to shape Next.js' roadmap and prioritize features.
+verify	Next.js consumer build	2026-10-30T11:59:39.7527410Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+verify	Next.js consumer build	2026-10-30T11:59:39.7528575Z https://nextjs.org/telemetry
+verify	Next.js consumer build	2026-10-30T11:59:39.7528893Z 
+verify	Next.js consumer build	2026-10-30T11:59:39.8833201Z    ▲ Next.js 15.5.28
+verify	Next.js consumer build	2026-10-30T11:59:39.8833557Z 
+verify	Next.js consumer build	2026-10-30T11:59:39.9326443Z    Creating an optimized production build ...
+verify	Next.js consumer build	2026-10-30T11:59:47.5144585Z  ✓ Compiled successfully in 5.1s
+verify	Next.js consumer build	2026-10-30T11:59:47.5183360Z    Linting and checking validity of types ...
+verify	Next.js consumer build	2026-10-30T11:59:49.6809493Z Failed to compile.
+verify	Next.js consumer build	2026-10-30T11:59:49.6810475Z 
+verify	Next.js consumer build	2026-10-30T11:59:49.6811683Z ./app/page.tsx:10:9
+verify	Next.js consumer build	2026-10-30T11:59:49.6812960Z Type error: Property 'ui-button' does not exist on type 'JSX.IntrinsicElements'.
+verify	Next.js consumer build	2026-10-30T11:59:49.6813655Z 
+verify	Next.js consumer build	2026-10-30T11:59:49.6815671Z ^[[0m ^[[90m  8 |^[[39m       ^[[33m<^[[39m^[[33mp^[[39m^[[33m>^[[39m^[[33mClient^[[39m^[[33m-^[[39monly registration ^[[36mof^[[39m ^[[33mPortable^[[39m ^[[33mUI^[[39m ^[[33mEngine^[[39m primitives^[[33m.^[[39m^[[33m<^[[39m^[[33m/^[[39m^[[33mp^[[39m^[[33m>^[[39m
+verify	Next.js consumer build	2026-10-30T11:59:49.6818062Z  ^[[90m  9 |^[[39m       ^[[33m<^[[39m^[[33mdiv^[[39m style^[[33m=^[[39m{{ display^[[33m:^[[39m ^[[32m'flex'^[[39m^[[33m,^[[39m gap^[[33m:^[[39m ^[[32m'1rem'^[[39m^[[33m,^[[39m flexWrap^[[33m:^[[39m ^[[32m'wrap'^[[39m^[[33m,^[[39m alignItems^[[33m:^[[39m ^[[32m'center'^[[39m }}^[[33m>^[[39m
+verify	Next.js consumer build	2026-10-30T11:59:49.6820392Z ^[[31m^[[1m>^[[22m^[[39m^[[90m 10 |^[[39m         ^[[33m<^[[39m^[[33mui^[[39m^[[33m-^[[39mbutton variant^[[33m=^[[39m^[[32m"primary"^[[39m^[[33m>^[[39m^[[33mSave^[[39m^[[33m<^[[39m^[[33m/^[[39m^[[33mui^[[39m^[[33m-^[[39mbutton^[[33m>^[[39m
+verify	Next.js consumer build	2026-10-30T11:59:49.6821351Z  ^[[90m    |^[[39m         ^[[31m^[[1m^^[[22m^[[39m
+verify	Next.js consumer build	2026-10-30T11:59:49.6822528Z  ^[[90m 11 |^[[39m         ^[[33m<^[[39m^[[33mui^[[39m^[[33m-^[[39minput label^[[33m=^[[39m^[[32m"Workspace"^[[39m name^[[33m=^[[39m^[[32m"workspace"^[[39m ^[[33m/^[[39m^[[33m>^[[39m
+verify	Next.js consumer build	2026-10-30T11:59:49.6823690Z  ^[[90m 12 |^[[39m       ^[[33m<^[[39m^[[33m/^[[39m^[[33mdiv^[[39m^[[33m>^[[39m
+verify	Next.js consumer build	2026-10-30T11:59:49.6824433Z  ^[[90m 13 |^[[39m       ^[[33m<^[[39m^[[33mui^[[39m^[[33m-^[[39mdialog label^[[33m=^[[39m^[[32m"Confirm"^[[39m^[[33m>^[[39m^[[0m
+verify	Next.js consumer build	2026-10-30T11:59:49.7177423Z Next.js build worker exited with code: 1 and signal: null
+verify	Next.js consumer build	2026-10-30T11:59:49.7361383Z ##[error]Process completed with exit code 1.
