@@ -57,6 +57,9 @@ jobs:
         run: npm run test:pack
         env:
           CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+      - name: Check consumer JSX types
+        run: node scripts/check-consumer-types-stale.mjs
+
       - name: Next.js consumer build
         working-directory: examples/nextjs-consumer
         run: |
