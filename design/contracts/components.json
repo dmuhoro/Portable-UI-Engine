@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "name": "@universal-ui/engine",
   "version": "2.1.0",
-  "generatedAt": "2026-10-30T11:48:50.245Z",
+  "generatedAt": "2026-10-30T13:02:49.352Z",
   "source": "packages/engine/elements/ui-primitives.js",
   "cssCustomProperties": [
     "--color-brand-primary",
