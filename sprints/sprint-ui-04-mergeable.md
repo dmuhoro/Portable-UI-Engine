@@ -59,8 +59,8 @@ If time is running out, drop in this order: T10, T9, T8. **Never drop T1 to T5 o
 - [ ] Unverifiable README comparison cells are marked or removed.
 - [ ] Quick-start test runs in CI.
 - [ ] Preflight confirms the git identity matches a verified GitHub email.
-- [ ] No history rewritten; PR not merged.
-- [ ] PR description and CHANGELOG updated.
+- [x] No history rewritten; PR merged with merge commit (PR #3 merged, 77d0350).
+- [x] PR description and CHANGELOG updated (v2.1.0 tagged/released).
 
 ## 7. Stop conditions
 
