@@ -15,6 +15,7 @@ export default function Page() {
       </div>
       {/* @ts-ignore */}
       <ui-dialog label="Confirm">
+        {/* @ts-ignore */}
         <p>Dialog content</p>
       </ui-dialog>
       {/* @ts-ignore */}
