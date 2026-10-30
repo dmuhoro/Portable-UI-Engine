@@ -78,3 +78,9 @@ npm run build                                  # engine bundles and showcase sit
 ## Project rules
 
 See [the Constitution](docs/CONSTITUTION.md), [architecture overview](docs/architecture/OVERVIEW.md), [ADRs](docs/adr/README.md), and [engineering conventions](AGENTS.md). Product decisions and implementation status are tracked in [sprints](sprints/README.md) and [the changelog](CHANGELOG.md).
+
+## Release
+
+- **Latest release:** [v2.1.0](https://github.com/dmuhoro/Portable-UI-Engine/releases/tag/v2.1.0)
+- **Package:** [`@universal-ui/engine`](packages/engine)
+- **Consumption:** [docs/consuming.md](docs/consuming.md)
